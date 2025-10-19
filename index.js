@@ -1,44 +1,41 @@
 import express from "express";
-import { rttSearch, pickNextService, mapLatenessToState } from "./src/RTTBridge.js";
+import { rttSearch, pickNextService, calculateOnTimeStatus } from "./src/RTTBridge.js";
 
 /**
  * Core business logic for getting train status
  * @param {Object} options
  * @param {string} options.originTiploc - Origin TIPLOC
  * @param {string} options.destTiploc - Destination TIPLOC
- * @param {string} [options.date] - Date in YYYY-MM-DD or YYYY/MM/DD (defaults to today)
  * @param {number} [options.minAfterMinutes] - Minimum minutes after now (default 20)
  * @param {number} [options.windowMinutes] - Window size in minutes (default 60)
- * @param {Date} [options.now] - Current time for testing (defaults to new Date())
+ * @param {Date} [options.now] - Current time (defaults to new Date()) - date is extracted from this
  * @param {function} [options.fetchImpl] - Optional fetch implementation for mocking
  * @returns {Promise<{lateness: string, selected: object, raw: object}>}
  */
 export async function getTrainStatus({
   originTiploc,
   destTiploc,
-  date,
   minAfterMinutes = 20,
   windowMinutes = 60,
   now,
   fetchImpl
 }) {
-  // Default date: today in YYYY/MM/DD
+  // Default to current time if not provided
   const currentTime = now || new Date();
+  
+  // Extract date from the current time
   const y = currentTime.getFullYear();
   const m = String(currentTime.getMonth() + 1).padStart(2, '0');
   const d = String(currentTime.getDate()).padStart(2, '0');
-  const dateStr = date ? date.replace(/-/g, '/') : `${y}/${m}/${d}`;
+  const dateStr = `${y}/${m}/${d}`;
 
   const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
   const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });
   if (!svc) {
     return { lateness: 'unknown', selected: null, raw: data };
   }
-  const loc = svc.locationDetail;
-  // If cancelled, treat as 'very poor'
-  const lateness = loc.displayAs === 'CANCELLED_CALL'
-    ? 'very poor'
-    : mapLatenessToState(Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness ?? 0));
+  
+  const lateness = calculateOnTimeStatus(svc);
   return { lateness, selected: svc, raw: data };
 }
 
@@ -88,7 +85,6 @@ app.post("/smarthome", async (req, res) => {
       const result = await getTrainStatus({
         originTiploc: ORIGIN_TIPLOC,
         destTiploc: DEST_TIPLOC,
-        date: DATE(),
         minAfterMinutes: MIN_AFTER_MINUTES,
         windowMinutes: WINDOW_MINUTES
       });

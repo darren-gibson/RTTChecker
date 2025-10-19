@@ -1,4 +1,4 @@
-import { hhmmToMins, mapLatenessToState, pickNextService, rttSearch, b64 } from '../src/RTTBridge.js';
+import { hhmmToMins, calculateOnTimeStatus, pickNextService, rttSearch, b64 } from '../src/RTTBridge.js';
 
 describe('time utilities', () => {
   test('hhmmToMins converts HHmm to minutes', () => {
@@ -8,20 +8,38 @@ describe('time utilities', () => {
   });
 });
 
-describe('mapLatenessToState', () => {
-  test('maps null/undefined to unknown', () => {
-    expect(mapLatenessToState(null)).toBe('unknown');
-    expect(mapLatenessToState(undefined)).toBe('unknown');
+describe('calculateOnTimeStatus', () => {
+  test('returns unknown for null/undefined service', () => {
+    expect(calculateOnTimeStatus(null)).toBe('unknown');
+    expect(calculateOnTimeStatus(undefined)).toBe('unknown');
   });
 
-  test('maps ranges correctly', () => {
-    expect(mapLatenessToState(0)).toBe('good');
-    expect(mapLatenessToState(2)).toBe('good');
-    expect(mapLatenessToState(3)).toBe('fair');
-    expect(mapLatenessToState(5)).toBe('fair');
-    expect(mapLatenessToState(6)).toBe('poor');
-    expect(mapLatenessToState(10)).toBe('poor');
-    expect(mapLatenessToState(11)).toBe('very poor');
+  test('returns very poor for cancelled trains', () => {
+    const cancelledService = {
+      locationDetail: {
+        cancelReasonCode: 'M8',
+        cancelReasonShortText: 'problem with train',
+        realtimeGbttDepartureLateness: 0
+      }
+    };
+    expect(calculateOnTimeStatus(cancelledService)).toBe('very poor');
+  });
+
+  test('maps lateness ranges correctly', () => {
+    const createService = (lateness) => ({
+      locationDetail: {
+        realtimeGbttDepartureLateness: lateness,
+        displayAs: 'CALL'
+      }
+    });
+
+    expect(calculateOnTimeStatus(createService(0))).toBe('good');
+    expect(calculateOnTimeStatus(createService(2))).toBe('good');
+    expect(calculateOnTimeStatus(createService(3))).toBe('fair');
+    expect(calculateOnTimeStatus(createService(5))).toBe('fair');
+    expect(calculateOnTimeStatus(createService(6))).toBe('poor');
+    expect(calculateOnTimeStatus(createService(10))).toBe('poor');
+    expect(calculateOnTimeStatus(createService(11))).toBe('very poor');
   });
 });
 

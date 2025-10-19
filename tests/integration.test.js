@@ -21,7 +21,6 @@ describe('Integration tests - getTrainStatus with real data', () => {
     const result = await getTrainStatus({
       originTiploc: 'CAMBDGE',
       destTiploc: 'KNGX',
-      date: '2025-10-19',
       minAfterMinutes: 20,
       windowMinutes: 60,
       now,
@@ -48,7 +47,6 @@ describe('Integration tests - getTrainStatus with real data', () => {
     const result = await getTrainStatus({
       originTiploc: 'CAMBDGE',
       destTiploc: 'KNGX',
-      date: '2025-10-19',
       minAfterMinutes: 5,
       windowMinutes: 10,
       now,
@@ -72,7 +70,6 @@ describe('Integration tests - getTrainStatus with real data', () => {
     const result = await getTrainStatus({
       originTiploc: 'KNGX',
       destTiploc: 'PBRO',
-      date: '2025-10-19',
       minAfterMinutes: 5,
       windowMinutes: 30,
       now,
@@ -99,7 +96,6 @@ describe('Integration tests - getTrainStatus with real data', () => {
     const result = await getTrainStatus({
       originTiploc: 'CAMBDGE',
       destTiploc: 'KNGX',
-      date: '2025-10-19',
       minAfterMinutes: 500,  // 500 minutes in the future
       windowMinutes: 10,
       now,

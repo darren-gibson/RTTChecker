@@ -2,8 +2,20 @@ import fetch from "node-fetch";
 
 export const hhmmToMins = t => parseInt(t.slice(0,2), 10)*60 + parseInt(t.slice(2,4), 10);
 
-export function mapLatenessToState(late) {
+export function calculateOnTimeStatus(service) {
+  if (!service) return "unknown";
+  
+  const loc = service.locationDetail || service;
+  
+  // If cancelled, always return 'very poor'
+  if (loc.cancelReasonCode) {
+    return "very poor";
+  }
+  
+  // Calculate lateness from departure times
+  const late = Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness ?? 0);
   if (late == null) return "unknown";
+  
   const a = Math.abs(late);
   if (a <= 2) return "good";
   if (a <= 5) return "fair";
