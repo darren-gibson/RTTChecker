@@ -6,7 +6,14 @@ app.use(express.json());
 
 const ORIGIN_TIPLOC = process.env.ORIGIN_TIPLOC || "CAMBDGE";
 const DEST_TIPLOC = process.env.DEST_TIPLOC || "KNGX";
-const DATE = () => new Date().toISOString().slice(0,10);
+const DATE = () => {
+  // Use local date (respects BST/GMT in the UK) instead of UTC
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 const MIN_AFTER_MINUTES = Number(process.env.MIN_AFTER_MINUTES || 20);
 const WINDOW_MINUTES = Number(process.env.WINDOW_MINUTES || 60);
 

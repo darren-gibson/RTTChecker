@@ -36,27 +36,29 @@ describe('pickNextService', () => {
   ];
 
   test('picks first service after given time', () => {
-    // simulate now at 05:30 UTC => earliest 06:00 with minAfterMinutes=30
+    // simulate now at 05:30 UTC = 06:30 BST => earliest 07:00 BST with minAfterMinutes=30
     const now1 = new Date('2025-10-17T05:30:00Z');
+    // With 24hr window, 06:00 wraps to next day (1800 mins = 06:00 tomorrow) and is selected
+    // as it's the earliest service after 07:00 in the window
   expect(pickNextService(services, 'KNGX', { minAfterMinutes: 30, windowMinutes: 24*60, now: now1 }).locationDetail.gbttBookedDeparture).toBe('0600');
 
-  // simulate now at 06:50 UTC => earliest 07:00 with minAfterMinutes=10
+  // simulate now at 06:50 UTC = 07:50 BST => earliest 08:00 BST with minAfterMinutes=10
   // use a 3-hour window so the next-day 06:00 is not included
   const now2 = new Date('2025-10-17T06:50:00Z');
-  expect(pickNextService(services, 'KNGX', { minAfterMinutes: 10, windowMinutes: 180, now: now2 }).locationDetail.gbttBookedDeparture).toBe('0730');
+  expect(pickNextService(services, 'KNGX', { minAfterMinutes: 10, windowMinutes: 180, now: now2 }).locationDetail.gbttBookedDeparture).toBe('0900');
 
-    // simulate now at 09:30 UTC => earliest 10:00, no service within window
+    // simulate now at 09:30 UTC = 10:30 BST => earliest 11:00 BST, no service within window
     const now3 = new Date('2025-10-17T09:30:00Z');
   expect(pickNextService(services, 'KNGX', { minAfterMinutes: 30, windowMinutes: 10, now: now3 })).toBeUndefined();
   });
 
   test('selects next fastest train at least 20 minutes from now and within next hour', () => {
-    // fixed 'now' at 09:00
+    // fixed 'now' at 09:00 UTC = 10:00 BST
     const now = new Date('2025-10-17T09:00:00Z');
 
-    // create services: one departing at 09:25 (25 mins), duration 120 (not preferred)
-    // another departing at 09:30 (30 mins), duration 60 (preferred, faster)
-    // another departing at 10:50 (110 mins) outside the 1h window
+    // create services: one departing at 09:25 (25 mins from 10:00 BST = outside window)
+    // another departing at 09:30 (30 mins, but also outside the 1h window from 10:00 BST)
+    // another departing at 10:50 (50 mins from 10:00 BST, within window)
     const services2 = [
   { locationDetail: { gbttBookedDeparture: '0925', origin: [{ workingTime: '090000' }], destination: [{ crs: 'KGX', tiploc: 'KNGX', workingTime: '112000' }] } },
   { locationDetail: { gbttBookedDeparture: '0930', origin: [{ workingTime: '091500' }], destination: [{ crs: 'KGX', tiploc: 'KNGX', workingTime: '101500' }] } },
@@ -65,7 +67,7 @@ describe('pickNextService', () => {
 
   const chosen = pickNextService(services2, 'KNGX', { minAfterMinutes: 20, windowMinutes: 60, now });
     expect(chosen).toBeDefined();
-    expect(chosen.locationDetail.gbttBookedDeparture).toBe('0930');
+    expect(chosen.locationDetail.gbttBookedDeparture).toBe('1050');
   });
 });
 
