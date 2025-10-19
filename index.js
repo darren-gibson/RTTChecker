@@ -1,78 +1,32 @@
 import express from "express";
-import { rttSearch, pickNextService, calculateOnTimeStatus } from "./src/RTTBridge.js";
-
-/**
- * Core business logic for getting train status
- * @param {Object} options
- * @param {string} options.originTiploc - Origin TIPLOC
- * @param {string} options.destTiploc - Destination TIPLOC
- * @param {number} [options.minAfterMinutes] - Minimum minutes after now (default 20)
- * @param {number} [options.windowMinutes] - Window size in minutes (default 60)
- * @param {Date} [options.now] - Current time (defaults to new Date()) - date is extracted from this
- * @param {function} [options.fetchImpl] - Optional fetch implementation for mocking
- * @returns {Promise<{lateness: string, selected: object, raw: object}>}
- */
-export async function getTrainStatus({
-  originTiploc,
-  destTiploc,
-  minAfterMinutes = 20,
-  windowMinutes = 60,
-  now,
-  fetchImpl
-}) {
-  // Default to current time if not provided
-  const currentTime = now || new Date();
-  
-  // Extract date from the current time
-  const y = currentTime.getFullYear();
-  const m = String(currentTime.getMonth() + 1).padStart(2, '0');
-  const d = String(currentTime.getDate()).padStart(2, '0');
-  const dateStr = `${y}/${m}/${d}`;
-
-  const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
-  const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });
-  if (!svc) {
-    return { lateness: 'unknown', selected: null, raw: data };
-  }
-  
-  const lateness = calculateOnTimeStatus(svc);
-  return { lateness, selected: svc, raw: data };
-}
+import { getTrainStatus } from "./src/RTTBridge.js";
+import { AirQualityState, GoogleHomeApi } from "./src/constants.js";
+import { config } from "./src/config.js";
 
 const app = express();
 app.use(express.json());
 
-const ORIGIN_TIPLOC = process.env.ORIGIN_TIPLOC || "CAMBDGE";
-const DEST_TIPLOC = process.env.DEST_TIPLOC || "KNGX";
-const DATE = () => {
-  // Use local date (respects BST/GMT in the UK) instead of UTC
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
-};
-const MIN_AFTER_MINUTES = Number(process.env.MIN_AFTER_MINUTES || 20);
-const WINDOW_MINUTES = Number(process.env.WINDOW_MINUTES || 60);
-
 app.post("/smarthome", async (req, res) => {
   const intent = req.body?.inputs?.[0]?.intent;
   const requestId = req.body?.requestId || "req";
-  if (intent === "action.devices.SYNC") {
+  
+  if (intent === GoogleHomeApi.Intent.SYNC) {
     return res.json({
       requestId,
       payload: {
-        agentUserId: "user-123",
+        agentUserId: config.googleHome.agentUserId,
         devices: [{
-          id: "train_1",
-          type: "action.devices.types.SENSOR",
-          traits: ["action.devices.traits.SensorState"],
-          name: { name: "My Train" },
+          id: config.googleHome.deviceId,
+          type: GoogleHomeApi.DeviceType.SENSOR,
+          traits: [GoogleHomeApi.Trait.SENSOR_STATE],
+          name: { name: config.googleHome.deviceName },
           willReportState: true,
           attributes: {
             sensorStatesSupported: [{
-              name: "AirQuality",
-              descriptiveCapabilities: { availableStates: ["good","fair","poor","very poor","unknown"] }
+              name: GoogleHomeApi.SensorName.AIR_QUALITY,
+              descriptiveCapabilities: { 
+                availableStates: Object.values(AirQualityState)
+              }
             }]
           }
         }]
@@ -80,23 +34,26 @@ app.post("/smarthome", async (req, res) => {
     });
   }
 
-  if (intent === "action.devices.QUERY") {
+  if (intent === GoogleHomeApi.Intent.QUERY) {
     try {
       const result = await getTrainStatus({
-        originTiploc: ORIGIN_TIPLOC,
-        destTiploc: DEST_TIPLOC,
-        minAfterMinutes: MIN_AFTER_MINUTES,
-        windowMinutes: WINDOW_MINUTES
+        originTiploc: config.train.originTiploc,
+        destTiploc: config.train.destTiploc,
+        minAfterMinutes: config.train.minAfterMinutes,
+        windowMinutes: config.train.windowMinutes
       });
 
       return res.json({
         requestId,
         payload: {
           devices: {
-            "train_1": {
-              status: "SUCCESS",
+            [config.googleHome.deviceId]: {
+              status: GoogleHomeApi.Status.SUCCESS,
               online: true,
-              currentSensorStateData: [{ name: "AirQuality", currentSensorState: result.lateness }]
+              currentSensorStateData: [{
+                name: GoogleHomeApi.SensorName.AIR_QUALITY,
+                currentSensorState: result.lateness
+              }]
             }
           }
         }
@@ -109,8 +66,6 @@ app.post("/smarthome", async (req, res) => {
   return res.status(400).json({ error: "Unsupported intent" });
 });
 
-// Only start the server if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  const PORT = process.env.PORT || 8080;
-  app.listen(PORT, () => console.log(`RTT bridge listening on :${PORT}`));
-}
+app.listen(config.server.port, () => {
+  console.log(`RTT bridge listening on :${config.server.port}`);
+});

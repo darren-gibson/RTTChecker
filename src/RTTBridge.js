@@ -1,15 +1,55 @@
 import fetch from "node-fetch";
+import { AirQualityState } from "./constants.js";
+import { config } from "./config.js";
 
 export const hhmmToMins = t => parseInt(t.slice(0,2), 10)*60 + parseInt(t.slice(2,4), 10);
 
+/**
+ * Core business logic for getting train status
+ * @param {Object} options
+ * @param {string} options.originTiploc - Origin TIPLOC
+ * @param {string} options.destTiploc - Destination TIPLOC
+ * @param {number} [options.minAfterMinutes] - Minimum minutes after now (default 20)
+ * @param {number} [options.windowMinutes] - Window size in minutes (default 60)
+ * @param {Date} [options.now] - Current time (defaults to new Date()) - date is extracted from this
+ * @param {function} [options.fetchImpl] - Optional fetch implementation for mocking
+ * @returns {Promise<{lateness: string, selected: object, raw: object}>}
+ */
+export async function getTrainStatus({
+  originTiploc,
+  destTiploc,
+  minAfterMinutes = 20,
+  windowMinutes = 60,
+  now,
+  fetchImpl
+}) {
+  // Default to current time if not provided
+  const currentTime = now || new Date();
+  
+  // Extract date from the current time
+  const y = currentTime.getFullYear();
+  const m = String(currentTime.getMonth() + 1).padStart(2, '0');
+  const d = String(currentTime.getDate()).padStart(2, '0');
+  const dateStr = `${y}/${m}/${d}`;
+
+  const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
+  const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });
+  if (!svc) {
+    return { lateness: AirQualityState.UNKNOWN, selected: null, raw: data };
+  }
+  
+  const lateness = calculateOnTimeStatus(svc);
+  return { lateness, selected: svc, raw: data };
+}
+
 export function calculateOnTimeStatus(service) {
-  if (!service) return "unknown";
+  if (!service) return AirQualityState.UNKNOWN;
   
   const loc = service.locationDetail || service;
   
   // If cancelled, always return 'very poor'
   if (loc.cancelReasonCode) {
-    return "very poor";
+    return AirQualityState.VERY_POOR;
   }
   
   // Calculate lateness from departure times
@@ -26,18 +66,18 @@ export function calculateOnTimeStatus(service) {
   if (isNaN(late) || late == null) late = 0;
   
   const a = Math.abs(late);
-  if (a <= 2) return "good";
-  if (a <= 5) return "fair";
-  if (a <= 10) return "poor";
-  return "very poor";
+  if (a <= 2) return AirQualityState.GOOD;
+  if (a <= 5) return AirQualityState.FAIR;
+  if (a <= 10) return AirQualityState.POOR;
+  return AirQualityState.VERY_POOR;
 }
 
 export const b64 = (u,p) => Buffer.from(`${u}:${p}`).toString("base64");
 
 export async function rttSearch(from, to, date, { user, pass, fetchImpl } = {}) {
   if (!from || !to) throw new Error('rttSearch requires both from and to TIPLOC');
-  const RTT_USER = user || process.env.RTT_USER;
-  const RTT_PASS = pass || process.env.RTT_PASS;
+  const RTT_USER = user || config.rtt.user;
+  const RTT_PASS = pass || config.rtt.pass;
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
   const res = await (fetchImpl || fetch)(url, { headers: { Authorization: `Basic ${b64(RTT_USER, RTT_PASS)}` } });
   if (!res.ok) throw new Error(`RTT ${res.status}`);

@@ -1,4 +1,5 @@
 import { hhmmToMins, calculateOnTimeStatus, pickNextService, rttSearch, b64 } from '../src/RTTBridge.js';
+import { AirQualityState } from '../src/constants.js';
 
 describe('time utilities', () => {
   test('hhmmToMins converts HHmm to minutes', () => {
@@ -10,8 +11,8 @@ describe('time utilities', () => {
 
 describe('calculateOnTimeStatus', () => {
   test('returns unknown for null/undefined service', () => {
-    expect(calculateOnTimeStatus(null)).toBe('unknown');
-    expect(calculateOnTimeStatus(undefined)).toBe('unknown');
+    expect(calculateOnTimeStatus(null)).toBe(AirQualityState.UNKNOWN);
+    expect(calculateOnTimeStatus(undefined)).toBe(AirQualityState.UNKNOWN);
   });
 
   test('returns very poor for cancelled trains', () => {
@@ -22,7 +23,7 @@ describe('calculateOnTimeStatus', () => {
         realtimeGbttDepartureLateness: 0
       }
     };
-    expect(calculateOnTimeStatus(cancelledService)).toBe('very poor');
+    expect(calculateOnTimeStatus(cancelledService)).toBe(AirQualityState.VERY_POOR);
   });
 
   test('maps lateness ranges correctly', () => {
@@ -33,13 +34,13 @@ describe('calculateOnTimeStatus', () => {
       }
     });
 
-    expect(calculateOnTimeStatus(createService(0))).toBe('good');
-    expect(calculateOnTimeStatus(createService(2))).toBe('good');
-    expect(calculateOnTimeStatus(createService(3))).toBe('fair');
-    expect(calculateOnTimeStatus(createService(5))).toBe('fair');
-    expect(calculateOnTimeStatus(createService(6))).toBe('poor');
-    expect(calculateOnTimeStatus(createService(10))).toBe('poor');
-    expect(calculateOnTimeStatus(createService(11))).toBe('very poor');
+    expect(calculateOnTimeStatus(createService(0))).toBe(AirQualityState.GOOD);
+    expect(calculateOnTimeStatus(createService(2))).toBe(AirQualityState.GOOD);
+    expect(calculateOnTimeStatus(createService(3))).toBe(AirQualityState.FAIR);
+    expect(calculateOnTimeStatus(createService(5))).toBe(AirQualityState.FAIR);
+    expect(calculateOnTimeStatus(createService(6))).toBe(AirQualityState.POOR);
+    expect(calculateOnTimeStatus(createService(10))).toBe(AirQualityState.POOR);
+    expect(calculateOnTimeStatus(createService(11))).toBe(AirQualityState.VERY_POOR);
   });
 
   test('calculates lateness from booked vs realtime when lateness field not provided', () => {
@@ -52,13 +53,13 @@ describe('calculateOnTimeStatus', () => {
     });
 
     // On time
-    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1410'))).toBe('good');
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1410'))).toBe(AirQualityState.GOOD);
     // 5 minutes late
-    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1415'))).toBe('fair');
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1415'))).toBe(AirQualityState.FAIR);
     // 12 minutes late
-    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1422'))).toBe('very poor');
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1422'))).toBe(AirQualityState.VERY_POOR);
     // Early by 2 minutes
-    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1408'))).toBe('good');
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1408'))).toBe(AirQualityState.GOOD);
   });
 });
 

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { getTrainStatus } from '../index.js';
+import { getTrainStatus } from '../src/RTTBridge.js';
+import { AirQualityState } from '../src/constants.js';
 
 describe('Integration tests - getTrainStatus with real data', () => {
   test('runningOnTime.json: at 12:20 selects 13:22 train running on time -> good', async () => {
@@ -33,7 +34,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
     expect(result.selected.trainIdentity).toBe('1T31');
     
     // Verify the lateness state is 'good' (running on time)
-    expect(result.lateness).toBe('good');
+    expect(result.lateness).toBe(AirQualityState.GOOD);
   });
 
   test('runningOnTime.json: with narrow 10 min window selects fastest available train', async () => {
@@ -81,7 +82,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
     expect(result.selected.locationDetail.displayAs).toBe('CANCELLED_CALL');
     
     // Cancelled trains should be marked as 'very poor'
-    expect(result.lateness).toBe('very poor');
+    expect(result.lateness).toBe(AirQualityState.VERY_POOR);
   });
 
   test('No matching service returns unknown lateness', async () => {
@@ -103,7 +104,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
     });
 
     expect(result.selected).toBeNull();
-    expect(result.lateness).toBe('unknown');
+    expect(result.lateness).toBe(AirQualityState.UNKNOWN);
   });
 
   test('lateTrain.json: 14:10 train running 12 minutes late -> fair', async () => {
@@ -130,6 +131,6 @@ describe('Integration tests - getTrainStatus with real data', () => {
     expect(result.selected.trainIdentity).toBe('1B78');
     
     // Verify the lateness state - 12 minutes late (calculated from 1410 booked vs 1422 realtime) should be 'very poor' (>10 mins)
-    expect(result.lateness).toBe('very poor');
+    expect(result.lateness).toBe(AirQualityState.VERY_POOR);
   });
 });
