@@ -1,6 +1,47 @@
 import express from "express";
 import { rttSearch, pickNextService, mapLatenessToState } from "./src/RTTBridge.js";
 
+/**
+ * Core business logic for getting train status
+ * @param {Object} options
+ * @param {string} options.originTiploc - Origin TIPLOC
+ * @param {string} options.destTiploc - Destination TIPLOC
+ * @param {string} [options.date] - Date in YYYY-MM-DD or YYYY/MM/DD (defaults to today)
+ * @param {number} [options.minAfterMinutes] - Minimum minutes after now (default 20)
+ * @param {number} [options.windowMinutes] - Window size in minutes (default 60)
+ * @param {Date} [options.now] - Current time for testing (defaults to new Date())
+ * @param {function} [options.fetchImpl] - Optional fetch implementation for mocking
+ * @returns {Promise<{lateness: string, selected: object, raw: object}>}
+ */
+export async function getTrainStatus({
+  originTiploc,
+  destTiploc,
+  date,
+  minAfterMinutes = 20,
+  windowMinutes = 60,
+  now,
+  fetchImpl
+}) {
+  // Default date: today in YYYY/MM/DD
+  const currentTime = now || new Date();
+  const y = currentTime.getFullYear();
+  const m = String(currentTime.getMonth() + 1).padStart(2, '0');
+  const d = String(currentTime.getDate()).padStart(2, '0');
+  const dateStr = date ? date.replace(/-/g, '/') : `${y}/${m}/${d}`;
+
+  const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
+  const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });
+  if (!svc) {
+    return { lateness: 'unknown', selected: null, raw: data };
+  }
+  const loc = svc.locationDetail;
+  // If cancelled, treat as 'very poor'
+  const lateness = loc.displayAs === 'CANCELLED_CALL'
+    ? 'very poor'
+    : mapLatenessToState(Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness ?? 0));
+  return { lateness, selected: svc, raw: data };
+}
+
 const app = express();
 app.use(express.json());
 
@@ -44,11 +85,13 @@ app.post("/smarthome", async (req, res) => {
 
   if (intent === "action.devices.QUERY") {
     try {
-    const data = await rttSearch(ORIGIN_TIPLOC, DEST_TIPLOC, DATE().replaceAll('-', '/'));
-  const svc = pickNextService(data?.services || [], DEST_TIPLOC, { minAfterMinutes: MIN_AFTER_MINUTES, windowMinutes: WINDOW_MINUTES });
-      const loc = svc?.locationDetail;
-      const late = loc ? Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness ?? 0) : null;
-      const current = mapLatenessToState(late);
+      const result = await getTrainStatus({
+        originTiploc: ORIGIN_TIPLOC,
+        destTiploc: DEST_TIPLOC,
+        date: DATE(),
+        minAfterMinutes: MIN_AFTER_MINUTES,
+        windowMinutes: WINDOW_MINUTES
+      });
 
       return res.json({
         requestId,
@@ -57,7 +100,7 @@ app.post("/smarthome", async (req, res) => {
             "train_1": {
               status: "SUCCESS",
               online: true,
-              currentSensorStateData: [{ name: "AirQuality", currentSensorState: current }]
+              currentSensorStateData: [{ name: "AirQuality", currentSensorState: result.lateness }]
             }
           }
         }
@@ -70,5 +113,8 @@ app.post("/smarthome", async (req, res) => {
   return res.status(400).json({ error: "Unsupported intent" });
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`RTT bridge listening on :${PORT}`));
+// Only start the server if not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 8080;
+  app.listen(PORT, () => console.log(`RTT bridge listening on :${PORT}`));
+}
