@@ -1,7 +1,7 @@
 import express from "express";
-import { getTrainStatus, calculateOnTimeStatus } from "./src/RTTBridge.js";
+import { getTrainStatus } from "./src/RTTBridge.js";
 import { AirQualityState, GoogleHomeApi } from "./src/constants.js";
-import { config } from "./src/config.js";
+import { config, isTestEnv } from "./src/config.js";
 
 const app = express();
 app.use(express.json());
@@ -44,10 +44,6 @@ app.post("/smarthome", async (req, res) => {
         now: new Date()
       });
 
-      const airQualityState = result.selected 
-        ? calculateOnTimeStatus(result.selected)
-        : AirQualityState.UNKNOWN;
-
       return res.json({
         requestId,
         payload: {
@@ -57,7 +53,7 @@ app.post("/smarthome", async (req, res) => {
               online: true,
               currentSensorStateData: [{
                 name: GoogleHomeApi.SensorName.AIR_QUALITY,
-                currentSensorState: airQualityState
+                currentSensorState: result.lateness
               }]
             }
           }
@@ -75,7 +71,7 @@ app.post("/smarthome", async (req, res) => {
 export { app };
 
 // Start server only when not in test environment
-if (process.env.NODE_ENV !== 'test') {
+if (!isTestEnv()) {
   app.listen(config.server.port, () => {
     console.log(`RTT bridge listening on :${config.server.port}`);
   });
