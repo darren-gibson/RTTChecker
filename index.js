@@ -1,5 +1,5 @@
 import express from "express";
-import { getTrainStatus } from "./src/RTTBridge.js";
+import { getTrainStatus, calculateOnTimeStatus } from "./src/RTTBridge.js";
 import { AirQualityState, GoogleHomeApi } from "./src/constants.js";
 import { config } from "./src/config.js";
 
@@ -40,8 +40,13 @@ app.post("/smarthome", async (req, res) => {
         originTiploc: config.train.originTiploc,
         destTiploc: config.train.destTiploc,
         minAfterMinutes: config.train.minAfterMinutes,
-        windowMinutes: config.train.windowMinutes
+        windowMinutes: config.train.windowMinutes,
+        now: new Date()
       });
+
+      const airQualityState = result.selected 
+        ? calculateOnTimeStatus(result.selected)
+        : AirQualityState.UNKNOWN;
 
       return res.json({
         requestId,
@@ -52,7 +57,7 @@ app.post("/smarthome", async (req, res) => {
               online: true,
               currentSensorStateData: [{
                 name: GoogleHomeApi.SensorName.AIR_QUALITY,
-                currentSensorState: result.lateness
+                currentSensorState: airQualityState
               }]
             }
           }
@@ -66,6 +71,12 @@ app.post("/smarthome", async (req, res) => {
   return res.status(400).json({ error: "Unsupported intent" });
 });
 
-app.listen(config.server.port, () => {
-  console.log(`RTT bridge listening on :${config.server.port}`);
-});
+// Export app for testing
+export { app };
+
+// Start server only when not in test environment
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.server.port, () => {
+    console.log(`RTT bridge listening on :${config.server.port}`);
+  });
+}
