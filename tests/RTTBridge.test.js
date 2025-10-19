@@ -41,6 +41,25 @@ describe('calculateOnTimeStatus', () => {
     expect(calculateOnTimeStatus(createService(10))).toBe('poor');
     expect(calculateOnTimeStatus(createService(11))).toBe('very poor');
   });
+
+  test('calculates lateness from booked vs realtime when lateness field not provided', () => {
+    const createServiceWithTimes = (booked, realtime) => ({
+      locationDetail: {
+        gbttBookedDeparture: booked,
+        realtimeDeparture: realtime,
+        displayAs: 'CALL'
+      }
+    });
+
+    // On time
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1410'))).toBe('good');
+    // 5 minutes late
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1415'))).toBe('fair');
+    // 12 minutes late
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1422'))).toBe('very poor');
+    // Early by 2 minutes
+    expect(calculateOnTimeStatus(createServiceWithTimes('1410', '1408'))).toBe('good');
+  });
 });
 
 describe('pickNextService', () => {

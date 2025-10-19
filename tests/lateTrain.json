@@ -1,0 +1,196 @@
+{
+    "location": {
+        "name": "Sheffield",
+        "crs": "SHF",
+        "tiploc": "SHEFFLD",
+        "country": "gb",
+        "system": "nr"
+    },
+    "filter": {
+        "destination": {
+            "name": "Cleethorpes",
+            "crs": "CLE",
+            "tiploc": "CLTHRPS",
+            "country": "gb",
+            "system": "nr"
+        }
+    },
+    "services": [
+        {
+            "locationDetail": {
+                "realtimeActivated": true,
+                "tiploc": "SHEFFLD",
+                "crs": "SHF",
+                "description": "Sheffield",
+                "gbttBookedArrival": "1408",
+                "gbttBookedDeparture": "1410",
+                "origin": [
+                    {
+                        "tiploc": "LVRPLSH",
+                        "description": "Liverpool Lime Street",
+                        "workingTime": "122000",
+                        "publicTime": "1220"
+                    }
+                ],
+                "destination": [
+                    {
+                        "tiploc": "CLTHRPS",
+                        "description": "Cleethorpes",
+                        "workingTime": "154900",
+                        "publicTime": "1551"
+                    }
+                ],
+                "isCall": true,
+                "isPublicCall": true,
+                "realtimeArrival": "1420",
+                "realtimeArrivalActual": false,
+                "realtimeDeparture": "1422",
+                "realtimeDepartureActual": false,
+                "platform": "1B",
+                "platformConfirmed": false,
+                "platformChanged": false,
+                "displayAs": "CALL"
+            },
+            "serviceUid": "C27099",
+            "runDate": "2025-10-19",
+            "trainIdentity": "1B78",
+            "runningIdentity": "1B78",
+            "atocCode": "TP",
+            "atocName": "Transpennine Express",
+            "serviceType": "train",
+            "isPassenger": true
+        },
+        {
+            "locationDetail": {
+                "realtimeActivated": true,
+                "tiploc": "SHEFFLD",
+                "crs": "SHF",
+                "description": "Sheffield",
+                "gbttBookedArrival": "1506",
+                "gbttBookedDeparture": "1510",
+                "origin": [
+                    {
+                        "tiploc": "LVRPLSH",
+                        "description": "Liverpool Lime Street",
+                        "workingTime": "132000",
+                        "publicTime": "1320"
+                    }
+                ],
+                "destination": [
+                    {
+                        "tiploc": "CLTHRPS",
+                        "description": "Cleethorpes",
+                        "workingTime": "165000",
+                        "publicTime": "1652"
+                    }
+                ],
+                "isCall": true,
+                "isPublicCall": true,
+                "realtimeArrival": "1505",
+                "realtimeArrivalActual": false,
+                "realtimeDeparture": "1510",
+                "realtimeDepartureActual": false,
+                "platform": "5B",
+                "platformConfirmed": false,
+                "platformChanged": false,
+                "displayAs": "CALL"
+            },
+            "serviceUid": "C27093",
+            "runDate": "2025-10-19",
+            "trainIdentity": "1B80",
+            "runningIdentity": "1B80",
+            "atocCode": "TP",
+            "atocName": "Transpennine Express",
+            "serviceType": "train",
+            "isPassenger": true
+        },
+        {
+            "locationDetail": {
+                "realtimeActivated": true,
+                "tiploc": "SHEFFLD",
+                "crs": "SHF",
+                "description": "Sheffield",
+                "gbttBookedArrival": "1606",
+                "gbttBookedDeparture": "1610",
+                "origin": [
+                    {
+                        "tiploc": "LVRPLSH",
+                        "description": "Liverpool Lime Street",
+                        "workingTime": "142000",
+                        "publicTime": "1420"
+                    }
+                ],
+                "destination": [
+                    {
+                        "tiploc": "CLTHRPS",
+                        "description": "Cleethorpes",
+                        "workingTime": "175100",
+                        "publicTime": "1753"
+                    }
+                ],
+                "isCall": true,
+                "isPublicCall": true,
+                "realtimeArrival": "1605",
+                "realtimeArrivalActual": false,
+                "realtimeDeparture": "1610",
+                "realtimeDepartureActual": false,
+                "platform": "1B",
+                "platformConfirmed": false,
+                "platformChanged": false,
+                "displayAs": "CALL"
+            },
+            "serviceUid": "C27087",
+            "runDate": "2025-10-19",
+            "trainIdentity": "1B82",
+            "runningIdentity": "1B82",
+            "atocCode": "TP",
+            "atocName": "Transpennine Express",
+            "serviceType": "train",
+            "isPassenger": true
+        },
+        {
+            "locationDetail": {
+                "realtimeActivated": true,
+                "tiploc": "SHEFFLD",
+                "crs": "SHF",
+                "description": "Sheffield",
+                "gbttBookedArrival": "1706",
+                "gbttBookedDeparture": "1710",
+                "origin": [
+                    {
+                        "tiploc": "LVRPLSH",
+                        "description": "Liverpool Lime Street",
+                        "workingTime": "152000",
+                        "publicTime": "1520"
+                    }
+                ],
+                "destination": [
+                    {
+                        "tiploc": "CLTHRPS",
+                        "description": "Cleethorpes",
+                        "workingTime": "184900",
+                        "publicTime": "1851"
+                    }
+                ],
+                "isCall": true,
+                "isPublicCall": true,
+                "realtimeArrival": "1705",
+                "realtimeArrivalActual": false,
+                "realtimeDeparture": "1710",
+                "realtimeDepartureActual": false,
+                "platform": "1",
+                "platformConfirmed": false,
+                "platformChanged": false,
+                "displayAs": "CALL"
+            },
+            "serviceUid": "C27081",
+            "runDate": "2025-10-19",
+            "trainIdentity": "1B84",
+            "runningIdentity": "1B84",
+            "atocCode": "TP",
+            "atocName": "Transpennine Express",
+            "serviceType": "train",
+            "isPassenger": true
+        }
+    ]
+}

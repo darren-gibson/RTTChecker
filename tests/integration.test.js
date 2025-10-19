@@ -105,4 +105,31 @@ describe('Integration tests - getTrainStatus with real data', () => {
     expect(result.selected).toBeNull();
     expect(result.lateness).toBe('unknown');
   });
+
+  test('lateTrain.json: 14:10 train running 12 minutes late -> fair', async () => {
+    const file = path.join(__dirname, 'lateTrain.json');
+    const json = fs.readFileSync(file, 'utf8');
+    const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
+
+    // Simulate current time at 14:00 BST (1 hour before scheduled departure)
+    const now = new Date('2025-10-19T13:00:00Z'); // 14:00 BST (UTC+1)
+
+    const result = await getTrainStatus({
+      originTiploc: 'SHEFFLD',
+      destTiploc: 'CLTHRPS',
+      minAfterMinutes: 5,
+      windowMinutes: 60,
+      now,
+      fetchImpl: fetchMock
+    });
+
+    // Verify the selected train
+    expect(result.selected).toBeDefined();
+    expect(result.selected.locationDetail.gbttBookedDeparture).toBe('1410');
+    expect(result.selected.locationDetail.realtimeDeparture).toBe('1422');
+    expect(result.selected.trainIdentity).toBe('1B78');
+    
+    // Verify the lateness state - 12 minutes late (calculated from 1410 booked vs 1422 realtime) should be 'very poor' (>10 mins)
+    expect(result.lateness).toBe('very poor');
+  });
 });

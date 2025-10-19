@@ -13,8 +13,17 @@ export function calculateOnTimeStatus(service) {
   }
   
   // Calculate lateness from departure times
-  const late = Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness ?? 0);
-  if (late == null) return "unknown";
+  let late = Number(loc.realtimeGbttDepartureLateness ?? loc.realtimeWttDepartureLateness);
+  
+  // If lateness field not provided (future trains), calculate from booked vs realtime times
+  if (isNaN(late) && loc.gbttBookedDeparture && loc.realtimeDeparture) {
+    const bookedMins = hhmmToMins(loc.gbttBookedDeparture);
+    const realtimeMins = hhmmToMins(loc.realtimeDeparture);
+    late = realtimeMins - bookedMins;
+  }
+  
+  // Default to 0 if still no lateness info
+  if (isNaN(late) || late == null) late = 0;
   
   const a = Math.abs(late);
   if (a <= 2) return "good";
