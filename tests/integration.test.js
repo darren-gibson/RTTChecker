@@ -4,6 +4,31 @@ import { getTrainStatus } from '../src/RTTBridge.js';
 import { AirQualityState } from '../src/constants.js';
 
 describe('Integration tests - getTrainStatus with real data', () => {
+  test('normalCommute.json: at 06:05 BST selects 06:39 train as earliest arrival after offset', async () => {
+    const file = path.join(__dirname, 'examples', 'normalCommute.json');
+    const json = fs.readFileSync(file, 'utf8');
+    const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
+
+    // Simulate current time at 06:05 BST (UTC+1)
+    const now = new Date('2025-10-20T05:05:00Z'); // 06:05 BST
+
+    const result = await getTrainStatus({
+      originTiploc: 'CAMBDGE',
+      destTiploc: 'KNGX',
+      minAfterMinutes: 20,
+      windowMinutes: 60,
+      now,
+      fetchImpl: fetchMock
+    });
+
+    // Should select the 06:39 train (arrives at KNGX at 07:32, earliest after offset)
+    expect(result.selected).toBeDefined();
+  expect(result.selected.locationDetail.gbttBookedDeparture).toBe('0639');
+  expect(result.selected.locationDetail.destination[0].tiploc).toBe('KNGX');
+  expect(result.selected.locationDetail.destination[0].publicTime).toBe('0732');
+    // Should be on time (or update as needed)
+    expect(result.lateness).toBe(AirQualityState.GOOD);
+  });
   test('runningOnTime.json: at 12:20 selects 13:22 train running on time -> good', async () => {
     // Load the real API response example
     const file = path.join(__dirname, 'examples', 'runningOnTime.json');

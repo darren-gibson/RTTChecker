@@ -154,11 +154,17 @@ export function pickNextService(services, destTiploc, opts = {}) {
 
   if (candidates.length === 0) return undefined;
 
-  // Sort by duration (fastest first), then by departure time
-  candidates.sort((a,b) => {
-    const da = Number.isNaN(a.duration) ? Infinity : a.duration;
-    const db = Number.isNaN(b.duration) ? Infinity : b.duration;
-    if (da !== db) return da - db;
+  // Sort by arrival time at destination (earliest first), then by departure time
+  candidates.sort((a, b) => {
+    const aArr = (() => {
+      const t = a.destEntry.workingTime || a.destEntry.publicTime || a.loc.gbttBookedArrival || a.loc.realtimeArrival;
+      return parseTime(t?.toString?.());
+    })();
+    const bArr = (() => {
+      const t = b.destEntry.workingTime || b.destEntry.publicTime || b.loc.gbttBookedArrival || b.loc.realtimeArrival;
+      return parseTime(t?.toString?.());
+    })();
+    if (aArr !== bArr) return aArr - bArr;
     return a.depMins - b.depMins;
   });
 
