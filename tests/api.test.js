@@ -1,12 +1,15 @@
 import request from 'supertest';
-import { app } from '../index.js';
 import { GoogleHomeApi, AirQualityState } from '../src/constants.js';
-import fetch from 'node-fetch';
+
+// Ensure node-fetch is mocked before the app is imported
+jest.mock('node-fetch');
+
+let app;
+let fetch;
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 // Mock node-fetch to avoid real API calls
-jest.mock('node-fetch');
 
 // Helper to create a mock fetch response
 const mockFetchResponse = (data) => {
@@ -25,6 +28,21 @@ const loadTestData = (filename) => {
 describe('Google Home Smart Home API', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeAll(async () => {
+    // Import mocked fetch and the app after jest.mock has been registered
+    const nf = await import('node-fetch');
+    fetch = nf.default || nf;
+    const mod = await import('../index.js');
+    app = mod.app;
+    // Freeze system time to match test fixtures (runningOnTime.json is 2025-10-19)
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(new Date('2025-10-19T11:20:00Z'));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   describe('POST /smarthome', () => {
@@ -84,6 +102,14 @@ describe('Google Home Smart Home API', () => {
     });
 
     describe('QUERY Intent', () => {
+      beforeEach(() => {
+        // Ensure config matches test fixtures so pickNextService can find candidates
+        const cfg = require('../src/config.js').config;
+        cfg.train.originTiploc = 'CAMBDGE';
+        cfg.train.destTiploc = 'KNGX';
+        cfg.train.minAfterMinutes = 0;
+        cfg.train.windowMinutes = 180;
+      });
       it('should return GOOD air quality when train is on time', async () => {
         // Load real API response for on-time train
         const runningOnTime = loadTestData('examples/runningOnTime.json');
