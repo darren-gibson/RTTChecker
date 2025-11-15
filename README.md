@@ -32,6 +32,14 @@ RTTChecker is a Matter device that queries the RTT API to select the best train 
 
 ## Matter Device Setup
 
+### Device Type
+This device implements the **Matter Mode Select** device type, which properly represents the 5 discrete train status states:
+- **On Time** (mode 0): Train on schedule (≤2 min late)
+- **Minor Delay** (mode 1): Slightly delayed (3-5 min late)
+- **Delayed** (mode 2): Moderate delay (6-10 min late)
+- **Major Delay** (mode 3): Significant delay (>10 min late) or cancelled
+- **Unknown** (mode 4): No suitable train found
+
 ### Prerequisites
 - Matter controller (Apple HomePod, Google Nest Hub, etc.)
 - Node.js 16+ installed
@@ -67,12 +75,35 @@ export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
 npm start
 ```
 
-### Commissioning
-1. Start the device with `npm start`
-2. Open your Matter controller app (Apple Home, Google Home, etc.)
-3. Select "Add Device" or "Add Accessory"
-4. Scan the QR code displayed in the terminal (or enter the setup code manually)
-5. The device will appear as "Train Status" with modes showing train punctuality
+### Commissioning with Google Home
+
+1. **Start the Device:**
+   ```bash
+   npm start
+   ```
+   The terminal will display a QR code and manual pairing code
+
+2. **Open Google Home App:**
+   - Launch the Google Home app on your phone
+   - Ensure your phone is on the same network
+
+3. **Add Device:**
+   - Tap the **+** button in the top left
+   - Select **Add device** → **New device**
+   - Choose your home
+   - Wait for Google Home to scan for devices
+
+4. **Commission Device:**
+   - When prompted, scan the **QR code** shown in the terminal
+   - OR tap "Set up without QR code" and enter the **manual pairing code**
+   - Default passcode: `20202021`
+   - Default discriminator: `3840`
+
+5. **Verify:**
+   - The device will appear as "Train Status" in your Google Home
+   - Current train status displays as one of 5 modes (On Time, Minor Delay, Delayed, Major Delay, Unknown)
+   - Status updates automatically every minute
+   - The device is read-only (you view status, but cannot manually change modes)
 
 ### Testing
 - Comprehensive Jest tests cover:
@@ -87,17 +118,20 @@ npm start
 ## Matter Device Details
 
 ### Device Type
-- **Type:** Generic Switch with Mode Select cluster
+- **Type:** Mode Select Device (Matter Device Type 39)
 - **Vendor ID:** 0xFFF1 (test vendor)
 - **Product ID:** 0x8001
+- **Cluster:** Mode Select (0x0050)
 
 ### Supported Modes
-The device reports one of five modes representing train status:
-1. **On Time** - Train running on schedule (≤2 min late)
-2. **Minor Delay** - Slightly delayed (3-5 min late)
-3. **Delayed** - Moderate delay (6-10 min late)
-4. **Major Delay** - Significant delay (>10 min late) or cancelled
-5. **Unknown** - No suitable train found
+The device implements a Mode Select cluster with five modes representing train status:
+1. **On Time** (mode 0) - Train running on schedule (≤2 min late)
+2. **Minor Delay** (mode 1) - Slightly delayed (3-5 min late)
+3. **Delayed** (mode 2) - Moderate delay (6-10 min late)
+4. **Major Delay** (mode 3) - Significant delay (>10 min late) or cancelled
+5. **Unknown** (mode 4) - No suitable train found
+
+The mode automatically updates every minute based on real-time RTT API data.
 
 ### Automation Examples
 Use the mode state in Matter automations:

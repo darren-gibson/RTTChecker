@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { TrainStatus, MatterDevice as MatterConstants } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
@@ -20,8 +21,9 @@ const STATUS_TO_MODE = {
  * TrainStatusDevice class
  * Implements a Matter device with Mode Select cluster for train status monitoring
  */
-export class TrainStatusDevice {
+export class TrainStatusDevice extends EventEmitter {
   constructor() {
+    super();
     this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
     this.updateInterval = null;
     this.updateIntervalMs = Number(process.env.UPDATE_INTERVAL_MS || 60000); // Default 1 minute
@@ -63,14 +65,33 @@ export class TrainStatusDevice {
       const newMode = STATUS_TO_MODE[result.status] ?? MatterConstants.Modes.UNKNOWN.mode;
       
       if (newMode !== this.currentMode) {
-        console.log(`Train status changed: ${this.currentMode} -> ${newMode} (${result.status})`);
+        const previousMode = this.currentMode;
+        console.log(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
         this.currentMode = newMode;
+        
+        // Emit event for Matter server
+        this.emit('statusChange', {
+          previousMode,
+          currentMode: newMode,
+          trainStatus: result.status,
+          selectedService: result.selected
+        });
       }
 
       return result;
     } catch (error) {
-      console.error('Failed to update train status:', error);
+      console.error('❌ Failed to update train status:', error);
+      const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
+      
+      if (previousMode !== this.currentMode) {
+        this.emit('statusChange', {
+          previousMode,
+          currentMode: this.currentMode,
+          error: error.message
+        });
+      }
+      
       throw error;
     }
   }
