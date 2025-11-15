@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { AirQualityState } from "./constants.js";
+import { TrainStatus } from "./constants.js";
 import { config } from "./config.js";
 
 export const hhmmToMins = t => parseInt(t.slice(0,2), 10)*60 + parseInt(t.slice(2,4), 10);
@@ -13,7 +13,7 @@ export const hhmmToMins = t => parseInt(t.slice(0,2), 10)*60 + parseInt(t.slice(
  * @param {number} [options.windowMinutes] - Window size in minutes (default 60)
  * @param {Date} [options.now] - Current time (defaults to new Date()) - date is extracted from this
  * @param {function} [options.fetchImpl] - Optional fetch implementation for mocking
- * @returns {Promise<{lateness: string, selected: object, raw: object}>}
+ * @returns {Promise<{status: string, selected: object, raw: object}>}
  */
 export async function getTrainStatus({
   originTiploc,
@@ -35,21 +35,21 @@ export async function getTrainStatus({
   const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
   const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });
   if (!svc) {
-    return { lateness: AirQualityState.UNKNOWN, selected: null, raw: data };
+    return { status: TrainStatus.UNKNOWN, selected: null, raw: data };
   }
   
-  const lateness = calculateOnTimeStatus(svc);
-  return { lateness, selected: svc, raw: data };
+  const status = calculateOnTimeStatus(svc);
+  return { status, selected: svc, raw: data };
 }
 
 export function calculateOnTimeStatus(service) {
-  if (!service) return AirQualityState.UNKNOWN;
+  if (!service) return TrainStatus.UNKNOWN;
   
   const loc = service.locationDetail || service;
   
-  // If cancelled, always return 'very poor'
+  // If cancelled, always return 'major delay'
   if (loc.cancelReasonCode) {
-    return AirQualityState.VERY_POOR;
+    return TrainStatus.MAJOR_DELAY;
   }
   
   // Calculate lateness from departure times
@@ -66,10 +66,10 @@ export function calculateOnTimeStatus(service) {
   if (isNaN(late) || late == null) late = 0;
   
   const a = Math.abs(late);
-  if (a <= 2) return AirQualityState.GOOD;
-  if (a <= 5) return AirQualityState.FAIR;
-  if (a <= 10) return AirQualityState.POOR;
-  return AirQualityState.VERY_POOR;
+  if (a <= 2) return TrainStatus.ON_TIME;
+  if (a <= 5) return TrainStatus.MINOR_DELAY;
+  if (a <= 10) return TrainStatus.DELAYED;
+  return TrainStatus.MAJOR_DELAY;
 }
 
 export const b64 = (u,p) => Buffer.from(`${u}:${p}`).toString("base64");

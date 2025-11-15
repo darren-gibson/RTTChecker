@@ -18,17 +18,20 @@ export const config = {
     windowMinutes: Number(process.env.WINDOW_MINUTES || 60)
   },
 
-  // Server configuration
+  // Server configuration (for testing/debugging)
   server: {
     port: Number(process.env.PORT || 8080),
     nodeEnv: process.env.NODE_ENV
   },
 
-  // Google Home device configuration
-  googleHome: {
-    agentUserId: 'user-123',
-    deviceId: 'train_1',
-    deviceName: 'My Train'
+  // Matter device configuration
+  matter: {
+    deviceName: process.env.DEVICE_NAME || 'Train Status',
+    vendorName: process.env.VENDOR_NAME || 'RTT Checker',
+    productName: process.env.PRODUCT_NAME || 'Train Status Monitor',
+    serialNumber: process.env.SERIAL_NUMBER || 'RTT-001',
+    discriminator: Number(process.env.DISCRIMINATOR || 3840),
+    passcode: Number(process.env.PASSCODE || 20202021)
   }
 };
 

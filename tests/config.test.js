@@ -5,7 +5,7 @@ describe('Configuration', () => {
     expect(config).toHaveProperty('rtt');
     expect(config).toHaveProperty('train');
     expect(config).toHaveProperty('server');
-    expect(config).toHaveProperty('googleHome');
+    expect(config).toHaveProperty('matter');
   });
 
   test('rtt config has user and pass', () => {
@@ -24,10 +24,13 @@ describe('Configuration', () => {
     expect(config.server.port).toBe(8080);
   });
 
-  test('googleHome config has device details', () => {
-    expect(config.googleHome.agentUserId).toBe('user-123');
-    expect(config.googleHome.deviceId).toBe('train_1');
-    expect(config.googleHome.deviceName).toBe('My Train');
+  test('matter config has device details', () => {
+    expect(config.matter.deviceName).toBe('Train Status');
+    expect(config.matter.vendorName).toBe('RTT Checker');
+    expect(config.matter.productName).toBe('Train Status Monitor');
+    expect(config.matter.serialNumber).toBe('RTT-001');
+    expect(config.matter.discriminator).toBe(3840);
+    expect(config.matter.passcode).toBe(20202021);
   });
 
   test('isTestEnv returns true in test environment', () => {

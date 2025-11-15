@@ -1,57 +1,34 @@
 /**
- * Google Home Air Quality sensor states
- * These map to the action.devices.traits.SensorState values
- * for Air Quality sensors in Google Home smart home API
+ * Train status states for Matter Mode Select cluster
+ * These map to discrete modes that represent train punctuality
  */
-export const AirQualityState = {
-  GOOD: 'good',
-  FAIR: 'fair',
-  POOR: 'poor',
-  VERY_POOR: 'very poor',
+export const TrainStatus = {
+  ON_TIME: 'on_time',
+  MINOR_DELAY: 'minor_delay',
+  DELAYED: 'delayed',
+  MAJOR_DELAY: 'major_delay',
   UNKNOWN: 'unknown'
 };
 
 /**
- * Google Home Smart Home API constants
- * Reference: https://developers.google.com/assistant/smarthome/
+ * Matter device constants for Mode Select cluster
+ * Reference: https://github.com/project-chip/connectedhomeip
  */
-export const GoogleHomeApi = {
-  // Intent types
-  Intent: {
-    SYNC: 'action.devices.SYNC',
-    QUERY: 'action.devices.QUERY',
-    EXECUTE: 'action.devices.EXECUTE',
-    DISCONNECT: 'action.devices.DISCONNECT'
+export const MatterDevice = {
+  // Mode Select cluster modes for train status
+  Modes: {
+    ON_TIME: { mode: 0, label: 'On Time' },
+    MINOR_DELAY: { mode: 1, label: 'Minor Delay' },
+    DELAYED: { mode: 2, label: 'Delayed' },
+    MAJOR_DELAY: { mode: 3, label: 'Major Delay' },
+    UNKNOWN: { mode: 4, label: 'Unknown' }
   },
 
-  // Device types
-  DeviceType: {
-    SENSOR: 'action.devices.types.SENSOR',
-    LIGHT: 'action.devices.types.LIGHT',
-    SWITCH: 'action.devices.types.SWITCH',
-    THERMOSTAT: 'action.devices.types.THERMOSTAT'
-  },
+  // Device identification
+  VendorId: 0xFFF1,  // Test vendor ID
+  ProductId: 0x8001, // Train status device
 
-  // Device traits
-  Trait: {
-    SENSOR_STATE: 'action.devices.traits.SensorState',
-    ON_OFF: 'action.devices.traits.OnOff',
-    BRIGHTNESS: 'action.devices.traits.Brightness'
-  },
-
-  // Sensor names
-  SensorName: {
-    AIR_QUALITY: 'AirQuality',
-    CARBON_MONOXIDE_LEVEL: 'CarbonMonoxideLevel',
-    SMOKE_LEVEL: 'SmokeLevel'
-  },
-
-  // Response status
-  Status: {
-    SUCCESS: 'SUCCESS',
-    ERROR: 'ERROR',
-    OFFLINE: 'OFFLINE',
-    PENDING: 'PENDING'
-  }
+  // Device type (using Generic Switch as base for Mode Select)
+  DeviceType: 0x000F // Generic Switch with Mode Select
 };
 

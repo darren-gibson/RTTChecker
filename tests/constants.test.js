@@ -1,27 +1,26 @@
-import { AirQualityState, GoogleHomeApi } from '../src/constants.js';
+import { TrainStatus, MatterDevice } from '../src/constants.js';
 
-describe('AirQualityState constants', () => {
+describe('TrainStatus constants', () => {
   test('all expected states are defined', () => {
-    expect(AirQualityState.GOOD).toBe('good');
-    expect(AirQualityState.FAIR).toBe('fair');
-    expect(AirQualityState.POOR).toBe('poor');
-    expect(AirQualityState.VERY_POOR).toBe('very poor');
-    expect(AirQualityState.UNKNOWN).toBe('unknown');
+    expect(TrainStatus.ON_TIME).toBe('on_time');
+    expect(TrainStatus.MINOR_DELAY).toBe('minor_delay');
+    expect(TrainStatus.DELAYED).toBe('delayed');
+    expect(TrainStatus.MAJOR_DELAY).toBe('major_delay');
+    expect(TrainStatus.UNKNOWN).toBe('unknown');
   });
 
   test('Object.values returns all state values', () => {
-    const values = Object.values(AirQualityState);
+    const values = Object.values(TrainStatus);
     expect(values).toHaveLength(5);
-    expect(values).toContain('good');
-    expect(values).toContain('fair');
-    expect(values).toContain('poor');
-    expect(values).toContain('very poor');
+    expect(values).toContain('on_time');
+    expect(values).toContain('minor_delay');
+    expect(values).toContain('delayed');
+    expect(values).toContain('major_delay');
     expect(values).toContain('unknown');
   });
 
-  test('constants match Google Home Air Quality sensor requirements', () => {
-    // Verify the values are Google Home compatible strings
-    const values = Object.values(AirQualityState);
+  test('constants are valid strings', () => {
+    const values = Object.values(TrainStatus);
     values.forEach(value => {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
@@ -29,49 +28,35 @@ describe('AirQualityState constants', () => {
   });
 });
 
-describe('GoogleHomeApi constants', () => {
-  test('Intent constants are defined', () => {
-    expect(GoogleHomeApi.Intent.SYNC).toBe('action.devices.SYNC');
-    expect(GoogleHomeApi.Intent.QUERY).toBe('action.devices.QUERY');
-    expect(GoogleHomeApi.Intent.EXECUTE).toBe('action.devices.EXECUTE');
-    expect(GoogleHomeApi.Intent.DISCONNECT).toBe('action.devices.DISCONNECT');
+describe('MatterDevice constants', () => {
+  test('Modes are defined with mode number and label', () => {
+    expect(MatterDevice.Modes.ON_TIME).toEqual({ mode: 0, label: 'On Time' });
+    expect(MatterDevice.Modes.MINOR_DELAY).toEqual({ mode: 1, label: 'Minor Delay' });
+    expect(MatterDevice.Modes.DELAYED).toEqual({ mode: 2, label: 'Delayed' });
+    expect(MatterDevice.Modes.MAJOR_DELAY).toEqual({ mode: 3, label: 'Major Delay' });
+    expect(MatterDevice.Modes.UNKNOWN).toEqual({ mode: 4, label: 'Unknown' });
   });
 
-  test('DeviceType constants are defined', () => {
-    expect(GoogleHomeApi.DeviceType.SENSOR).toBe('action.devices.types.SENSOR');
-    expect(GoogleHomeApi.DeviceType.LIGHT).toBe('action.devices.types.LIGHT');
-    expect(GoogleHomeApi.DeviceType.SWITCH).toBe('action.devices.types.SWITCH');
-    expect(GoogleHomeApi.DeviceType.THERMOSTAT).toBe('action.devices.types.THERMOSTAT');
+  test('Mode numbers are sequential', () => {
+    expect(MatterDevice.Modes.ON_TIME.mode).toBe(0);
+    expect(MatterDevice.Modes.MINOR_DELAY.mode).toBe(1);
+    expect(MatterDevice.Modes.DELAYED.mode).toBe(2);
+    expect(MatterDevice.Modes.MAJOR_DELAY.mode).toBe(3);
+    expect(MatterDevice.Modes.UNKNOWN.mode).toBe(4);
   });
 
-  test('Trait constants are defined', () => {
-    expect(GoogleHomeApi.Trait.SENSOR_STATE).toBe('action.devices.traits.SensorState');
-    expect(GoogleHomeApi.Trait.ON_OFF).toBe('action.devices.traits.OnOff');
-    expect(GoogleHomeApi.Trait.BRIGHTNESS).toBe('action.devices.traits.Brightness');
+  test('Device identification constants are defined', () => {
+    expect(MatterDevice.VendorId).toBe(0xFFF1);
+    expect(MatterDevice.ProductId).toBe(0x8001);
+    expect(MatterDevice.DeviceType).toBe(0x000F);
   });
 
-  test('SensorName constants are defined', () => {
-    expect(GoogleHomeApi.SensorName.AIR_QUALITY).toBe('AirQuality');
-    expect(GoogleHomeApi.SensorName.CARBON_MONOXIDE_LEVEL).toBe('CarbonMonoxideLevel');
-    expect(GoogleHomeApi.SensorName.SMOKE_LEVEL).toBe('SmokeLevel');
-  });
-
-  test('Status constants are defined', () => {
-    expect(GoogleHomeApi.Status.SUCCESS).toBe('SUCCESS');
-    expect(GoogleHomeApi.Status.ERROR).toBe('ERROR');
-    expect(GoogleHomeApi.Status.OFFLINE).toBe('OFFLINE');
-    expect(GoogleHomeApi.Status.PENDING).toBe('PENDING');
-  });
-
-  test('all constants follow Google Home API naming conventions', () => {
-    // Intent strings should start with 'action.devices.'
-    expect(GoogleHomeApi.Intent.SYNC).toMatch(/^action\.devices\./);
-    expect(GoogleHomeApi.Intent.QUERY).toMatch(/^action\.devices\./);
-    
-    // DeviceType strings should start with 'action.devices.types.'
-    expect(GoogleHomeApi.DeviceType.SENSOR).toMatch(/^action\.devices\.types\./);
-    
-    // Trait strings should start with 'action.devices.traits.'
-    expect(GoogleHomeApi.Trait.SENSOR_STATE).toMatch(/^action\.devices\.traits\./);
+  test('all mode labels are user-friendly strings', () => {
+    const modes = Object.values(MatterDevice.Modes);
+    modes.forEach(mode => {
+      expect(typeof mode.label).toBe('string');
+      expect(mode.label.length).toBeGreaterThan(0);
+      expect(mode.label).toMatch(/^[A-Z]/); // Starts with capital letter
+    });
   });
 });
