@@ -1,7 +1,6 @@
-import { Device } from '@project-chip/matter-node.js/device';
-import { ClusterServer } from '@project-chip/matter-node.js/cluster';
-import { ModeSelect } from '@project-chip/matter-node.js/cluster';
-import { DeviceTypes } from '@project-chip/matter-node.js/device';
+import { Device, DeviceTypes } from '@project-chip/matter.js/device';
+import { ClusterServer } from '@project-chip/matter.js/cluster';
+import { ModeSelectCluster } from '@project-chip/matter.js/cluster';
 import { MatterDevice as MatterConstants } from './constants.js';
 
 /**
@@ -44,7 +43,7 @@ export class TrainStatusModeDevice extends Device {
     // Create Mode Select cluster server
     this.addClusterServer(
       ClusterServer(
-        ModeSelect.Cluster,
+        ModeSelectCluster,
         {
           description: 'Train punctuality status',
           standardNamespace: null,
@@ -68,7 +67,7 @@ export class TrainStatusModeDevice extends Device {
    * @param {number} mode - Mode number from MatterConstants.Modes
    */
   setCurrentMode(mode) {
-    const cluster = this.getClusterServer(ModeSelect.Cluster);
+  const cluster = this.getClusterServer(ModeSelectCluster);
     if (cluster) {
       cluster.setCurrentModeAttribute(mode);
       const modeLabel = this.getModeLabel(mode);
@@ -81,7 +80,7 @@ export class TrainStatusModeDevice extends Device {
    * @returns {number}
    */
   getCurrentMode() {
-    const cluster = this.getClusterServer(ModeSelect.Cluster);
+  const cluster = this.getClusterServer(ModeSelectCluster);
     return cluster?.getCurrentModeAttribute() ?? MatterConstants.Modes.UNKNOWN.mode;
   }
 

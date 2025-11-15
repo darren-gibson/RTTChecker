@@ -20,7 +20,7 @@
     "jest": "^29.0.0"
   },
   "dependencies": {
-    "@project-chip/matter-node.js": "^0.9.0",
+    "@project-chip/matter-node.js": "^0.12.6",
     "node-fetch": "^2.6.7",
     "qrcode-terminal": "^0.12.0"
   }

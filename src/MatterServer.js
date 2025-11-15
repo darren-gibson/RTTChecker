@@ -1,5 +1,5 @@
 import { StorageBackendDisk, StorageManager } from '@project-chip/matter-node.js/storage';
-import { MatterServer, CommissioningServer } from '@project-chip/matter-node.js';
+import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
 import qr from 'qrcode-terminal';
 import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
