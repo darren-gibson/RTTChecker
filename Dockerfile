@@ -26,12 +26,13 @@ ENV NODE_ENV=production
 ENV DEVICE_NAME="Train Status"
 ENV UPDATE_INTERVAL_MS=60000
 
-# Note: Set RTT_USER, RTT_PASS, ORIGIN_TIPLOC, DEST_TIPLOC via secrets/env
-# Cloud Run sets PORT dynamically (though Matter doesn't use HTTP)
-ENV PORT=8080
+# Note: Set RTT_USER, RTT_PASS, ORIGIN_TIPLOC, DEST_TIPLOC via environment variables
 
-# Expose the port (for debugging/health checks if needed)
-EXPOSE 8080
+# Matter Protocol Requirements:
+# - UDP port 5540 (Matter commissioning/communication)
+# - UDP port 5353 (mDNS for device discovery)
+# - Container MUST be run with --network host for mDNS to work
+# - EXPOSE directives are not used because host networking bypasses them
 
 # Start the Matter device
 CMD ["node", "index.js"]

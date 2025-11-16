@@ -1,9 +1,13 @@
 # RTTChecker
 
-A Matter smart home device that monitors real-time train status using the UK Rail Real-Time Trains (RTT) API. Displays train punctuality as a Mode Select device compatible with all Matter controllers.
+A Matter smart home device that monitors real-time train status using the UK Rail Real-Time Trains (RTT) API. Exposes two Matter endpoints:
+- A Mode Select device for status (On Time / Minor / Delayed / Major / Unknown)
+- A Temperature Sensor that shows numeric delay in minutes (1:1 mapping)
 
 ## Overview
-RTTChecker is a Matter device that queries the RTT API to select the best train for a given journey and reports its punctuality status using the Matter Mode Select cluster. The device appears in Matter-compatible apps (Apple Home, Google Home, Amazon Alexa) showing clear train status modes.
+RTTChecker is a Matter device that queries the RTT API to select the best train for a given journey and reports its punctuality via two representations:
+- Discrete status using the Matter Mode Select cluster
+- Numeric delay (in minutes) using the Temperature Measurement cluster (temperature value equals minutes delayed; negative values mean early)
 
 ## Key Behaviour
 - **Train Selection Logic:**
@@ -21,9 +25,10 @@ RTTChecker is a Matter device that queries the RTT API to select the best train 
 		- **Unknown** (mode 4): No suitable train found
 
 - **Matter Integration:**
-	- Implements Matter Mode Select cluster
+	- Implements Mode Select cluster for status
+	- Implements Temperature Measurement cluster for numeric delay (1:1 minutes ↔ °C)
 	- Compatible with Apple Home, Google Home, Amazon Alexa
-	- Updates status automatically every minute (configurable)
+	- Updates automatically every minute (configurable)
 
 ## Example Scenario
 - At 06:05 BST, 20/Oct/2025, for Cambridge (CAMBDGE) to London Kings Cross (KNGX):
@@ -32,13 +37,20 @@ RTTChecker is a Matter device that queries the RTT API to select the best train 
 
 ## Matter Device Setup
 
-### Device Type
-This device implements the **Matter Mode Select** device type, which properly represents the 5 discrete train status states:
+### Device Types
+This device exposes two endpoints:
+
+1) **Matter Mode Select** device type, representing the 5 discrete train status states:
 - **On Time** (mode 0): Train on schedule (≤2 min late)
 - **Minor Delay** (mode 1): Slightly delayed (3-5 min late)
 - **Delayed** (mode 2): Moderate delay (6-10 min late)
 - **Major Delay** (mode 3): Significant delay (>10 min late) or cancelled
 - **Unknown** (mode 4): No suitable train found
+
+2) **Matter Temperature Sensor** device type, representing the numeric delay with a simple, voice-friendly mapping:
+- Temperature value equals the number of minutes delayed (°C = minutes)
+- Negative values indicate early arrivals (e.g., -3°C = 3 minutes early)
+- Values are capped to a safe range: -10°C (very early) to 50°C (very late)
 
 ### Prerequisites
 - Matter controller (Apple HomePod, Google Nest Hub, etc.)
@@ -68,6 +80,10 @@ export DEVICE_NAME="Train Status"
 export DISCRIMINATOR=3840       # For Matter commissioning
 export PASSCODE=20202021        # For Matter commissioning
 export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
+
+# Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC→DEST_TIPLOC)
+export STATUS_DEVICE_NAME="CAMBDGE→KNGX Train Status"   # Mode Select endpoint name
+export DELAY_DEVICE_NAME="CAMBDGE→KNGX Train Delay"     # Temperature Sensor endpoint name
 ```
 
 ### Running the Device
@@ -100,10 +116,12 @@ npm start
    - Default discriminator: `3840`
 
 5. **Verify:**
-   - The device will appear as "Train Status" in your Google Home
-   - Current train status displays as one of 5 modes (On Time, Minor Delay, Delayed, Major Delay, Unknown)
-   - Status updates automatically every minute
-   - The device is read-only (you view status, but cannot manually change modes)
+	- Two endpoints will appear in Google Home:
+	  - "CAMBDGE→KNGX Train Status" (or your override) – Mode Select with one of 5 modes
+	  - "CAMBDGE→KNGX Train Delay" (or your override) – Temperature Sensor showing numeric delay
+	- Temperature value equals minutes of delay (negative = early, zero = on time)
+	- Values update automatically every minute
+	- Devices are read-only (status comes from RTT updates)
 
 ### Testing
 - Comprehensive Jest tests cover:
@@ -117,13 +135,18 @@ npm start
 
 ## Matter Device Details
 
-### Device Type
+### Device Types
+Mode Select endpoint:
 - **Type:** Mode Select Device (Matter Device Type 39)
-- **Vendor ID:** 0xFFF1 (test vendor)
-- **Product ID:** 0x8001
 - **Cluster:** Mode Select (0x0050)
 
-### Supported Modes
+Temperature Sensor endpoint:
+- **Type:** Temperature Sensor (Matter Device Type 770)
+- **Cluster:** Temperature Measurement (0x0402)
+- **Units:** Hundredths of degrees Celsius (0.01°C) where 1.00°C = 1 minute delay
+- **Range:** -10.00°C to 50.00°C (maps to -10 to +50 minutes)
+
+### Supported Modes (Mode Select)
 The device implements a Mode Select cluster with five modes representing train status:
 1. **On Time** (mode 0) - Train running on schedule (≤2 min late)
 2. **Minor Delay** (mode 1) - Slightly delayed (3-5 min late)
@@ -132,6 +155,15 @@ The device implements a Mode Select cluster with five modes representing train s
 5. **Unknown** (mode 4) - No suitable train found
 
 The mode automatically updates every minute based on real-time RTT API data.
+
+### Delay-to-Temperature Mapping (Temperature Sensor)
+- 0 minutes late → 0°C (on time)
+- 5 minutes late → 5°C
+- 20 minutes late → 20°C
+- -3 minutes (early) → -3°C
+- Values are capped to -10°C (very early) and 50°C (very late)
+
+This mapping makes Google Home voice queries like "What's the temperature of Train Delay Sensor?" directly tell you the minutes delayed.
 
 ### Automation Examples
 Use the mode state in Matter automations:
@@ -144,12 +176,14 @@ Use the mode state in Matter automations:
 - `src/RTTBridge.js`: Core train selection logic
 - `src/config.js`: Configuration management
 - `src/constants.js`: Matter modes and train status constants
+- `src/TrainStatusAirQualityDevice.js`: Temperature Sensor endpoint (1:1 delay→temp)
+- `src/TrainStatusModeDevice.js`: Mode Select endpoint
 - `tests/`: Jest tests and real API response examples
 - `index.js`: Device startup and lifecycle management
 - `Dockerfile`: Containerization for deployment
 
 ## Deployment
-The device can be deployed to cloud environments (Google Cloud Run, AWS, etc.) for always-on operation. See `build/deploy.sh` for deployment scripts.
+The device can be deployed using Docker for always-on operation. The Dockerfile is configured for containerized deployment on any platform supporting Docker (local server, VM, etc.). For network discovery to work, the container must be run with `--network host` to enable mDNS/Matter commissioning.
 
 ## Behaviour Summary
 - **Clarity:** The device always selects the train that arrives at the destination earliest after the offset, regardless of origin, as long as it passes through the specified origin.

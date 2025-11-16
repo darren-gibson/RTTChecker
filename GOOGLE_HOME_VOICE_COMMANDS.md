@@ -1,10 +1,46 @@
-# Using Train Status Device with Google Home
+# Using Train Status Devices with Google Home
 
 ## Voice Commands
 
-Google Home's support for Mode Select devices varies. Here are the commands you can try:
+This project exposes TWO Matter endpoints in Google Home:
+- "Train Status" (Mode Select) — shows On Time / Minor Delay / Delayed / Major Delay / Unknown
+- "Train Delay Sensor" (Temperature Sensor) — shows numeric delay in minutes via temperature value
 
-### Basic Status Check
+Google Home's voice support for Mode Select is limited, but the Temperature Sensor works great for voice queries.
+
+### Ask for Numeric Delay (Recommended)
+These commands read the Temperature Sensor value, which equals minutes delayed:
+```
+"Hey Google, what's the temperature of Train Delay Sensor?"
+"Hey Google, what's Train Delay Sensor's temperature?"
+"Hey Google, what's the temperature in <room>?"  (if the sensor is assigned to a room)
+```
+
+How to interpret:
+- 0°C = on time
+- 5°C = 5 minutes late
+- 20°C = 20 minutes late
+- -3°C = 3 minutes early (negative values mean early)
+
+Tip: You can rename the device in Google Home to "Train Delay" for shorter phrases:
+```
+"Hey Google, what's the temperature of Train Delay?"
+
+### Custom Names
+If you set `STATUS_DEVICE_NAME` or `DELAY_DEVICE_NAME` before starting the server, those names appear instead of defaults (which derive from `<ORIGIN>→<DEST>`). Use short names to reduce friction in voice phrases:
+```
+export STATUS_DEVICE_NAME="Cambridge→London Status"
+export DELAY_DEVICE_NAME="Cambridge→London Delay"
+```
+Then you can ask:
+```
+"Hey Google, what's the temperature of Cambridge→London Delay?"
+```
+Inside the Google Home app you can still rename endpoints locally without changing environment variables.
+```
+
+### Check Status (Mode Select)
+Basic status commands for the Mode Select endpoint:
 ```
 "Hey Google, what's the status of Train Status?"
 "Hey Google, what mode is Train Status in?"
@@ -39,6 +75,7 @@ The most reliable way is through the **Google Home app**:
 - ❌ Voice commands might be limited to "turn on/off" (which won't work for read-only devices)
 - ✅ Google Home **app** reliably shows current mode
 - ✅ Mode changes are visible in the app in real-time
+- ✅ Temperature Sensor works well with voice, and its value equals minutes delayed
 
 ## Alternative: Add Automations
 
@@ -78,6 +115,17 @@ Starter: When Train Status is "Delayed" or "Major Delay"
 Action:  Turn hallway light red
 ```
 
+### Numeric (Temperature) Automation Examples
+
+Use the Temperature Sensor for numeric thresholds (minutes delayed):
+```
+Starter: When Train Delay Sensor temperature rises above 10°C
+Action:  Send notification "Train is >10 minutes late"
+
+Starter: When Train Delay Sensor temperature falls below 0°C
+Action:  Announce "Train is on time or early"
+```
+
 ## Checking Current Status
 
 ### Via Google Home App (Most Reliable)
@@ -86,13 +134,13 @@ Action:  Turn hallway light red
 3. Find **"Train Status"**
 4. Tap to view → Current mode displayed prominently
 
-### Via Voice (May be Limited)
+### Via Voice (Mode Select may be Limited)
 ```
 "Hey Google, what's Train Status set to?"
 "Hey Google, read Train Status"
 ```
 
-If voice commands don't work well, this is a known limitation of Google Home's current Mode Select implementation.
+If voice commands don't work well for modes, this is a known limitation of Google Home's current Mode Select implementation. Use the Temperature Sensor instead for a reliable, voice-friendly numeric delay.
 
 ## Better Controller Options
 

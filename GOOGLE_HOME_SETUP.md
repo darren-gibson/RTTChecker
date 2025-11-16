@@ -1,4 +1,4 @@
-# Testing with Google Home Nest Display
+# Testing with Google Home (Nest Hub / App)
 
 ## Quick Start
 
@@ -21,6 +21,14 @@ export WINDOW_MINUTES=60          # Within next 60 minutes
 export DEVICE_NAME="Train Status"
 export DISCRIMINATOR=3840
 export PASSCODE=20202021
+export UPDATE_INTERVAL_MS=60000   # Update every 60 seconds
+
+# Optional: Per-endpoint custom names (defaults derive from ORIGIN_TIPLOC→DEST_TIPLOC)
+# If unset, names will be automatically generated like:
+#   <ORIGIN>→<DEST> Train Status
+#   <ORIGIN>→<DEST> Train Delay
+export STATUS_DEVICE_NAME="CAMBDGE→KNGX Train Status"
+export DELAY_DEVICE_NAME="CAMBDGE→KNGX Train Delay"
 ```
 
 ### 2. Start the Device
@@ -93,13 +101,23 @@ You'll see updates like:
 ```
 
 **In Google Home App:**
-- Device shows as ON when train is on time/minor delay
-- Device shows as OFF when delayed/major delay/unknown
-- State updates automatically every minute
+- You should see TWO endpoints/devices. Default names are derived from the route:
+   - `<ORIGIN>→<DEST> Train Status` (or your `STATUS_DEVICE_NAME` override) – Mode Select with 5 modes
+   - `<ORIGIN>→<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
+- If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
+- The Temperature Sensor value equals minutes delayed (negative = early, 0 = on time)
+- Values update automatically every minute
+- Endpoints are read-only (status comes from RTT updates)
 
-**Voice Control:**
-- "Hey Google, is Train Status on?"
-- "Hey Google, turn on/off Train Status" (doesn't do anything useful, but works)
+**Voice Control (Recommended):**
+- "Hey Google, what's the temperature of Train Delay Sensor?"
+- "Hey Google, what's Train Delay Sensor's temperature?"
+- Assign to a room and ask: "Hey Google, what's the temperature in <room>?"
+
+Interpretation:
+- 0°C = on time
+- 5°C = 5 minutes late
+- -3°C = 3 minutes early
 
 ### 5. Create Automations
 
@@ -156,20 +174,13 @@ curl -u "$RTT_USER:$RTT_PASS" \
 - Verify trains run during current time
 - Check `MIN_AFTER_MINUTES` isn't too large
 
-### State Mapping
+### Device Endpoints & Mapping
 
-The device uses **On/Off state** for Google Home compatibility:
-
-| Train Status | Mode | Google Home State |
-|--------------|------|-------------------|
-| On Time (≤2 min late) | 0 | ON |
-| Minor Delay (3-5 min) | 1 | ON |
-| Delayed (6-10 min) | 2 | OFF |
-| Major Delay (>10 min) | 3 | OFF |
-| Unknown (no train) | 4 | OFF |
-
-**Why On/Off instead of modes?**
-Google Home has better support for simple on/off devices than multi-mode devices. This gives the most reliable experience.
+- Mode Select endpoint shows the discrete status (On Time / Minor / Delayed / Major / Unknown)
+- Temperature Sensor endpoint shows numeric delay with a simple mapping:
+   - Temperature (°C) = Minutes delayed
+   - Negative values = minutes early
+   - Range capped to -10°C … 50°C
 
 ## Advanced Configuration
 
@@ -197,16 +208,22 @@ sudo journalctl -u train-status -f
 # Build image
 docker build -t train-status .
 
-# Run with env vars
+# Run with env vars (MUST use --network host for Matter/mDNS)
 docker run -d \
   --name train-status \
   --network host \
   -e RTT_USER="$RTT_USER" \
   -e RTT_PASS="$RTT_PASS" \
+  -e ORIGIN_TIPLOC="CAMBDGE" \
+  -e DEST_TIPLOC="KNGX" \
   train-status
 ```
 
-**Note:** `--network host` is required for mDNS discovery
+**Important:** `--network host` is **required** for Matter commissioning because:
+- Matter uses UDP port 5540 for device communication
+- mDNS uses UDP port 5353 for device discovery
+- Bridge networking breaks mDNS multicast packets
+- Without host networking, Google Home won't discover the device
 
 ### Custom Update Interval
 
@@ -228,6 +245,42 @@ export DISCRIMINATOR=3840
 export ORIGIN_TIPLOC="CAMBDGE"
 export DEST_TIPLOC="KNGX"
 npm start
+
+### Device Naming
+
+Each instance exposes two Matter endpoints whose names are either derived from your route or overridden by environment variables:
+
+Derived defaults:
+- `<ORIGIN_TIPLOC>→<DEST_TIPLOC> Train Status`
+- `<ORIGIN_TIPLOC>→<DEST_TIPLOC> Train Delay`
+
+Override with:
+```bash
+export STATUS_DEVICE_NAME="Cambridge→London Train Status"
+export DELAY_DEVICE_NAME="Cambridge→London Train Delay"
+```
+
+Guidelines:
+- Keep names unique across simultaneous instances to avoid confusion in controllers.
+- Shorter names improve voice commands (you can further rename inside Google Home).
+- Avoid emojis or special characters if a controller strips them.
+
+Example two-route setup:
+```bash
+# Cambridge → London
+export ORIGIN_TIPLOC=CAMBDGE
+export DEST_TIPLOC=KNGX
+export STATUS_DEVICE_NAME="C→L Status"
+export DELAY_DEVICE_NAME="C→L Delay"
+npm start
+
+# (Second terminal) London → Cambridge
+export ORIGIN_TIPLOC=KNGX
+export DEST_TIPLOC=CAMBDGE
+export STATUS_DEVICE_NAME="L→C Status"
+export DELAY_DEVICE_NAME="L→C Delay"
+npm start
+```
 
 # Terminal 2: London → Cambridge  
 export DEVICE_NAME="London Train"

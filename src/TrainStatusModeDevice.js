@@ -8,8 +8,8 @@ import { MatterDevice as MatterConstants } from './constants.js';
  * A Matter Mode Select device that represents train punctuality status
  */
 export class TrainStatusModeDevice extends Device {
-  constructor() {
-    super(DeviceTypes.MODE_SELECT, { name: 'Train Status' });
+  constructor(name = 'Train Status') {
+    super(DeviceTypes.MODE_SELECT, { name });
     
     // Map our train status modes to Matter Mode Select format
     const supportedModes = [

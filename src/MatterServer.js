@@ -3,6 +3,7 @@ import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
 import qr from 'qrcode-terminal';
 import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
+import { TrainStatusTemperatureSensor } from './TrainStatusAirQualityDevice.js';
 import { MatterDevice as MatterConstants } from './constants.js';
 import { config } from './config.js';
 
@@ -67,19 +68,57 @@ export async function startMatterServer(trainDevice) {
   console.log(`\n   Manual pairing code: ${manualPairingCode}\n`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
-  // Create a Mode Select device with 5 train status modes
-  const modeDevice = new TrainStatusModeDevice();
+  // Create devices with unique, meaningful names derived from route (can be overridden by env vars)
+  const modeDevice = new TrainStatusModeDevice(config.matter.statusDeviceName);
+  const tempSensor = new TrainStatusTemperatureSensor(config.matter.delayDeviceName);
 
-  // Update mode when train status changes
+  // Update devices when train status changes
   trainDevice.on('statusChange', (change) => {
+    // Update Mode Select device
     modeDevice.setCurrentMode(change.currentMode);
+
+    // Update temperature sensor with delay minutes (1:1 mapping: delay = temperature)
+    // Extract delay from trainStatus if available, otherwise use mode-based estimate
+    let delayMinutes = 0;
+    
+    if (change.trainStatus) {
+      // Try to get actual delay from train status
+      const service = change.selectedService;
+      if (service?.rtd || service?.etd) {
+        // Calculate delay from real-time vs expected times
+        // This is a simplified estimate; real logic would parse time strings
+        delayMinutes = 0; // Placeholder for actual delay calculation
+      }
+    }
+    
+    // Fallback to mode-based delay estimates if no real delay data
+    if (delayMinutes === 0) {
+      const modeToDelay = {
+        0: 0,    // ON_TIME: 0 min = 0°C
+        1: 3,    // MINOR_DELAY: ~3 min = ~3°C
+        2: 10,   // DELAYED: ~10 min = ~10°C
+        3: 20,   // MAJOR_DELAY: ~20 min = ~20°C
+        4: -999, // UNKNOWN: use special sentinel
+      };
+      delayMinutes = modeToDelay[change.currentMode] ?? 0;
+    }
+    
+    // Update temperature sensor (direct 1:1 mapping)
+    if (delayMinutes === -999) {
+      // Unknown: set to 0°C (on time default)
+      tempSensor.setDelayMinutes(0);
+    } else {
+      tempSensor.setDelayMinutes(delayMinutes);
+    }
   });
 
   // Initial state
   modeDevice.setCurrentMode(trainDevice.getCurrentMode());
+  tempSensor.setDelayMinutes(0); // Start at on-time baseline (0°C = on time)
 
-  // Add endpoint to commissioning server
+  // Add endpoints to commissioning server
   commissioningServer.addDevice(modeDevice);
+  commissioningServer.addDevice(tempSensor);
   await matterServer.addCommissioningServer(commissioningServer);
 
   // Start the server

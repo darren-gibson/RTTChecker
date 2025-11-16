@@ -35,6 +35,10 @@ export const config = {
   }
 };
 
+// Derive per-endpoint names (can be overridden by explicit env vars)
+config.matter.statusDeviceName = process.env.STATUS_DEVICE_NAME || `${config.train.originTiploc}→${config.train.destTiploc} Train Status`;
+config.matter.delayDeviceName = process.env.DELAY_DEVICE_NAME || `${config.train.originTiploc}→${config.train.destTiploc} Train Delay`;
+
 /**
  * Check if running in test environment
  */
