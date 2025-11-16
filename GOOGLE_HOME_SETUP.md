@@ -109,6 +109,14 @@ You'll see updates like:
 - Values update automatically every minute
 - Endpoints are read-only (status comes from RTT updates)
 
+### Bridge mode and names
+- The app now exposes a Bridge (Aggregator) endpoint with two bridged devices under it.
+- Per-endpoint names are advertised via the Bridged Device Basic Information cluster using:
+   - `nodeLabel`: endpoint-specific label (Status/Delay names)
+   - `productName` and `productLabel`: a friendly product identifier
+- Google Home should display these bridged devices with their labels beneath a single bridge.
+- If Google Home shows generic names, you can rename each bridged device in the app after commissioning.
+
 **Voice Control (Recommended):**
 - "Hey Google, what's the temperature of Train Delay Sensor?"
 - "Hey Google, what's Train Delay Sensor's temperature?"

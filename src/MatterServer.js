@@ -1,5 +1,6 @@
 import { StorageBackendDisk, StorageManager } from '@project-chip/matter-node.js/storage';
 import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
+import { Aggregator } from '@project-chip/matter.js/device';
 import qr from 'qrcode-terminal';
 import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
@@ -98,6 +99,41 @@ export async function startMatterServer(trainDevice) {
   console.log(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
   console.log(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
 
+  // Create an Aggregator (Bridge) endpoint and add devices as bridged devices with per-endpoint labels
+  console.log('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
+  const aggregator = new Aggregator();
+  try {
+    // Add Mode device as bridged device with Basic Info
+    // Aggregator auto-adds BridgedDeviceBasicInformation cluster when attribute values are provided
+    aggregator.addBridgedDevice(modeDevice, {
+      nodeLabel: config.matter.statusDeviceName,
+      reachable: true,
+      vendorName: config.matter.vendorName,
+      productName: 'Train Status Mode',
+      productLabel: 'Mode Select',
+      serialNumber: config.matter.serialNumber,
+    });
+    console.log('   ✓ Bridged: Mode Select');
+  } catch (e) {
+    console.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
+    aggregator.addBridgedDevice(modeDevice);
+  }
+  try {
+    // Add Temperature device as bridged device with Basic Info
+    aggregator.addBridgedDevice(tempSensor, {
+      nodeLabel: config.matter.delayDeviceName,
+      reachable: true,
+      vendorName: config.matter.vendorName,
+      productName: 'Train Delay Sensor',
+      productLabel: 'Temperature Sensor',
+      serialNumber: config.matter.serialNumber,
+    });
+    console.log('   ✓ Bridged: Temperature Sensor');
+  } catch (e) {
+    console.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
+    aggregator.addBridgedDevice(tempSensor);
+  }
+
   // Update devices when train status changes
   trainDevice.on('statusChange', (change) => {
     // Update Mode Select device
@@ -142,12 +178,10 @@ export async function startMatterServer(trainDevice) {
   modeDevice.setCurrentMode(trainDevice.getCurrentMode());
   tempSensor.setDelayMinutes(0); // Start at on-time baseline (0°C = on time)
 
-  // Add endpoints to commissioning server
+  // Add endpoints to commissioning server (as a bridge exposing both devices)
   console.log('🔌 Registering endpoints with commissioning server...');
-  commissioningServer.addDevice(modeDevice);
-  console.log(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
-  commissioningServer.addDevice(tempSensor);
-  console.log(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
+  commissioningServer.addDevice(aggregator);
+  console.log('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
   
   await matterServer.addCommissioningServer(commissioningServer);
   console.log('   ✓ Commissioning server registered with Matter server');

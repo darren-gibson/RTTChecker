@@ -115,8 +115,9 @@ npm start
    - Default passcode: `20202021`
    - Default discriminator: `3840`
 
+
 5. **Verify:**
-	- Two endpoints will appear in Google Home:
+	- The app exposes a Bridge (Aggregator) with two bridged devices that will appear in Google Home:
 	  - "CAMBDGE-KNGX Train Status" (or your override) – Mode Select with one of 5 modes
 	  - "CAMBDGE-KNGX Train Delay" (or your override) – Temperature Sensor showing numeric delay
 	- Temperature value equals minutes of delay (negative = early, zero = on time)
