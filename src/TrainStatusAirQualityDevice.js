@@ -16,7 +16,10 @@ import { TemperatureMeasurementCluster, IdentifyCluster } from '@project-chip/ma
  */
 export class TrainStatusTemperatureSensor extends Device {
   constructor(name = 'Train Delay Sensor') {
-    super(DeviceTypes.TEMPERATURE_SENSOR, { name });
+    super(DeviceTypes.TEMPERATURE_SENSOR);
+    
+    // Set device name (must be done after super() call)
+    this.name = name;
 
     // Add TemperatureMeasurement cluster (primary sensor for Google Home)
     // Temperature is in 0.01°C units (hundredths of a degree)

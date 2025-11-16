@@ -81,9 +81,9 @@ export DISCRIMINATOR=3840       # For Matter commissioning
 export PASSCODE=20202021        # For Matter commissioning
 export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
 
-# Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC→DEST_TIPLOC)
-export STATUS_DEVICE_NAME="CAMBDGE→KNGX Train Status"   # Mode Select endpoint name
-export DELAY_DEVICE_NAME="CAMBDGE→KNGX Train Delay"     # Temperature Sensor endpoint name
+# Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC-DEST_TIPLOC)
+export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"   # Mode Select endpoint name
+export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"     # Temperature Sensor endpoint name
 ```
 
 ### Running the Device
@@ -117,8 +117,8 @@ npm start
 
 5. **Verify:**
 	- Two endpoints will appear in Google Home:
-	  - "CAMBDGE→KNGX Train Status" (or your override) – Mode Select with one of 5 modes
-	  - "CAMBDGE→KNGX Train Delay" (or your override) – Temperature Sensor showing numeric delay
+	  - "CAMBDGE-KNGX Train Status" (or your override) – Mode Select with one of 5 modes
+	  - "CAMBDGE-KNGX Train Delay" (or your override) – Temperature Sensor showing numeric delay
 	- Temperature value equals minutes of delay (negative = early, zero = on time)
 	- Values update automatically every minute
 	- Devices are read-only (status comes from RTT updates)

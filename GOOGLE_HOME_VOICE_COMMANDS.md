@@ -27,14 +27,14 @@ Tip: You can rename the device in Google Home to "Train Delay" for shorter phras
 "Hey Google, what's the temperature of Train Delay?"
 
 ### Custom Names
-If you set `STATUS_DEVICE_NAME` or `DELAY_DEVICE_NAME` before starting the server, those names appear instead of defaults (which derive from `<ORIGIN>→<DEST>`). Use short names to reduce friction in voice phrases:
+If you set `STATUS_DEVICE_NAME` or `DELAY_DEVICE_NAME` before starting the server, those names appear instead of defaults (which derive from `<ORIGIN>-<DEST>`). Use short names to reduce friction in voice phrases:
 ```
-export STATUS_DEVICE_NAME="Cambridge→London Status"
-export DELAY_DEVICE_NAME="Cambridge→London Delay"
+export STATUS_DEVICE_NAME="Cambridge-London Status"
+export DELAY_DEVICE_NAME="Cambridge-London Delay"
 ```
 Then you can ask:
 ```
-"Hey Google, what's the temperature of Cambridge→London Delay?"
+"Hey Google, what's the temperature of Cambridge-London Delay?"
 ```
 Inside the Google Home app you can still rename endpoints locally without changing environment variables.
 ```

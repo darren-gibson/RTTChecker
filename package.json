@@ -8,8 +8,8 @@
   "start": "node index.js",
   "test": "jest --coverage",
   "lint": "echo 'no linter configured'",
-  "predeploy": "npm test",
-  "deploy": "sh ./build/deploy.sh"
+  "diagnose": "./diagnose.sh",
+  "reset": "./reset-commissioning.sh"
   },
   "keywords": ["matter", "smart-home", "train", "rtt-api"],
   "author": "",

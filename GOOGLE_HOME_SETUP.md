@@ -23,12 +23,12 @@ export DISCRIMINATOR=3840
 export PASSCODE=20202021
 export UPDATE_INTERVAL_MS=60000   # Update every 60 seconds
 
-# Optional: Per-endpoint custom names (defaults derive from ORIGIN_TIPLOC→DEST_TIPLOC)
+# Optional: Per-endpoint custom names (defaults derive from ORIGIN_TIPLOC-DEST_TIPLOC)
 # If unset, names will be automatically generated like:
-#   <ORIGIN>→<DEST> Train Status
-#   <ORIGIN>→<DEST> Train Delay
-export STATUS_DEVICE_NAME="CAMBDGE→KNGX Train Status"
-export DELAY_DEVICE_NAME="CAMBDGE→KNGX Train Delay"
+#   <ORIGIN>-<DEST> Train Status
+#   <ORIGIN>-<DEST> Train Delay
+export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"
+export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"
 ```
 
 ### 2. Start the Device
@@ -102,8 +102,8 @@ You'll see updates like:
 
 **In Google Home App:**
 - You should see TWO endpoints/devices. Default names are derived from the route:
-   - `<ORIGIN>→<DEST> Train Status` (or your `STATUS_DEVICE_NAME` override) – Mode Select with 5 modes
-   - `<ORIGIN>→<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
+  - `<ORIGIN>-<DEST> Train Status` (or your `STATUS_DEVICE_NAME` override) – Mode Select with 5 modes
+  - `<ORIGIN>-<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
 - If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
 - The Temperature Sensor value equals minutes delayed (negative = early, 0 = on time)
 - Values update automatically every minute
@@ -251,13 +251,13 @@ npm start
 Each instance exposes two Matter endpoints whose names are either derived from your route or overridden by environment variables:
 
 Derived defaults:
-- `<ORIGIN_TIPLOC>→<DEST_TIPLOC> Train Status`
-- `<ORIGIN_TIPLOC>→<DEST_TIPLOC> Train Delay`
+- `<ORIGIN_TIPLOC>-<DEST_TIPLOC> Train Status`
+- `<ORIGIN_TIPLOC>-<DEST_TIPLOC> Train Delay`
 
 Override with:
 ```bash
-export STATUS_DEVICE_NAME="Cambridge→London Train Status"
-export DELAY_DEVICE_NAME="Cambridge→London Train Delay"
+export STATUS_DEVICE_NAME="Cambridge-London Train Status"
+export DELAY_DEVICE_NAME="Cambridge-London Train Delay"
 ```
 
 Guidelines:

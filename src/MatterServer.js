@@ -19,10 +19,29 @@ import { config } from './config.js';
  */
 export async function startMatterServer(trainDevice) {
   console.log('🔧 Initializing Matter server...');
+  console.log('   Storage directory: .matter-storage/');
 
   // Storage for commissioning data
   const storageManager = new StorageManager(new StorageBackendDisk('.matter-storage'));
-  storageManager.initialize();
+  await storageManager.initialize();
+  
+  // Check if device is already commissioned
+  const contexts = storageManager.createContext('0');
+  try {
+    const fabrics = contexts.get('FabricManager', 'fabrics');
+    if (fabrics && fabrics.length > 0) {
+      console.log('⚠️  WARNING: Device is already commissioned!');
+      console.log('   Found', fabrics.length, 'existing fabric(s)');
+      console.log('   To re-commission, delete .matter-storage/ directory first:');
+      console.log('   rm -rf .matter-storage/');
+      console.log('   Then restart the server.\n');
+    } else {
+      console.log('   ✓ No existing fabrics - ready for commissioning\n');
+    }
+  } catch (error) {
+    // Storage key doesn't exist yet - device not commissioned
+    console.log('   ✓ No existing fabrics - ready for commissioning\n');
+  }
 
   // Create Matter server
   const matterServer = new MatterServer(storageManager);
@@ -69,8 +88,15 @@ export async function startMatterServer(trainDevice) {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // Create devices with unique, meaningful names derived from route (can be overridden by env vars)
+  console.log('📝 Creating Matter endpoints:');
+  console.log(`   Mode Select Device: "${config.matter.statusDeviceName}"`);
+  console.log(`   Temperature Sensor: "${config.matter.delayDeviceName}"`);
+  
   const modeDevice = new TrainStatusModeDevice(config.matter.statusDeviceName);
   const tempSensor = new TrainStatusTemperatureSensor(config.matter.delayDeviceName);
+  
+  console.log(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
+  console.log(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
 
   // Update devices when train status changes
   trainDevice.on('statusChange', (change) => {
@@ -117,15 +143,29 @@ export async function startMatterServer(trainDevice) {
   tempSensor.setDelayMinutes(0); // Start at on-time baseline (0°C = on time)
 
   // Add endpoints to commissioning server
+  console.log('🔌 Registering endpoints with commissioning server...');
   commissioningServer.addDevice(modeDevice);
+  console.log(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
   commissioningServer.addDevice(tempSensor);
+  console.log(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
+  
   await matterServer.addCommissioningServer(commissioningServer);
+  console.log('   ✓ Commissioning server registered with Matter server');
 
   // Start the server
   await matterServer.start();
 
   console.log('✅ Matter server started and ready for commissioning');
+  console.log('   mDNS broadcast on port 5353 (UDP)');
+  console.log('   Matter server on port 5540 (UDP)');
   console.log('   Waiting for Google Home to connect...\n');
+  
+  console.log('🔍 Troubleshooting Tips:');
+  console.log('   • Ensure phone and device are on the SAME WiFi network');
+  console.log('   • Check firewall allows UDP ports 5353 and 5540');
+  console.log('   • If stuck, delete .matter-storage/ and restart');
+  console.log('   • Try disabling VPN on your phone');
+  console.log();
 
   // Note: matter.js does not emit a generic 'commissioned' event here; pairing will complete in the controller UI.
 

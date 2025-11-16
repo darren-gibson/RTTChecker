@@ -43,4 +43,22 @@ describe('Configuration', () => {
     // Note: Currently not used in production code, but available for future use
     expect(isProductionEnv()).toBe(false);
   });
+
+  test('device names are sanitized to use dash separator', () => {
+    // Default derived names should use dash, not arrow
+    expect(config.matter.statusDeviceName).toBe('CAMBDGE-KNGX Train Status');
+    expect(config.matter.delayDeviceName).toBe('CAMBDGE-KNGX Train Delay');
+  });
+
+  test('device names are ASCII-safe', () => {
+    // Names should only contain printable ASCII characters
+    expect(config.matter.statusDeviceName).toMatch(/^[\x20-\x7E]+$/);
+    expect(config.matter.delayDeviceName).toMatch(/^[\x20-\x7E]+$/);
+  });
+
+  test('device names are within Matter length limits', () => {
+    // Matter has 64 character limit on device names
+    expect(config.matter.statusDeviceName.length).toBeLessThanOrEqual(64);
+    expect(config.matter.delayDeviceName.length).toBeLessThanOrEqual(64);
+  });
 });
