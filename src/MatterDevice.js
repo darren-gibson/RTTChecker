@@ -1,14 +1,25 @@
+/**
+ * @typedef {import('./types.js').StatusChangeEvent} StatusChangeEvent
+ * @typedef {import('./types.js').RTTService} RTTService
+ * @typedef {import('./types.js').RTTSearchResponse} RTTSearchResponse
+ */
+
 import { EventEmitter } from 'events';
 import { TrainStatus, MatterDevice as MatterConstants, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
 import { log } from "./logger.js";
 
-// Centralized debug via logger
-
 /**
- * Matter device implementation for Train Status Monitor
- * Uses Mode Select cluster to report train punctuality status
+ * Matter device implementation for Train Status Monitor.
+ * Uses Mode Select cluster to report train punctuality status.
+ * 
+ * Emits 'statusChange' events with normalized payload containing:
+ * - timestamp, previousMode, currentMode, modeChanged
+ * - trainStatus, selectedService, raw, error
+ * 
+ * @extends EventEmitter
+ * @fires TrainStatusDevice#statusChange
  */
 
 // Map TrainStatus to Matter mode numbers
@@ -53,44 +64,70 @@ export class TrainStatusDevice extends EventEmitter {
   }
 
   /**
-   * Update train status from RTT API
+   * Update train status from RTT API and emit statusChange event.
+   * 
+   * Polls RTT API for train status, maps to Matter mode, and emits
+   * normalized statusChange event with all fields (never undefined).
+   * 
+   * @async
+   * @returns {Promise<void>}
+   * @emits statusChange
+   * 
+   * @example
+   * device.on('statusChange', (event) => {
+   *   console.log(event.currentMode);       // Always present
+   *   console.log(event.selectedService);   // RTTService or null
+   *   console.log(event.error);             // Error or null
+   * });
    */
   async updateTrainStatus() {
+    const timestamp = new Date();
     try {
       const result = await getTrainStatus({
         originTiploc: config.train.originTiploc,
         destTiploc: config.train.destTiploc,
         minAfterMinutes: config.train.minAfterMinutes,
         windowMinutes: config.train.windowMinutes,
-        now: new Date()
+        now: timestamp
       });
 
       const newMode = STATUS_TO_MODE[result.status] ?? MatterConstants.Modes.UNKNOWN.mode;
+      const modeChanged = newMode !== this.currentMode;
       
-      if (newMode !== this.currentMode) {
+      if (modeChanged) {
         const previousMode = this.currentMode;
-  log.info(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
+        log.info(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
         this.currentMode = newMode;
         
-        // Emit event for Matter server
+        // Emit normalized event payload
         this.emit('statusChange', {
+          timestamp,
           previousMode,
           currentMode: newMode,
+          modeChanged: true,
           trainStatus: result.status,
-          selectedService: result.selected
+          selectedService: result.selected || null,
+          raw: result.raw || null,
+          error: null
         });
       }
 
       return result;
     } catch (error) {
-  log.error('❌ Failed to update train status:', error);
+      log.error('❌ Failed to update train status:', error);
       const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
+      const modeChanged = previousMode !== this.currentMode;
       
-      if (previousMode !== this.currentMode) {
+      if (modeChanged) {
         this.emit('statusChange', {
+          timestamp,
           previousMode,
           currentMode: this.currentMode,
+          modeChanged: true,
+          trainStatus: TrainStatus.UNKNOWN,
+          selectedService: null,
+          raw: null,
           error: error.message
         });
       }
@@ -100,7 +137,10 @@ export class TrainStatusDevice extends EventEmitter {
   }
 
   /**
-   * Start periodic updates
+   * Start periodic train status updates.
+   * Interval controlled by UPDATE_INTERVAL_MS env var (default 60000ms).
+   * 
+   * @returns {void}
    */
   startPeriodicUpdates() {
   log.debug('🔁 Triggering initial train status fetch...');
@@ -121,7 +161,10 @@ export class TrainStatusDevice extends EventEmitter {
   }
 
   /**
-   * Stop periodic updates
+   * Stop periodic train status updates.
+   * Clears the update interval timer.
+   * 
+   * @returns {void}
    */
   stopPeriodicUpdates() {
     if (this.updateInterval) {

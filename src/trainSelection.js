@@ -1,30 +1,48 @@
+/**
+ * @typedef {import('./types.js').RTTService} RTTService
+ * @typedef {import('./types.js').RTTLocation} RTTLocation
+ * @typedef {import('./types.js').TrainSelectionOptions} TrainSelectionOptions
+ * @typedef {import('./types.js').TrainCandidate} TrainCandidate
+ */
+
 import { log } from './logger.js';
 import { config } from './config.js';
+import { parseTime, normalizeDepartureMinutes } from './timeUtils.js';
 
-// Parse HHmm time string to minutes since midnight
-export function parseTime(ts) {
-  if (!ts) return NaN;
-  const s = String(ts);
-  if (s.length < 4) return NaN;
-  return parseInt(s.slice(0,2), 10) * 60 + parseInt(s.slice(2,4), 10);
-}
-
-function normalizeDepartureMinutes(depMins, nowMinutes) {
-  if (Number.isNaN(depMins)) return depMins;
-  // Day wrap: if departure earlier than now, treat as next day
-  if (depMins < nowMinutes) return depMins + 24*60;
-  return depMins;
-}
-
+/**
+ * Check if departure time falls within search window.
+ * @private
+ * @param {number} depMins - Departure time in minutes
+ * @param {number} earliest - Window start in minutes
+ * @param {number} latest - Window end in minutes
+ * @returns {boolean} True if within window
+ */
 function withinWindow(depMins, earliest, latest) {
   return depMins >= earliest && depMins <= latest;
 }
 
+/**
+ * Find destination entry in location's destination array.
+ * @private
+ * @param {RTTLocation} loc - Location details with destinations
+ * @param {string} destTiploc - Target destination TIPLOC
+ * @returns {RTTLocation|undefined} Matching destination or undefined
+ */
 function findDestinationEntry(loc, destTiploc) {
   const destList = Array.isArray(loc.destination) ? loc.destination : [];
   return destList.find(d => d.tiploc === destTiploc);
 }
 
+/**
+ * Build candidate object with computed journey details.
+ * @private
+ * @param {RTTService} service - Train service
+ * @param {RTTLocation} destEntry - Destination location details
+ * @param {RTTLocation} loc - Origin location details
+ * @param {number} depMins - Departure minutes since midnight
+ * @param {string} depStr - Departure time string (for logging)
+ * @returns {TrainCandidate} Candidate with duration and timing details
+ */
 function buildCandidate(service, destEntry, loc, depMins, depStr) {
   // Compute journey duration (origin to destination)
   const originTime = loc.origin?.[0]?.workingTime || loc.origin?.[0]?.publicTime || loc.gbttBookedDeparture;
@@ -39,6 +57,12 @@ function buildCandidate(service, destEntry, loc, depMins, depStr) {
   return { service, depMins, duration, depStr, destEntry, loc };
 }
 
+/**
+ * Rank candidates by arrival time (earliest first), then departure time.
+ * @private
+ * @param {TrainCandidate[]} candidates - Array of candidates to rank
+ * @returns {TrainCandidate[]} Sorted candidates (modifies in place)
+ */
 function rankCandidates(candidates) {
   // Sort by arrival time then departure time
   candidates.sort((a,b) => {
@@ -50,6 +74,12 @@ function rankCandidates(candidates) {
   return candidates;
 }
 
+/**
+ * Log candidate details at debug level.
+ * @private
+ * @param {TrainCandidate} candidate - Candidate to log
+ * @param {boolean} [selected=false] - Whether this is the selected candidate
+ */
 function logCandidate(candidate, selected = false) {
   try {
     const { depStr, destEntry, loc } = candidate;
@@ -62,6 +92,27 @@ function logCandidate(candidate, selected = false) {
   } catch { /* ignore */ }
 }
 
+/**
+ * Pick the next appropriate train service from RTT search results.
+ * 
+ * Filters services by:
+ * - Departure time within search window
+ * - Presence of destination TIPLOC
+ * 
+ * Ranks by earliest arrival time, then earliest departure.
+ * 
+ * @param {RTTService[]} services - Array of train services from RTT API
+ * @param {string} destTiploc - Destination TIPLOC code to match
+ * @param {TrainSelectionOptions} [opts={}] - Selection options
+ * @returns {RTTService|undefined} Selected service, or undefined if none found
+ * 
+ * @example
+ * const service = pickNextService(data.services, 'KNGX', {
+ *   minAfterMinutes: 20,
+ *   windowMinutes: 60,
+ *   now: new Date()
+ * });
+ */
 export function pickNextService(services, destTiploc, opts = {}) {
   if (!Array.isArray(services)) return undefined;
 
@@ -102,3 +153,4 @@ export function pickNextService(services, destTiploc, opts = {}) {
 }
 
 export default pickNextService;
+export { parseTime }; // Re-export for RTTBridge compatibility
