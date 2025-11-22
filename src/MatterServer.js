@@ -99,44 +99,51 @@ export async function startMatterServer(trainDevice) {
   console.log(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
   console.log(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
 
-  // Create an Aggregator (Bridge) endpoint and add devices as bridged devices with per-endpoint labels
-  console.log('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
-  const aggregator = new Aggregator();
-  try {
-    // Add Mode device as bridged device with Basic Info
-    // Aggregator auto-adds BridgedDeviceBasicInformation cluster when attribute values are provided
-    aggregator.addBridgedDevice(modeDevice, {
-      nodeLabel: config.matter.statusDeviceName,
-      reachable: true,
-      vendorName: config.matter.vendorName,
-      productName: 'Train Status Mode',
-      productLabel: 'Mode Select',
-      serialNumber: config.matter.serialNumber,
-    });
-    console.log('   ✓ Bridged: Mode Select');
-  } catch (e) {
-    console.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
-    aggregator.addBridgedDevice(modeDevice);
-  }
-  try {
-    // Add Temperature device as bridged device with Basic Info
-    aggregator.addBridgedDevice(tempSensor, {
-      nodeLabel: config.matter.delayDeviceName,
-      reachable: true,
-      vendorName: config.matter.vendorName,
-      productName: 'Train Delay Sensor',
-      productLabel: 'Temperature Sensor',
-      serialNumber: config.matter.serialNumber,
-    });
-    console.log('   ✓ Bridged: Temperature Sensor');
-  } catch (e) {
-    console.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
-    aggregator.addBridgedDevice(tempSensor);
-  }
+    // Optionally use an Aggregator (Bridge) to group endpoints. Can be disabled via USE_BRIDGE=false
+    let aggregator = null;
+    if (config.matter.useBridge) {
+      console.log('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
+      aggregator = new Aggregator();
+      try {
+        // Add Mode device as bridged device with Basic Info
+        // Each bridged device needs a unique serial number to avoid endpoint ID conflicts
+        aggregator.addBridgedDevice(modeDevice, {
+          nodeLabel: config.matter.statusDeviceName,
+          reachable: true,
+          vendorName: config.matter.vendorName,
+          productName: 'Train Status Mode',
+          productLabel: 'Mode Select',
+          serialNumber: `${config.matter.serialNumber}-MODE`,
+          uniqueId: `${config.matter.serialNumber}-MODE`,
+        });
+        console.log('   ✓ Bridged: Mode Select');
+      } catch (e) {
+        console.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
+        aggregator.addBridgedDevice(modeDevice);
+      }
+      try {
+        // Add Temperature device as bridged device with Basic Info
+        aggregator.addBridgedDevice(tempSensor, {
+          nodeLabel: config.matter.delayDeviceName,
+          reachable: true,
+          vendorName: config.matter.vendorName,
+          productName: 'Train Delay Sensor',
+          productLabel: 'Temperature Sensor',
+          serialNumber: `${config.matter.serialNumber}-TEMP`,
+          uniqueId: `${config.matter.serialNumber}-TEMP`,
+        });
+        console.log('   ✓ Bridged: Temperature Sensor');
+      } catch (e) {
+        console.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
+        aggregator.addBridgedDevice(tempSensor);
+      }
+    } else {
+      console.log('🔗 Bridge disabled (USE_BRIDGE=false). Exposing endpoints directly.');
+    }
 
   // Update devices when train status changes
   trainDevice.on('statusChange', (change) => {
-    // Update Mode Select device
+    // Update Mode Select device (always reflect current status, even if error/unknown)
     modeDevice.setCurrentMode(change.currentMode);
 
     // Update temperature sensor with delay minutes (1:1 mapping: delay = temperature)
@@ -160,28 +167,30 @@ export async function startMatterServer(trainDevice) {
         1: 3,    // MINOR_DELAY: ~3 min = ~3°C
         2: 10,   // DELAYED: ~10 min = ~10°C
         3: 20,   // MAJOR_DELAY: ~20 min = ~20°C
-        4: -999, // UNKNOWN: use special sentinel
+        4: 99,   // UNKNOWN: 99 min = 99°C (very high to signal problem)
       };
-      delayMinutes = modeToDelay[change.currentMode] ?? 0;
+      delayMinutes = modeToDelay[change.currentMode] ?? 99;
     }
     
     // Update temperature sensor (direct 1:1 mapping)
-    if (delayMinutes === -999) {
-      // Unknown: set to 0°C (on time default)
-      tempSensor.setDelayMinutes(0);
-    } else {
-      tempSensor.setDelayMinutes(delayMinutes);
-    }
-  });
-
-  // Initial state
-  modeDevice.setCurrentMode(trainDevice.getCurrentMode());
-  tempSensor.setDelayMinutes(0); // Start at on-time baseline (0°C = on time)
+    tempSensor.setDelayMinutes(delayMinutes);
+  });  // Initial state: Start with UNKNOWN until first real update
+  modeDevice.setCurrentMode(MatterConstants.Modes.UNKNOWN.mode);
+  tempSensor.setDelayMinutes(99); // 99°C = unknown/error state
 
   // Add endpoints to commissioning server (as a bridge exposing both devices)
   console.log('🔌 Registering endpoints with commissioning server...');
-  commissioningServer.addDevice(aggregator);
-  console.log('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
+    // Add endpoints to commissioning server
+    console.log('🔌 Registering endpoints with commissioning server...');
+    if (config.matter.useBridge && aggregator) {
+      commissioningServer.addDevice(aggregator);
+      console.log('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
+    } else {
+      commissioningServer.addDevice(modeDevice);
+      console.log(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
+      commissioningServer.addDevice(tempSensor);
+      console.log(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
+    }
   
   await matterServer.addCommissioningServer(commissioningServer);
   console.log('   ✓ Commissioning server registered with Matter server');

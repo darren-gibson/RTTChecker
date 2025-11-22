@@ -1,0 +1,32 @@
+# Matter commissioning storage (device-instance specific, should not be in image)
+.matter-storage/
+
+# Node modules (installed during build)
+node_modules/
+
+# Test files
+tests/
+coverage/
+*.test.js
+jest.config.cjs
+
+# Development files
+.env
+.env.local
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# CI/CD
+.github/
+
+# IDE
+.vscode/
+.idea/
+
+# Build artifacts
+*.log
+npm-debug.log*

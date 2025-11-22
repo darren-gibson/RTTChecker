@@ -3,6 +3,9 @@ import { TrainStatus, MatterDevice as MatterConstants } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
 
+const isDebug = (process.env.LOG_LEVEL || '').toLowerCase() === 'debug';
+const debug = (msg) => { if (isDebug) console.log(msg); };
+
 /**
  * Matter device implementation for Train Status Monitor
  * Uses Mode Select cluster to report train punctuality status
@@ -100,6 +103,7 @@ export class TrainStatusDevice extends EventEmitter {
    * Start periodic updates
    */
   startPeriodicUpdates() {
+  debug('🔁 [debug] Triggering initial train status fetch...');
     // Update immediately
     this.updateTrainStatus().catch(err => {
       console.error('Initial train status update failed:', err);
@@ -107,6 +111,7 @@ export class TrainStatusDevice extends EventEmitter {
 
     // Then update on interval
     this.updateInterval = setInterval(() => {
+  debug('⏱️ [debug] Periodic train status fetch...');
       this.updateTrainStatus().catch(err => {
         console.error('Periodic train status update failed:', err);
       });

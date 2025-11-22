@@ -2,6 +2,10 @@ import fetch from "node-fetch";
 import { TrainStatus } from "./constants.js";
 import { config } from "./config.js";
 
+// Simple debug logger (only prints when LOG_LEVEL=debug)
+const isDebug = (process.env.LOG_LEVEL || '').toLowerCase() === 'debug';
+function logDebug(msg) { if (isDebug) console.log(msg); }
+
 export const hhmmToMins = t => parseInt(t.slice(0,2), 10)*60 + parseInt(t.slice(2,4), 10);
 
 /**
@@ -79,7 +83,9 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl } = {}) 
   const RTT_USER = user || config.rtt.user;
   const RTT_PASS = pass || config.rtt.pass;
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
+  logDebug(`[RTTBridge][debug] GET ${url}`);
   const res = await (fetchImpl || fetch)(url, { headers: { Authorization: `Basic ${b64(RTT_USER, RTT_PASS)}` } });
+  logDebug(`[RTTBridge][debug] Response: ${res.status}`);
   if (!res.ok) throw new Error(`RTT ${res.status}`);
   return res.json();
 }
@@ -104,15 +110,16 @@ export function pickNextService(services, destTiploc, opts = {}) {
   };
 
   const logCandidate = (depStr, destEntry, loc, isSelected = false) => {
+    if (!isDebug) return; // only emit candidate logs in debug mode
     try {
       const destArrival = destEntry.publicTime || destEntry.workingTime || loc.realtimeArrival || loc.gbttBookedArrival || 'N/A';
       const originDesc = loc.origin?.[0]?.description || loc.origin?.[0]?.tiploc || 'unknown';
       const destDesc = destEntry.description || destEntry.tiploc || 'unknown';
       const platform = loc.platform || '?';
       const prefix = isSelected ? 'SELECTED' : 'candidate';
-      console.log(`[RTTBridge] ${prefix}: dep=${depStr} arr=${destArrival} ${originDesc}→${destDesc} platform=${platform}`);
+      logDebug(`[RTTBridge][debug] ${prefix}: dep=${depStr} arr=${destArrival} ${originDesc}→${destDesc} platform=${platform}`);
     } catch (e) {
-      // ignore logging errors
+      /* ignore */
     }
   };
 
@@ -152,7 +159,13 @@ export function pickNextService(services, destTiploc, opts = {}) {
     return { service: s, depMins, duration, depStr, destEntry, loc };
   }).filter(Boolean);
 
-  if (candidates.length === 0) return undefined;
+  if (candidates.length === 0) {
+    // Always emit an info-level log (not gated by LOG_LEVEL) so users know why status stays UNKNOWN
+    try {
+      console.log(`[RTTBridge] info: no candidate service found (origin=${config.train.originTiploc} dest=${destTiploc} minAfter=${minAfterMinutes} window=${windowMinutes})`);
+    } catch (_) { /* ignore logging errors */ }
+    return undefined;
+  }
 
   // Sort by arrival time at destination (earliest first), then by departure time
   candidates.sort((a, b) => {

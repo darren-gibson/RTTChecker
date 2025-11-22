@@ -80,10 +80,14 @@ export DEVICE_NAME="Train Status"
 export DISCRIMINATOR=3840       # For Matter commissioning
 export PASSCODE=20202021        # For Matter commissioning
 export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
+export USE_BRIDGE="true"        # Default true, set to "false" to disable the Matter Bridge (Aggregator) and expose the two endpoints directly
 
 # Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC-DEST_TIPLOC)
 export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"   # Mode Select endpoint name
 export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"     # Temperature Sensor endpoint name
+
+# Logging (optional)
+export LOG_LEVEL="debug"          # Set to "debug" for verbose RTT request/response & candidate selection logs
 ```
 
 ### Running the Device
@@ -162,9 +166,10 @@ The mode automatically updates every minute based on real-time RTT API data.
 - 5 minutes late → 5°C
 - 20 minutes late → 20°C
 - -3 minutes (early) → -3°C
-- Values are capped to -10°C (very early) and 50°C (very late)
+- Unknown/No data → 99°C (indicates error or no train found)
+- Values are capped to -10°C (very early) and 50°C (very late), except Unknown state
 
-This mapping makes Google Home voice queries like "What's the temperature of Train Delay Sensor?" directly tell you the minutes delayed.
+This mapping makes Google Home voice queries like "What's the temperature of Train Delay Sensor?" directly tell you the minutes delayed. A reading of 99°C indicates an error state or that no suitable train was found.
 
 ### Automation Examples
 Use the mode state in Matter automations:

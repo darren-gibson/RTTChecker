@@ -31,7 +31,10 @@ export const config = {
     productName: process.env.PRODUCT_NAME || 'Train Status Monitor',
     serialNumber: process.env.SERIAL_NUMBER || 'RTT-001',
     discriminator: Number(process.env.DISCRIMINATOR || 3840),
-    passcode: Number(process.env.PASSCODE || 20202021)
+    passcode: Number(process.env.PASSCODE || 20202021),
+    // Use a Bridge (Aggregator) to group endpoints under a single device.
+    // Set USE_BRIDGE=false to expose endpoints directly without a bridge in controllers like Google Home.
+    useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false'
   }
 };
 
