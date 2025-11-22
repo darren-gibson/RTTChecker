@@ -7,6 +7,7 @@ import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
 import { TrainStatusTemperatureSensor } from './TrainStatusAirQualityDevice.js';
 import { MatterDevice as MatterConstants } from './constants.js';
 import { config } from './config.js';
+import { log } from './logger.js';
 
 /**
  * Matter Server Implementation
@@ -19,8 +20,8 @@ import { config } from './config.js';
  * Initialize and start the Matter server with train status device
  */
 export async function startMatterServer(trainDevice) {
-  console.log('🔧 Initializing Matter server...');
-  console.log('   Storage directory: .matter-storage/');
+  log.info('🔧 Initializing Matter server...');
+  log.info('   Storage directory: .matter-storage/');
 
   // Storage for commissioning data
   const storageManager = new StorageManager(new StorageBackendDisk('.matter-storage'));
@@ -31,17 +32,17 @@ export async function startMatterServer(trainDevice) {
   try {
     const fabrics = contexts.get('FabricManager', 'fabrics');
     if (fabrics && fabrics.length > 0) {
-      console.log('⚠️  WARNING: Device is already commissioned!');
-      console.log('   Found', fabrics.length, 'existing fabric(s)');
-      console.log('   To re-commission, delete .matter-storage/ directory first:');
-      console.log('   rm -rf .matter-storage/');
-      console.log('   Then restart the server.\n');
+  log.warn('WARNING: Device is already commissioned!');
+  log.warn(`   Found ${fabrics.length} existing fabric(s)`);
+  log.warn('   To re-commission, delete .matter-storage/ directory first:');
+  log.warn('   rm -rf .matter-storage/');
+  log.warn('   Then restart the server.\n');
     } else {
-      console.log('   ✓ No existing fabrics - ready for commissioning\n');
+  log.info('   ✓ No existing fabrics - ready for commissioning\n');
     }
   } catch (error) {
     // Storage key doesn't exist yet - device not commissioned
-    console.log('   ✓ No existing fabrics - ready for commissioning\n');
+  log.info('   ✓ No existing fabrics - ready for commissioning\n');
   }
 
   // Create Matter server
@@ -66,43 +67,43 @@ export async function startMatterServer(trainDevice) {
     discriminator: config.matter.discriminator,
   });
 
-  console.log('📡 Matter server created');
-  console.log(`   Discriminator: ${config.matter.discriminator}`);
-  console.log(`   Passcode: ${config.matter.passcode}`);
+  log.info('📡 Matter server created');
+  log.info(`   Discriminator: ${config.matter.discriminator}`);
+  log.info(`   Passcode: ${config.matter.passcode}`);
 
   // Generate QR code for commissioning
   const { qrPairingCode, manualPairingCode } = commissioningServer.getPairingCode();
   
-  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('📱 COMMISSION THIS DEVICE WITH GOOGLE HOME');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('\n1️⃣  Open Google Home app on your phone');
-  console.log('2️⃣  Tap + → Add device → New device');  
-  console.log('3️⃣  Select your home');
-  console.log('4️⃣  Scan this QR code or enter manual code:\n');
+  log.info('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  log.info('📱 COMMISSION THIS DEVICE WITH GOOGLE HOME');
+  log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  log.info('\n1️⃣  Open Google Home app on your phone');
+  log.info('2️⃣  Tap + → Add device → New device');  
+  log.info('3️⃣  Select your home');
+  log.info('4️⃣  Scan this QR code or enter manual code:\n');
   try {
     qr.generate(qrPairingCode, { small: true });
   } catch (e) {
-    console.log(`QR: ${qrPairingCode}`);
+    log.info(`QR: ${qrPairingCode}`);
   }
-  console.log(`\n   Manual pairing code: ${manualPairingCode}\n`);
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  log.info(`\n   Manual pairing code: ${manualPairingCode}\n`);
+  log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // Create devices with unique, meaningful names derived from route (can be overridden by env vars)
-  console.log('📝 Creating Matter endpoints:');
-  console.log(`   Mode Select Device: "${config.matter.statusDeviceName}"`);
-  console.log(`   Temperature Sensor: "${config.matter.delayDeviceName}"`);
+  log.info('📝 Creating Matter endpoints:');
+  log.info(`   Mode Select Device: "${config.matter.statusDeviceName}"`);
+  log.info(`   Temperature Sensor: "${config.matter.delayDeviceName}"`);
   
   const modeDevice = new TrainStatusModeDevice(config.matter.statusDeviceName);
   const tempSensor = new TrainStatusTemperatureSensor(config.matter.delayDeviceName);
   
-  console.log(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
-  console.log(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
+  log.info(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
+  log.info(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
 
     // Optionally use an Aggregator (Bridge) to group endpoints. Can be disabled via USE_BRIDGE=false
     let aggregator = null;
     if (config.matter.useBridge) {
-      console.log('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
+  log.info('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
       aggregator = new Aggregator();
       try {
         // Add Mode device as bridged device with Basic Info
@@ -116,9 +117,9 @@ export async function startMatterServer(trainDevice) {
           serialNumber: `${config.matter.serialNumber}-MODE`,
           uniqueId: `${config.matter.serialNumber}-MODE`,
         });
-        console.log('   ✓ Bridged: Mode Select');
+  log.info('   ✓ Bridged: Mode Select');
       } catch (e) {
-        console.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
+  log.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
         aggregator.addBridgedDevice(modeDevice);
       }
       try {
@@ -132,13 +133,13 @@ export async function startMatterServer(trainDevice) {
           serialNumber: `${config.matter.serialNumber}-TEMP`,
           uniqueId: `${config.matter.serialNumber}-TEMP`,
         });
-        console.log('   ✓ Bridged: Temperature Sensor');
+  log.info('   ✓ Bridged: Temperature Sensor');
       } catch (e) {
-        console.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
+  log.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
         aggregator.addBridgedDevice(tempSensor);
       }
     } else {
-      console.log('🔗 Bridge disabled (USE_BRIDGE=false). Exposing endpoints directly.');
+  log.info('🔗 Bridge disabled (USE_BRIDGE=false). Exposing endpoints directly.');
     }
 
   // Update devices when train status changes
@@ -179,36 +180,35 @@ export async function startMatterServer(trainDevice) {
   tempSensor.setDelayMinutes(99); // 99°C = unknown/error state
 
   // Add endpoints to commissioning server (as a bridge exposing both devices)
-  console.log('🔌 Registering endpoints with commissioning server...');
-    // Add endpoints to commissioning server
-    console.log('🔌 Registering endpoints with commissioning server...');
+  log.info('🔌 Registering endpoints with commissioning server...');
+    log.info('🔌 Registering endpoints with commissioning server...');
     if (config.matter.useBridge && aggregator) {
       commissioningServer.addDevice(aggregator);
-      console.log('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
+  log.info('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
     } else {
       commissioningServer.addDevice(modeDevice);
-      console.log(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
+  log.info(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
       commissioningServer.addDevice(tempSensor);
-      console.log(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
+  log.info(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
     }
   
   await matterServer.addCommissioningServer(commissioningServer);
-  console.log('   ✓ Commissioning server registered with Matter server');
+  log.info('   ✓ Commissioning server registered with Matter server');
 
   // Start the server
   await matterServer.start();
 
-  console.log('✅ Matter server started and ready for commissioning');
-  console.log('   mDNS broadcast on port 5353 (UDP)');
-  console.log('   Matter server on port 5540 (UDP)');
-  console.log('   Waiting for Google Home to connect...\n');
+  log.info('✅ Matter server started and ready for commissioning');
+  log.info('   mDNS broadcast on port 5353 (UDP)');
+  log.info('   Matter server on port 5540 (UDP)');
+  log.info('   Waiting for Google Home to connect...\n');
   
-  console.log('🔍 Troubleshooting Tips:');
-  console.log('   • Ensure phone and device are on the SAME WiFi network');
-  console.log('   • Check firewall allows UDP ports 5353 and 5540');
-  console.log('   • If stuck, delete .matter-storage/ and restart');
-  console.log('   • Try disabling VPN on your phone');
-  console.log();
+  log.info('🔍 Troubleshooting Tips:');
+  log.info('   • Ensure phone and device are on the SAME WiFi network');
+  log.info('   • Check firewall allows UDP ports 5353 and 5540');
+  log.info('   • If stuck, delete .matter-storage/ and restart');
+  log.info('   • Try disabling VPN on your phone');
+  log.info('');
 
   // Note: matter.js does not emit a generic 'commissioned' event here; pairing will complete in the controller UI.
 

@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
-import { TrainStatus, MatterDevice as MatterConstants } from "./constants.js";
+import { TrainStatus, MatterDevice as MatterConstants, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
+import { log } from "./logger.js";
 
-const isDebug = (process.env.LOG_LEVEL || '').toLowerCase() === 'debug';
-const debug = (msg) => { if (isDebug) console.log(msg); };
+// Centralized debug via logger
 
 /**
  * Matter device implementation for Train Status Monitor
@@ -69,7 +69,7 @@ export class TrainStatusDevice extends EventEmitter {
       
       if (newMode !== this.currentMode) {
         const previousMode = this.currentMode;
-        console.log(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
+  log.info(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
         this.currentMode = newMode;
         
         // Emit event for Matter server
@@ -83,7 +83,7 @@ export class TrainStatusDevice extends EventEmitter {
 
       return result;
     } catch (error) {
-      console.error('❌ Failed to update train status:', error);
+  log.error('❌ Failed to update train status:', error);
       const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
       
@@ -103,7 +103,7 @@ export class TrainStatusDevice extends EventEmitter {
    * Start periodic updates
    */
   startPeriodicUpdates() {
-  debug('🔁 [debug] Triggering initial train status fetch...');
+  log.debug('🔁 Triggering initial train status fetch...');
     // Update immediately
     this.updateTrainStatus().catch(err => {
       console.error('Initial train status update failed:', err);
@@ -111,13 +111,13 @@ export class TrainStatusDevice extends EventEmitter {
 
     // Then update on interval
     this.updateInterval = setInterval(() => {
-  debug('⏱️ [debug] Periodic train status fetch...');
+    log.debug('⏱️ Periodic train status fetch...');
       this.updateTrainStatus().catch(err => {
         console.error('Periodic train status update failed:', err);
       });
     }, this.updateIntervalMs);
 
-    console.log(`Started periodic updates every ${this.updateIntervalMs}ms`);
+  log.info(`Started periodic updates every ${this.updateIntervalMs}ms`);
   }
 
   /**
@@ -127,7 +127,7 @@ export class TrainStatusDevice extends EventEmitter {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
-      console.log('Stopped periodic updates');
+  log.info('Stopped periodic updates');
     }
   }
 

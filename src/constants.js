@@ -32,3 +32,20 @@ export const MatterDevice = {
   DeviceType: 0x000F // Generic Switch with Mode Select
 };
 
+/**
+ * Timing and status calculation constants
+ */
+export const Timing = {
+  // Default search offsets
+  DEFAULT_MIN_AFTER_MINUTES: 20,
+  DEFAULT_WINDOW_MINUTES: 60,
+  // Sentinel temperature/delay value for unknown state
+  UNKNOWN_DELAY_SENTINEL: 99,
+  // Lateness thresholds (absolute minutes late)
+  LATE_THRESHOLDS: {
+    ON_TIME: 2,
+    MINOR: 5,
+    DELAYED: 10
+  }
+};
+

@@ -1,6 +1,6 @@
 import { TrainStatusDevice } from "./src/MatterDevice.js";
 import { startMatterServer } from "./src/MatterServer.js";
-import { isTestEnv } from "./src/config.js";
+import { isTestEnv, validateConfig } from "./src/config.js";
 
 /**
  * Matter Train Status Device
@@ -15,6 +15,14 @@ export { device };
 
 // Start device only when not in test environment
 if (!isTestEnv()) {
+  // Validate configuration early
+  try {
+    validateConfig();
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+  
   console.log('🚆 Starting Matter Train Status Device...');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
   

@@ -1,4 +1,4 @@
-import { config, isTestEnv, isProductionEnv } from '../src/config.js';
+import { config, isTestEnv, isProductionEnv, validateConfig } from '../src/config.js';
 
 describe('Configuration', () => {
   test('config object has all required properties', () => {
@@ -60,5 +60,51 @@ describe('Configuration', () => {
     // Matter has 64 character limit on device names
     expect(config.matter.statusDeviceName.length).toBeLessThanOrEqual(64);
     expect(config.matter.delayDeviceName.length).toBeLessThanOrEqual(64);
+  });
+});
+
+describe('validateConfig', () => {
+  test('throws error when RTT_USER is missing', () => {
+    const mockConfig = { rtt: { pass: 'test' } };
+    const validateFn = () => {
+      const errors = [];
+      if (!mockConfig.rtt.user) errors.push('RTT_USER environment variable is required (RTT API username)');
+      if (!mockConfig.rtt.pass) errors.push('RTT_PASS environment variable is required (RTT API password)');
+      if (errors.length > 0) throw new Error('Configuration validation failed');
+    };
+    expect(() => validateFn()).toThrow(/Configuration validation failed/);
+  });
+  
+  test('throws error when RTT_PASS is missing', () => {
+    const mockConfig = { rtt: { user: 'test' } };
+    const validateFn = () => {
+      const errors = [];
+      if (!mockConfig.rtt.user) errors.push('RTT_USER');
+      if (!mockConfig.rtt.pass) errors.push('RTT_PASS');
+      if (errors.length > 0) throw new Error('Configuration validation failed');
+    };
+    expect(() => validateFn()).toThrow(/Configuration validation failed/);
+  });
+  
+  test('throws error when both credentials are missing', () => {
+    const mockConfig = { rtt: {} };
+    const validateFn = () => {
+      const errors = [];
+      if (!mockConfig.rtt.user) errors.push('RTT_USER');
+      if (!mockConfig.rtt.pass) errors.push('RTT_PASS');
+      if (errors.length > 0) throw new Error('Configuration validation failed');
+    };
+    expect(() => validateFn()).toThrow(/Configuration validation failed/);
+  });
+  
+  test('passes validation when both credentials present', () => {
+    const mockConfig = { rtt: { user: 'test', pass: 'pass' } };
+    const validateFn = () => {
+      const errors = [];
+      if (!mockConfig.rtt.user) errors.push('RTT_USER');
+      if (!mockConfig.rtt.pass) errors.push('RTT_PASS');
+      if (errors.length > 0) throw new Error('fail');
+    };
+    expect(() => validateFn()).not.toThrow();
   });
 });

@@ -67,3 +67,29 @@ export const isTestEnv = () => config.server.nodeEnv === 'test';
  * Check if running in production environment
  */
 export const isProductionEnv = () => config.server.nodeEnv === 'production';
+
+/**
+ * Validate required configuration
+ * Throws descriptive error if critical config is missing
+ */
+export function validateConfig() {
+  const errors = [];
+  
+  if (!config.rtt.user) {
+    errors.push('RTT_USER environment variable is required (RTT API username)');
+  }
+  if (!config.rtt.pass) {
+    errors.push('RTT_PASS environment variable is required (RTT API password)');
+  }
+  
+  if (errors.length > 0) {
+    const msg = [
+      '❌ Configuration validation failed:',
+      ...errors.map(e => `   • ${e}`),
+      '',
+      'Please set the required environment variables and restart.',
+      'See README.md for configuration details.'
+    ].join('\n');
+    throw new Error(msg);
+  }
+}
