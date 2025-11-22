@@ -87,8 +87,37 @@ export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"   # Mode Select endpoint n
 export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"     # Temperature Sensor endpoint name
 
 # Logging (optional)
-export LOG_LEVEL="debug"          # Set to "debug" for verbose RTT request/response & candidate selection logs
+export LOG_LEVEL="debug"          # error < warn < info < debug (default: info)
 ```
+
+### Logging and Debugging
+
+The application uses a centralized logging system with configurable log levels:
+
+**Log Levels** (set via `LOG_LEVEL` environment variable):
+- `error`: Critical failures only (config validation, API auth errors)
+- `warn`: Warnings and retryable issues (API temporarily down, no train found)
+- `info`: Normal operation (status changes, periodic updates) - **default**
+- `debug`: Verbose details (API requests/responses, candidate train selection)
+
+**Examples:**
+```bash
+# Production: errors and warnings only
+export LOG_LEVEL="warn"
+
+# Development: full debug output
+export LOG_LEVEL="debug"
+
+# Default: info level (status changes, updates)
+export LOG_LEVEL="info"
+```
+
+**Error Context:**
+The application provides structured error information:
+- Authentication failures point to credentials
+- Retryable errors (5xx) show retry indication
+- Network errors include endpoint and context
+- All errors are timestamped with relevant details
 
 ### Running the Device
 ```bash
@@ -129,10 +158,15 @@ npm start
 	- Devices are read-only (status comes from RTT updates)
 
 ### Testing
-- Comprehensive Jest tests cover:
+- Comprehensive Jest test suite with 105 tests covering:
 	- Train selection logic with real API responses
-	- Edge cases (no train, cancelled, late)
+	- Edge cases (no train, cancelled, late, midnight wrap)
 	- Matter device behavior and status mapping
+	- Event payload normalization
+	- Configuration validation
+	- Error handling and classification
+	- Time utilities and parsing
+- Test coverage: ~88% statement coverage
 - To run tests:
 	```bash
 	npm test
@@ -178,23 +212,48 @@ Use the mode state in Matter automations:
 - **"If train status is Unknown, send alert"**
 
 ## Project Structure
-- `src/MatterDevice.js`: Matter device implementation
-- `src/RTTBridge.js`: Core train selection logic
-- `src/config.js`: Configuration management
-- `src/constants.js`: Matter modes and train status constants
+
+### Core Application
+- `index.js`: Device startup and lifecycle management
+- `src/config.js`: Configuration management with validation
+- `src/constants.js`: Matter modes, train status constants, and timing thresholds
+
+### Train Logic
+- `src/RTTBridge.js`: RTT API integration and train status calculation
+- `src/trainSelection.js`: Modular train selection algorithm
+- `src/timeUtils.js`: Time parsing and date handling utilities
+
+### Matter Device Implementation
+- `src/MatterServer.js`: Matter commissioning server setup and endpoint creation
+- `src/MatterDevice.js`: TrainStatusDevice class with periodic updates and event emission
 - `src/TrainStatusAirQualityDevice.js`: Temperature Sensor endpoint (1:1 delay→temp)
 - `src/TrainStatusModeDevice.js`: Mode Select endpoint
-- `tests/`: Jest tests and real API response examples
-- `index.js`: Device startup and lifecycle management
+
+### Infrastructure
+- `src/logger.js`: Centralized logging with level control (error/warn/info/debug)
+- `src/errors.js`: Custom error classes for structured error handling
+- `src/types.js`: JSDoc type definitions for IDE support
+
+### Testing & Deployment
+- `tests/`: Comprehensive Jest test suite (105 tests)
 - `Dockerfile`: Containerization for deployment
+
+### Architecture Highlights
+- **Modular Design**: Separation of concerns with focused modules
+- **Type Safety**: JSDoc annotations for IDE autocomplete and documentation
+- **Error Handling**: Typed errors with context (RTTApiError, ConfigurationError, etc.)
+- **Logging**: Level-based logging controlled by `LOG_LEVEL` env var
+- **Event-Driven**: Normalized event payloads for status changes
+- **Validated Config**: Fail-fast startup with descriptive error messages
 
 ## Deployment
 The device can be deployed using Docker for always-on operation. The Dockerfile is configured for containerized deployment on any platform supporting Docker (local server, VM, etc.). For network discovery to work, the container must be run with `--network host` to enable mDNS/Matter commissioning.
 
 ## Behaviour Summary
 - **Clarity:** The device always selects the train that arrives at the destination earliest after the offset, regardless of origin, as long as it passes through the specified origin.
-- **Reliability:** Status is calculated from real-time and scheduled data, with robust handling of edge cases.
+- **Reliability:** Status is calculated from real-time and scheduled data, with robust handling of edge cases and structured error recovery.
 - **Integration:** Full Matter protocol support for seamless integration with any Matter controller.
+- **Observability:** Comprehensive logging and error tracking with actionable diagnostics for troubleshooting.
 
 ---
 For more details, see the integration tests and API documentation in the codebase.

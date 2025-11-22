@@ -9,6 +9,7 @@ import { TrainStatus, MatterDevice as MatterConstants, Timing } from "./constant
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
 import { log } from "./logger.js";
+import { RTTApiError, NoTrainFoundError, RTTCheckerError } from "./errors.js";
 
 /**
  * Matter device implementation for Train Status Monitor.
@@ -114,7 +115,23 @@ export class TrainStatusDevice extends EventEmitter {
 
       return result;
     } catch (error) {
-      log.error('❌ Failed to update train status:', error);
+      // Enhanced error logging with context
+      if (error instanceof RTTApiError) {
+        if (error.isAuthError()) {
+          log.error('❌ RTT API authentication failed. Check RTT_USER and RTT_PASS credentials.');
+        } else if (error.isRetryable()) {
+          log.warn(`⚠️  RTT API temporarily unavailable (${error.statusCode}). Will retry on next update.`);
+        } else {
+          log.error(`❌ RTT API error: ${error.message}`, { statusCode: error.statusCode });
+        }
+      } else if (error instanceof NoTrainFoundError) {
+        log.warn(`⚠️  No suitable train found: ${error.message}`);
+      } else if (error instanceof RTTCheckerError) {
+        log.error(`❌ RTTChecker error: ${error.message}`, error.context);
+      } else {
+        log.error('❌ Failed to update train status:', error);
+      }
+      
       const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
       const modeChanged = previousMode !== this.currentMode;

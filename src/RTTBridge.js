@@ -9,6 +9,7 @@ import { TrainStatus, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { log } from "./logger.js";
 import { pickNextService } from "./trainSelection.js";
+import { RTTApiError, NoTrainFoundError } from "./errors.js";
 
 /**
  * Convert HHmm time string to minutes since midnight.
@@ -107,15 +108,48 @@ export const b64 = (u,p) => Buffer.from(`${u}:${p}`).toString("base64");
  * @throws {Error} If from/to TIPLOCs are missing or API request fails
  */
 export async function rttSearch(from, to, date, { user, pass, fetchImpl } = {}) {
-  if (!from || !to) throw new Error('rttSearch requires both from and to TIPLOC');
+  if (!from || !to) {
+    throw new RTTApiError('rttSearch requires both from and to TIPLOC', {
+      context: { from, to, date }
+    });
+  }
+  
   const RTT_USER = user || config.rtt.user;
   const RTT_PASS = pass || config.rtt.pass;
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
+  
   log.debug(`[RTTBridge] GET ${url}`);
-  const res = await (fetchImpl || fetch)(url, { headers: { Authorization: `Basic ${b64(RTT_USER, RTT_PASS)}` } });
-  log.debug(`[RTTBridge] Response: ${res.status}`);
-  if (!res.ok) throw new Error(`RTT ${res.status}`);
-  return res.json();
+  
+  try {
+    const res = await (fetchImpl || fetch)(url, { 
+      headers: { Authorization: `Basic ${b64(RTT_USER, RTT_PASS)}` } 
+    });
+    
+    log.debug(`[RTTBridge] Response: ${res.status}`);
+    
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new RTTApiError(`RTT API request failed: ${res.status} ${res.statusText}`, {
+        statusCode: res.status,
+        endpoint: url,
+        responseBody: body,
+        context: { from, to, date }
+      });
+    }
+    
+    return res.json();
+  } catch (error) {
+    // Re-throw RTTApiError as-is
+    if (error instanceof RTTApiError) {
+      throw error;
+    }
+    
+    // Wrap network errors
+    throw new RTTApiError(`Network error calling RTT API: ${error.message}`, {
+      endpoint: url,
+      context: { from, to, date, originalError: error.message }
+    });
+  }
 }
 
 // pickNextService now imported from trainSelection.js and re-exported here for backward compatibility

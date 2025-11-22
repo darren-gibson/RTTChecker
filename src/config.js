@@ -3,6 +3,8 @@
  * Loads and validates environment variables with sensible defaults
  */
 
+import { ConfigurationError } from './errors.js';
+
 export const config = {
   // RTT API credentials
   rtt: {
@@ -70,26 +72,33 @@ export const isProductionEnv = () => config.server.nodeEnv === 'production';
 
 /**
  * Validate required configuration
- * Throws descriptive error if critical config is missing
+ * Throws ConfigurationError if critical config is missing
  */
 export function validateConfig() {
-  const errors = [];
+  const missingFields = [];
   
   if (!config.rtt.user) {
-    errors.push('RTT_USER environment variable is required (RTT API username)');
+    missingFields.push('RTT_USER');
   }
   if (!config.rtt.pass) {
-    errors.push('RTT_PASS environment variable is required (RTT API password)');
+    missingFields.push('RTT_PASS');
   }
   
-  if (errors.length > 0) {
+  if (missingFields.length > 0) {
     const msg = [
       '❌ Configuration validation failed:',
-      ...errors.map(e => `   • ${e}`),
+      ...missingFields.map(f => `   • ${f} environment variable is required`),
       '',
       'Please set the required environment variables and restart.',
       'See README.md for configuration details.'
     ].join('\n');
-    throw new Error(msg);
+    
+    throw new ConfigurationError(msg, {
+      missingFields,
+      context: {
+        rttUser: config.rtt.user ? '(set)' : '(not set)',
+        rttPass: config.rtt.pass ? '(set)' : '(not set)'
+      }
+    });
   }
 }

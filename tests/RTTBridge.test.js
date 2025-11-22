@@ -118,8 +118,14 @@ describe('rttSearch', () => {
   });
 
   test('throws on non-ok', async () => {
-    const fakeFetch = jest.fn(() => Promise.resolve({ ok: false, status: 502 }));
-  await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch })).rejects.toThrow('RTT 502');
+    const fakeFetch = jest.fn(() => Promise.resolve({ 
+      ok: false, 
+      status: 502, 
+      statusText: 'Bad Gateway',
+      text: () => Promise.resolve('Service temporarily unavailable')
+    }));
+    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch }))
+      .rejects.toThrow('RTT API request failed: 502');
   });
 });
 
