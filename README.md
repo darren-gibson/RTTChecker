@@ -246,8 +246,163 @@ Use the mode state in Matter automations:
 - **Event-Driven**: Normalized event payloads for status changes
 - **Validated Config**: Fail-fast startup with descriptive error messages
 
-## Deployment
-The device can be deployed using Docker for always-on operation. The Dockerfile is configured for containerized deployment on any platform supporting Docker (local server, VM, etc.). For network discovery to work, the container must be run with `--network host` to enable mDNS/Matter commissioning.
+## Container Deployment
+
+### Building the Container
+
+```bash
+# Using Docker
+docker build -t train-status .
+
+# Using Podman
+podman build -t train-status .
+```
+
+### Running with Docker
+
+```bash
+docker run -d \
+  --name train-status \
+  --network host \
+  --restart unless-stopped \
+  -e RTT_USER=your_username \
+  -e RTT_PASS=your_password \
+  -e ORIGIN_TIPLOC=CAMBDGE \
+  -e DEST_TIPLOC=KNGX \
+  -e USE_BRIDGE=true \
+  -v $(pwd)/.matter-storage:/app/.matter-storage \
+  train-status
+```
+
+### Running with Podman
+
+**⚠️ Important: macOS Limitation**
+
+Podman on macOS runs containers inside a virtual machine, which means `--network host` does **NOT** give access to your Mac's actual network. mDNS/Matter discovery will **NOT work** in Podman containers on macOS.
+
+**Solutions:**
+1. **Recommended**: Run the application directly on macOS without containerization:
+   ```bash
+   npm install
+   export RTT_USER=your_username RTT_PASS=your_password
+   node index.js
+   ```
+
+2. Use Docker Desktop instead of Podman (Docker Desktop has better macOS network integration)
+
+3. Deploy the container on a Linux host where `--network host` works as expected
+
+**For Linux hosts**, Podman requires additional configuration for mDNS/Matter discovery to work:
+
+```bash
+# Run with host networking and proper capabilities
+podman run -d \
+  --name train-status \
+  --network host \
+  --restart unless-stopped \
+  --cap-add=NET_ADMIN \
+  --cap-add=NET_RAW \
+  -e RTT_USER=your_username \
+  -e RTT_PASS=your_password \
+  -e ORIGIN_TIPLOC=CAMBDGE \
+  -e DEST_TIPLOC=KNGX \
+  -e USE_BRIDGE=true \
+  -v $(pwd)/.matter-storage:/app/.matter-storage:Z \
+  train-status
+```
+
+**Important Podman Notes:**
+- `--network host` is **required** for Matter/mDNS discovery
+- `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` allow Avahi to use multicast
+- `:Z` suffix on volume mount sets correct SELinux context
+- The entrypoint automatically starts Avahi daemon for mDNS
+
+### Troubleshooting Container Discovery
+
+If the device isn't discovered by Google Home/Matter controllers:
+
+1. **Check Avahi is running inside container:**
+   ```bash
+   podman exec train-status pgrep avahi-daemon
+   ```
+
+2. **Verify mDNS traffic (on host):**
+   ```bash
+   sudo tcpdump -i any udp port 5353
+   ```
+
+3. **Test from another machine on same network:**
+   ```bash
+   avahi-browse -a -t
+   # Should show _matter._tcp and _matterc._udp services
+   ```
+
+4. **Check firewall (host machine):**
+   ```bash
+   # Allow UDP 5353 (mDNS) and 5540 (Matter)
+   sudo firewall-cmd --permanent --add-port=5353/udp
+   sudo firewall-cmd --permanent --add-port=5540/udp
+   sudo firewall-cmd --reload
+   ```
+
+5. **SELinux troubleshooting (if using Podman on Fedora/RHEL):**
+   ```bash
+   # Check for denials
+   sudo ausearch -m avc -ts recent
+   
+   # If Avahi is blocked, you may need:
+   sudo setsebool -P container_connect_any 1
+   ```
+
+6. **Manual commissioning (fallback):**
+   If discovery still fails, use the manual pairing code displayed in logs:
+   ```bash
+   podman logs train-status | grep -A5 "MANUAL PAIRING CODE"
+   ```
+
+### Docker Compose / Podman Compose (Recommended)
+
+For easier management, use the provided `docker-compose.yml`:
+
+```bash
+# 1. Copy example environment file
+cp .env.example .env
+
+# 2. Edit .env with your credentials and preferences
+nano .env
+
+# 3. Start with Docker Compose
+docker-compose up -d
+
+# OR with Podman Compose
+podman-compose up -d
+
+# View logs
+docker-compose logs -f
+# or
+podman-compose logs -f
+
+# Stop
+docker-compose down
+# or
+podman-compose down
+```
+
+### Monitoring
+
+```bash
+# View logs
+podman logs -f train-status
+
+# Check status
+podman ps | grep train-status
+
+# Restart if needed
+podman restart train-status
+
+# Check Avahi status inside container
+podman exec train-status pgrep avahi-daemon
+```
 
 ## Behaviour Summary
 - **Clarity:** The device always selects the train that arrives at the destination earliest after the offset, regardless of origin, as long as it passes through the specified origin.

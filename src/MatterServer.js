@@ -143,8 +143,11 @@ export async function startMatterServer(trainDevice) {
   // Check if device is already commissioned
   const contexts = storageManager.createContext('0');
   try {
-    const fabrics = contexts.get('FabricManager', 'fabrics');
-    if (fabrics && fabrics.length > 0) {
+    // Check if FabricManager storage exists
+    const fabricManagerContext = storageManager.createContext('FabricManager');
+    const fabrics = fabricManagerContext.get('fabrics');
+    
+    if (fabrics && Array.isArray(fabrics) && fabrics.length > 0) {
   log.warn('WARNING: Device is already commissioned!');
   log.warn(`   Found ${fabrics.length} existing fabric(s)`);
   log.warn('   To re-commission, delete .matter-storage/ directory first:');
