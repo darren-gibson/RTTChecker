@@ -1,10 +1,11 @@
 import { StorageBackendDisk, StorageManager } from '@project-chip/matter-node.js/storage';
 import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
+import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cluster';
 import { Aggregator } from '@project-chip/matter.js/device';
 import qr from 'qrcode-terminal';
 import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
-import { TrainStatusTemperatureSensor } from './TrainStatusAirQualityDevice.js';
+import { TrainStatusTemperatureSensor } from './TrainStatusTemperatureSensor.js';
 import { MatterDevice as MatterConstants } from './constants.js';
 import { config } from './config.js';
 import { log } from './logger.js';
@@ -38,15 +39,33 @@ function createEndpoints() {
     
     try {
       aggregator.addBridgedDevice(modeDevice, {
-        nodeLabel: config.matter.statusDeviceName,
-        reachable: true,
-        vendorName: config.matter.vendorName,
-        productName: 'Train Status Mode',
-        productLabel: 'Mode Select',
-        serialNumber: `${config.matter.serialNumber}-MODE`,
-        uniqueId: `${config.matter.serialNumber}-MODE`,
+  vendorName: config.matter.vendorName,
+  vendorId: MatterConstants.VendorId,
+        productId: MatterConstants.ProductId,
+  productName: config.matter.statusDeviceName,
+  productLabel: config.matter.statusDeviceName,
+  nodeLabel: config.matter.statusDeviceName,
+  hardwareVersion: 1,
+  hardwareVersionString: '1.0',
+  softwareVersion: 1,
+  softwareVersionString: '1.0',
+  serialNumber: `${config.matter.serialNumber}-MODE`,
+  reachable: true,
+  uniqueId: `${config.matter.serialNumber}-MODE`,
       });
       log.info('   ✓ Bridged: Mode Select');
+      const biMode = modeDevice.getClusterServer(BridgedDeviceBasicInformationCluster);
+      if (biMode) {
+        log.debug('      Bridged Mode Select attributes:', {
+          nodeLabel: biMode.getNodeLabelAttribute(),
+          productName: biMode.getProductNameAttribute(),
+          productLabel: biMode.getProductLabelAttribute(),
+          serialNumber: biMode.getSerialNumberAttribute(),
+          uniqueId: biMode.getUniqueIdAttribute?.()
+        });
+      } else {
+        log.debug('      Bridged Mode Select BasicInformation cluster not found');
+      }
     } catch (e) {
       log.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
       aggregator.addBridgedDevice(modeDevice);
@@ -54,15 +73,33 @@ function createEndpoints() {
     
     try {
       aggregator.addBridgedDevice(tempSensor, {
-        nodeLabel: config.matter.delayDeviceName,
-        reachable: true,
-        vendorName: config.matter.vendorName,
-        productName: 'Train Delay Sensor',
-        productLabel: 'Temperature Sensor',
-        serialNumber: `${config.matter.serialNumber}-TEMP`,
-        uniqueId: `${config.matter.serialNumber}-TEMP`,
+  vendorName: config.matter.vendorName,
+  vendorId: MatterConstants.VendorId,
+        productId: MatterConstants.ProductId,
+  productName: config.matter.delayDeviceName,
+  productLabel: config.matter.delayDeviceName,
+  nodeLabel: config.matter.delayDeviceName,
+  hardwareVersion: 1,
+  hardwareVersionString: '1.0',
+  softwareVersion: 1,
+  softwareVersionString: '1.0',
+  serialNumber: `${config.matter.serialNumber}-TEMP`,
+  reachable: true,
+  uniqueId: `${config.matter.serialNumber}-TEMP`,
       });
       log.info('   ✓ Bridged: Temperature Sensor');
+      const biTemp = tempSensor.getClusterServer(BridgedDeviceBasicInformationCluster);
+      if (biTemp) {
+        log.debug('      Bridged Temperature Sensor attributes:', {
+          nodeLabel: biTemp.getNodeLabelAttribute(),
+          productName: biTemp.getProductNameAttribute(),
+          productLabel: biTemp.getProductLabelAttribute(),
+          serialNumber: biTemp.getSerialNumberAttribute(),
+          uniqueId: biTemp.getUniqueIdAttribute?.()
+        });
+      } else {
+        log.debug('      Bridged Temperature Sensor BasicInformation cluster not found');
+      }
     } catch (e) {
       log.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
       aggregator.addBridgedDevice(tempSensor);

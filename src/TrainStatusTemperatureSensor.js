@@ -1,6 +1,8 @@
 import { Device, DeviceTypes } from '@project-chip/matter.js/device';
 import { ClusterServer } from '@project-chip/matter.js/cluster';
-import { TemperatureMeasurementCluster, IdentifyCluster } from '@project-chip/matter.js/cluster';
+import { TemperatureMeasurementCluster, IdentifyCluster, BasicInformationCluster } from '@project-chip/matter.js/cluster';
+import { MatterDevice as MatterConstants } from './constants.js';
+import { config } from './config.js';
 
 /**
  * Train Status Temperature Sensor Device
@@ -20,6 +22,30 @@ export class TrainStatusTemperatureSensor extends Device {
     
     // Set device name (must be done after super() call)
     this.name = name;
+
+    // Add BasicInformation cluster when NOT using bridge so controllers use these name attributes directly
+    if (!config.matter.useBridge) {
+      this.addClusterServer(
+        ClusterServer(
+          BasicInformationCluster,
+          {
+            vendorName: config.matter.vendorName,
+            vendorId: MatterConstants.VendorId,
+            productName: name,
+            productLabel: name,
+            nodeLabel: name,
+            hardwareVersion: 1,
+            hardwareVersionString: '1.0',
+            softwareVersion: 1,
+            softwareVersionString: '1.0',
+            serialNumber: `${config.matter.serialNumber}-TEMP`,
+            reachable: true,
+          },
+          {},
+          { startUp: true, shutDown: true, leave: true, reachableChanged: true }
+        )
+      );
+    }
 
     // Add TemperatureMeasurement cluster (primary sensor for Google Home)
     // Temperature is in 0.01°C units (hundredths of a degree)

@@ -1,7 +1,8 @@
 import { Device, DeviceTypes } from '@project-chip/matter.js/device';
 import { ClusterServer } from '@project-chip/matter.js/cluster';
-import { ModeSelectCluster } from '@project-chip/matter.js/cluster';
+import { ModeSelectCluster, BasicInformationCluster } from '@project-chip/matter.js/cluster';
 import { MatterDevice as MatterConstants } from './constants.js';
+import { config } from './config.js';
 
 /**
  * Train Status Mode Device
@@ -13,6 +14,30 @@ export class TrainStatusModeDevice extends Device {
     
     // Set device name (must be done after super() call)
     this.name = name;
+    
+    // Add BasicInformation cluster when NOT using bridge so controllers use these name attributes directly
+    if (!config.matter.useBridge) {
+      this.addClusterServer(
+        ClusterServer(
+          BasicInformationCluster,
+          {
+            vendorName: config.matter.vendorName,
+            vendorId: MatterConstants.VendorId,
+            productName: name,
+            productLabel: name,
+            nodeLabel: name,
+            hardwareVersion: 1,
+            hardwareVersionString: '1.0',
+            softwareVersion: 1,
+            softwareVersionString: '1.0',
+            serialNumber: `${config.matter.serialNumber}-MODE`,
+            reachable: true,
+          },
+          {},
+          { startUp: true, shutDown: true, leave: true, reachableChanged: true }
+        )
+      );
+    }
     
     // Map our train status modes to Matter Mode Select format
     const supportedModes = [
