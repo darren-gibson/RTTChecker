@@ -1,0 +1,10 @@
+# Production override for AMD64 deployment target
+version: '3.8'
+
+services:
+  train-status:
+    build:
+      context: .
+      args:
+        TARGETPLATFORM: linux/amd64
+    image: train-status:latest-amd64

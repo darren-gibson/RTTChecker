@@ -1,0 +1,10 @@
+# Development override for local Mac/ARM64 environment
+version: '3.8'
+
+services:
+  train-status:
+    build:
+      context: .
+      args:
+        TARGETPLATFORM: linux/arm64
+    image: train-status:latest-arm64

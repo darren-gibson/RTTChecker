@@ -4,3 +4,4 @@ coverage/
 .vscode/launch.json
 .matter-storage/
 matter-storage/
+train-status-*.tar.gz

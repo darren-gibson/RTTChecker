@@ -248,14 +248,44 @@ Use the mode state in Matter automations:
 
 ## Container Deployment
 
-### Building the Container
+### Multi-Architecture Builds
+
+This project supports building for both local development (ARM64/Apple Silicon) and production deployment (AMD64/x86_64).
+
+**Quick Start:**
 
 ```bash
-# Using Docker
-docker build -t train-status .
+# For local dev on Mac (ARM64)
+./build-container.sh dev
 
-# Using Podman
-podman build -t train-status .
+# For production deployment (AMD64)
+./build-container.sh prod
+
+# Build both architectures
+./build-container.sh multi
+```
+
+### Building the Container
+
+**For local development (ARM64):**
+```bash
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml build
+# Creates: train-status:latest-arm64
+```
+
+**For production deployment (AMD64):**
+```bash
+podman-compose -f docker-compose.yml -f docker-compose.prod.yml build
+# Creates: train-status:latest-amd64
+```
+
+**Manual build (specify architecture):**
+```bash
+# ARM64
+podman build --platform linux/arm64 -t train-status:latest-arm64 .
+
+# AMD64
+podman build --platform linux/amd64 -t train-status:latest-amd64 .
 ```
 
 ### Running with Docker
@@ -292,10 +322,10 @@ Podman on macOS runs containers inside a virtual machine, which means `--network
 
 3. Deploy the container on a Linux host where `--network host` works as expected
 
-**For Linux hosts**, Podman requires additional configuration for mDNS/Matter discovery to work:
+**For Linux hosts**, run the appropriate architecture:
 
 ```bash
-# Run with host networking and proper capabilities
+# Run AMD64 image on Linux server
 podman run -d \
   --name train-status \
   --network host \
@@ -307,15 +337,28 @@ podman run -d \
   -e ORIGIN_TIPLOC=CAMBDGE \
   -e DEST_TIPLOC=KNGX \
   -e USE_BRIDGE=true \
-  -v $(pwd)/.matter-storage:/app/.matter-storage:Z \
-  train-status
+  -v $(pwd)/matter-storage:/app/.matter-storage:Z \
+  train-status:latest-amd64
+```
+
+**Transferring to Production Server:**
+
+```bash
+# Export on Mac
+podman save train-status:latest-amd64 | gzip > train-status-amd64.tar.gz
+
+# Transfer to server (scp, rsync, etc.)
+scp train-status-amd64.tar.gz user@server:/path/
+
+# Load on server
+podman load < train-status-amd64.tar.gz
 ```
 
 **Important Podman Notes:**
 - `--network host` is **required** for Matter/mDNS discovery
-- `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` allow Avahi to use multicast
-- `:Z` suffix on volume mount sets correct SELinux context
-- The entrypoint automatically starts Avahi daemon for mDNS
+- `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` allow proper network access
+- `:Z` suffix on volume mount sets correct SELinux context on RHEL/Fedora
+- Matter.js handles mDNS directly (no Avahi needed)
 
 ### Troubleshooting Container Discovery
 
@@ -362,19 +405,37 @@ If the device isn't discovered by Google Home/Matter controllers:
 
 ### Docker Compose / Podman Compose (Recommended)
 
-For easier management, use the provided `docker-compose.yml`:
+For easier management, use the provided docker-compose files:
 
+**Local Development (ARM64/Mac):**
 ```bash
 # 1. Copy example environment file
 cp .env.example .env
 
-# 2. Edit .env with your credentials and preferences
+# 2. Edit .env with your credentials
 nano .env
 
-# 3. Start with Docker Compose
-docker-compose up -d
+# 3. Build and run for ARM64
+podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
-# OR with Podman Compose
+# View logs
+podman-compose logs -f train-status
+```
+
+**Production Deployment (AMD64/Linux):**
+```bash
+# 1. Ensure .env is configured
+cp .env.example .env
+nano .env
+
+# 2. Build and run for AMD64
+podman-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# View logs
+podman-compose logs -f train-status
+
+# Stop
+podman-compose -f docker-compose.yml -f docker-compose.prod.yml down
 podman-compose up -d
 
 # View logs
