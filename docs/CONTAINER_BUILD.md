@@ -10,22 +10,22 @@ This project supports building container images for both:
 ### Build Script (Recommended)
 ```bash
 # For local Mac development
-./build-container.sh dev
+./scripts/build-container.sh dev
 
 # For production Linux server
-./build-container.sh prod
+./scripts/build-container.sh prod
 
 # Build both architectures
-./build-container.sh multi
+./scripts/build-container.sh multi
 ```
 
 ### Manual Build
 ```bash
 # ARM64
-podman build --platform linux/arm64 -t train-status:latest-arm64 .
+podman build --platform linux/arm64 -f docker/Dockerfile -t train-status:latest-arm64 .
 
 # AMD64
-podman build --platform linux/amd64 -t train-status:latest-amd64 .
+podman build --platform linux/amd64 -f docker/Dockerfile -t train-status:latest-amd64 .
 ```
 
 ## Docker Compose
@@ -37,7 +37,7 @@ cp .env.example .env
 nano .env
 
 # Build and run
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
 
 # View logs
 podman-compose logs -f train-status
@@ -49,7 +49,7 @@ podman-compose down
 ### Production Deployment (AMD64)
 ```bash
 # On Mac: Build AMD64 image
-./build-container.sh prod
+./scripts/build-container.sh prod
 
 # Export image
 podman save train-status:latest-amd64 | gzip > train-status-amd64.tar.gz
@@ -61,15 +61,15 @@ scp train-status-amd64.tar.gz user@server:/path/
 podman load < train-status-amd64.tar.gz
 
 # On server: Run with compose
-podman-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
 ```
 
 ## Files
 
-- `docker-compose.yml` - Base configuration
-- `docker-compose.dev.yml` - ARM64 override for local dev
-- `docker-compose.prod.yml` - AMD64 override for production
-- `build-container.sh` - Convenience build script
+- `docker/docker-compose.yml` - Base configuration
+- `docker/docker-compose.dev.yml` - ARM64 override for local dev
+- `docker/docker-compose.prod.yml` - AMD64 override for production
+- `scripts/build-container.sh` - Convenience build script
 - `.env.example` - Environment variable template
 
 ## Architecture Selection
@@ -108,7 +108,7 @@ podman inspect train-status:latest-arm64 | grep Architecture
 ### Test container
 ```bash
 # Start container
-podman-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
 
 # Check logs
 podman logs train-status

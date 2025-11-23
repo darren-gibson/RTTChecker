@@ -5,3 +5,7 @@ coverage/
 .matter-storage/
 matter-storage/
 train-status-*.tar.gz
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

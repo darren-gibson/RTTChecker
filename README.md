@@ -1,23 +1,23 @@
-# RTTChecker
+# Train Status Matter Device
 
 A Matter smart home device that monitors real-time train status using the UK Rail Real-Time Trains (RTT) API. Exposes two Matter endpoints:
 - A Mode Select device for status (On Time / Minor / Delayed / Major / Unknown)
 - A Temperature Sensor that shows numeric delay in minutes (1:1 mapping)
 
 ## Overview
-RTTChecker is a Matter device that queries the RTT API to select the best train for a given journey and reports its punctuality via two representations:
+Train Status is a Matter device that queries the RTT API to select the best train for a given journey and reports its punctuality via two representations:
 - Discrete status using the Matter Mode Select cluster
 - Numeric delay (in minutes) using the Temperature Measurement cluster (temperature value equals minutes delayed; negative values mean early)
 
 ## Key Behaviour
 - **Train Selection Logic:**
-	- Given an origin and destination TIPLOC, a minimum offset (minutes after now), and a time window, RTTChecker selects the train that arrives at the destination earliest after the offset.
+	- Given an origin and destination TIPLOC, a minimum offset (minutes after now), and a time window, the service selects the train that arrives at the destination earliest after the offset.
 	- The train does not need to originate at the specified origin, but must pass through it (as a calling point or origin).
 	- Only trains within the offset and window are considered.
 	- If no suitable train is found, the service reports `UNKNOWN` status.
 
 - **Status Reporting (Matter Mode Select):**
-	- For the selected train, RTTChecker reports status as a Matter mode:
+	- For the selected train, the service reports status as a Matter mode:
 		- **On Time** (mode 0): On time or ≤2 minutes late
 		- **Minor Delay** (mode 1): 3–5 minutes late
 		- **Delayed** (mode 2): 6–10 minutes late
@@ -32,7 +32,7 @@ RTTChecker is a Matter device that queries the RTT API to select the best train 
 
 ## Example Scenario
 - At 06:05 BST, 20/Oct/2025, for Cambridge (CAMBDGE) to London Kings Cross (KNGX):
-	- With a 20-minute offset and 60-minute window, RTTChecker selects the 06:39 train, as it arrives at KNGX at 07:32 (earliest after offset).
+	- With a 20-minute offset and 60-minute window, the service selects the 06:39 train, as it arrives at KNGX at 07:32 (earliest after offset).
 	- The device displays mode "On Time" if the train is running on schedule.
 
 ## Matter Device Setup
@@ -236,7 +236,9 @@ Use the mode state in Matter automations:
 
 ### Testing & Deployment
 - `tests/`: Comprehensive Jest test suite (105 tests)
-- `Dockerfile`: Containerization for deployment
+- `docker/`: Container assets (Dockerfile, docker-compose, entrypoint)
+- `scripts/`: Build and utility scripts
+- `docs/`: Additional documentation and guides
 
 ### Architecture Highlights
 - **Modular Design**: Separation of concerns with focused modules
@@ -256,26 +258,26 @@ This project supports building for both local development (ARM64/Apple Silicon) 
 
 ```bash
 # For local dev on Mac (ARM64)
-./build-container.sh dev
+./scripts/build-container.sh dev
 
 # For production deployment (AMD64)
-./build-container.sh prod
+./scripts/build-container.sh prod
 
 # Build both architectures
-./build-container.sh multi
+./scripts/build-container.sh multi
 ```
 
 ### Building the Container
 
 **For local development (ARM64):**
 ```bash
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml build
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml build
 # Creates: train-status:latest-arm64
 ```
 
 **For production deployment (AMD64):**
 ```bash
-podman-compose -f docker-compose.yml -f docker-compose.prod.yml build
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml build
 # Creates: train-status:latest-amd64
 ```
 
@@ -416,7 +418,7 @@ cp .env.example .env
 nano .env
 
 # 3. Build and run for ARM64
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
 
 # View logs
 podman-compose logs -f train-status
@@ -429,13 +431,13 @@ cp .env.example .env
 nano .env
 
 # 2. Build and run for AMD64
-podman-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
 
 # View logs
 podman-compose logs -f train-status
 
 # Stop
-podman-compose -f docker-compose.yml -f docker-compose.prod.yml down
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml down
 podman-compose up -d
 
 # View logs
@@ -470,6 +472,53 @@ podman exec train-status pgrep avahi-daemon
 - **Reliability:** Status is calculated from real-time and scheduled data, with robust handling of edge cases and structured error recovery.
 - **Integration:** Full Matter protocol support for seamless integration with any Matter controller.
 - **Observability:** Comprehensive logging and error tracking with actionable diagnostics for troubleshooting.
+
+## Repository Structure
+
+The repository is organized for clear separation of concerns:
+
+```
+.
+├── src/                      # Application source code
+│   ├── config.js             # Environment configuration & validation
+│   ├── RTTBridge.js          # RTT API integration
+│   ├── MatterServer.js       # Matter server & commissioning
+│   ├── MatterDevice.js       # Device base class
+│   └── ...
+├── tests/                    # Jest test suite (105 tests)
+│   ├── integration.test.js   # End-to-end scenarios
+│   ├── RTTBridge.test.js     # API & train selection tests
+│   └── ...
+├── docker/                   # Container deployment assets
+│   ├── Dockerfile            # Multi-arch container definition
+│   ├── docker-compose.yml    # Base compose configuration
+│   ├── docker-compose.dev.yml   # ARM64/local override
+│   ├── docker-compose.prod.yml  # AMD64/production override
+│   └── docker-entrypoint.sh  # Container startup script
+├── scripts/                  # Operational utilities
+│   ├── build-container.sh    # Multi-arch build automation
+│   ├── reset-commissioning.sh # Reset Matter pairing
+│   ├── diagnose.sh           # System diagnostics
+│   └── podman-troubleshoot.sh # Container debugging
+├── docs/                     # Additional documentation
+│   ├── CONTAINER_BUILD.md    # Multi-arch build guide
+│   ├── GOOGLE_HOME_SETUP.md  # Google Home integration
+│   ├── GOOGLE_HOME_VOICE_COMMANDS.md # Voice command guide
+│   └── MIGRATION_TO_CHIP.md  # Matter.js migration notes
+├── matter-storage/           # Persistent commissioning state
+│   └── README.md             # Storage format documentation
+├── coverage/                 # Jest coverage reports (generated)
+├── index.js                  # Application entry point
+├── package.json              # Dependencies & scripts
+├── .env.example              # Environment variable template
+└── README.md                 # This file
+```
+
+### Key Benefits of This Structure
+- **Clear boundaries**: Source, tests, deployment, and docs are cleanly separated
+- **Easy navigation**: Related files grouped by function (docker/, scripts/, docs/)
+- **Discoverable**: Each directory contains only its relevant files
+- **Scalable**: Additional scripts, docs, or deployment configs go in appropriate directories
 
 ---
 For more details, see the integration tests and API documentation in the codebase.
