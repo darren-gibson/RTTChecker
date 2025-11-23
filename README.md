@@ -498,13 +498,11 @@ The repository is organized for clear separation of concerns:
 ├── scripts/                  # Operational utilities
 │   ├── build-container.sh    # Multi-arch build automation
 │   ├── reset-commissioning.sh # Reset Matter pairing
-│   ├── diagnose.sh           # System diagnostics
-│   └── podman-troubleshoot.sh # Container debugging
+│   └── diagnose.sh           # System diagnostics
 ├── docs/                     # Additional documentation
 │   ├── CONTAINER_BUILD.md    # Multi-arch build guide
 │   ├── GOOGLE_HOME_SETUP.md  # Google Home integration
-│   ├── GOOGLE_HOME_VOICE_COMMANDS.md # Voice command guide
-│   └── MIGRATION_TO_CHIP.md  # Matter.js migration notes
+│   └── GOOGLE_HOME_VOICE_COMMANDS.md # Voice command guide
 ├── matter-storage/           # Persistent commissioning state
 │   └── README.md             # Storage format documentation
 ├── coverage/                 # Jest coverage reports (generated)
