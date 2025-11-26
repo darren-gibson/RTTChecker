@@ -43,28 +43,28 @@ if (!isTestEnv()) {
   startMatterServer(device)
     .then((servers) => {
       matterServer = servers.matterServer;
-      console.log('🎯 Device ready! Monitor train status updates below:\n');
+      log.info('🎯 Device ready! Monitor train status updates below:\n');
     })
     .catch((error) => {
-      console.error('❌ Failed to start Matter server:', error);
+      log.error('❌ Failed to start Matter server:', error);
       process.exit(1);
     });
   
   // Handle graceful shutdown
   const shutdown = async () => {
-    console.log('\n\n🛑 Shutting down gracefully...');
+    log.info('\n\n🛑 Shutting down gracefully...');
     device.stopPeriodicUpdates();
     
     if (matterServer) {
       try {
         await matterServer.close();
-        console.log('✅ Matter server closed');
+        log.info('✅ Matter server closed');
       } catch (err) {
-        console.error('Error closing Matter server:', err);
+        log.error('Error closing Matter server:', err);
       }
     }
     
-    console.log('👋 Goodbye!');
+    log.info('👋 Goodbye!');
     process.exit(0);
   };
   

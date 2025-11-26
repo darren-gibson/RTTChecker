@@ -29,8 +29,8 @@ ENV UPDATE_INTERVAL_MS=60000
 
 # Note: Set RTT_USER, RTT_PASS, ORIGIN_TIPLOC, DEST_TIPLOC via environment variables
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
+# Copy entrypoint script (from docker/ subdirectory in build context)
+COPY docker/docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Matter Protocol Requirements:

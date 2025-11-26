@@ -90,7 +90,7 @@ function logCandidate(candidate, selected = false) {
     const destDesc = destEntry.description || destEntry.tiploc || 'unknown';
     const platform = loc.platform || '?';
     const prefix = selected ? 'SELECTED' : 'candidate';
-    log.debug(`[RTTBridge] ${prefix}: dep=${depStr} arr=${destArrival} ${originDesc}→${destDesc} platform=${platform}`);
+    log.debug(`${prefix}: dep=${depStr} arr=${destArrival} ${originDesc}→${destDesc} platform=${platform}`);
   } catch { /* ignore */ }
 }
 
@@ -135,7 +135,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
     const destEntry = findDestinationEntry(loc, destTiploc);
     if (!destEntry) {
       const id = s.serviceUid || s.trainIdentity || s.runningIdentity || 'unknown';
-      log.warn(`[RTTBridge] excluding service ${id}: no destination TIPLOC ${destTiploc}`);
+      log.warn(`excluding service ${id}: no destination TIPLOC ${destTiploc}`);
       return null;
     }
     const cand = buildCandidate(s, destEntry, loc, depMins, depStr);
@@ -144,7 +144,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
   }).filter(Boolean);
 
   if (candidates.length === 0) {
-    log.info(`[RTTBridge] info: no candidate service found (origin=${config.train.originTiploc} dest=${destTiploc} minAfter=${minAfterMinutes} window=${windowMinutes})`);
+    log.info(`no candidate service found (origin=${config.train.originTiploc} dest=${destTiploc} minAfter=${minAfterMinutes} window=${windowMinutes})`);
     return undefined;
   }
 

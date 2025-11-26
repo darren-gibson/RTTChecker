@@ -120,14 +120,14 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl } = {}) 
   const RTT_PASS = pass || config.rtt.pass;
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
   
-  log.debug(`[RTTBridge] GET ${url}`);
+  log.debug(`GET ${url}`);
   
   try {
     const res = await (fetchImpl || fetch)(url, { 
       headers: { Authorization: `Basic ${b64(RTT_USER, RTT_PASS)}` } 
     });
     
-    log.debug(`[RTTBridge] Response: ${res.status}`);
+    log.debug(`Response: ${res.status}`);
     
     if (!res.ok) {
       const body = await res.text().catch(() => '');

@@ -172,7 +172,7 @@ export class TrainStatusDevice extends EventEmitter {
     this.updateInterval = setInterval(() => {
     log.debug('⏱️ Periodic train status fetch...');
       this.updateTrainStatus().catch(err => {
-        console.error('Periodic train status update failed:', err);
+        log.error('Periodic train status update failed:', err);
       });
     }, this.updateIntervalMs);
 
