@@ -5,9 +5,11 @@
  * @typedef {import('./types.js').TrainCandidate} TrainCandidate
  */
 
-import { log } from './logger.js';
+import { loggers } from './logger.js';
 import { config } from './config.js';
 import { parseTime, normalizeDepartureMinutes } from './timeUtils.js';
+
+const log = loggers.bridge;
 
 /**
  * Check if departure time falls within search window.

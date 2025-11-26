@@ -7,9 +7,11 @@
 import fetch from "node-fetch";
 import { TrainStatus, Timing } from "./constants.js";
 import { config } from "./config.js";
-import { log } from "./logger.js";
+import { loggers } from "./logger.js";
 import { pickNextService } from "./trainSelection.js";
 import { RTTApiError, NoTrainFoundError } from "./errors.js";
+
+const log = loggers.bridge;
 
 /**
  * Convert HHmm time string to minutes since midnight.

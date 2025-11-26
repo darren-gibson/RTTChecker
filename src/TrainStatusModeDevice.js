@@ -82,7 +82,6 @@ export class TrainStatusModeDevice extends Device {
         {
           // Handle mode change requests (optional - we're read-only)
           changeToMode: async ({ request: { newMode } }) => {
-            console.log(`Mode change requested to: ${newMode} (read-only device)`);
             // For a read-only device, we ignore manual changes
           }
         }
@@ -98,8 +97,7 @@ export class TrainStatusModeDevice extends Device {
   const cluster = this.getClusterServer(ModeSelectCluster);
     if (cluster) {
       cluster.setCurrentModeAttribute(mode);
-      const modeLabel = this.getModeLabel(mode);
-      console.log(`🚆 Train status: ${modeLabel} (mode ${mode})`);
+      // Mode update logged by calling code via facility logger
     }
   }
 

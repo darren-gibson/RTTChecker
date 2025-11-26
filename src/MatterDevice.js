@@ -8,8 +8,10 @@ import { EventEmitter } from 'events';
 import { TrainStatus, MatterDevice as MatterConstants, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
-import { log } from "./logger.js";
+import { loggers } from "./logger.js";
 import { RTTApiError, NoTrainFoundError, RTTCheckerError } from "./errors.js";
+
+const log = loggers.rtt;
 
 /**
  * Matter device implementation for Train Status Monitor.
@@ -163,7 +165,7 @@ export class TrainStatusDevice extends EventEmitter {
   log.debug('🔁 Triggering initial train status fetch...');
     // Update immediately
     this.updateTrainStatus().catch(err => {
-      console.error('Initial train status update failed:', err);
+      log.error('Initial train status update failed:', err);
     });
 
     // Then update on interval

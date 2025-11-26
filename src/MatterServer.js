@@ -8,14 +8,14 @@ import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
 import { TrainStatusTemperatureSensor } from './TrainStatusTemperatureSensor.js';
 import { MatterDevice as MatterConstants } from './constants.js';
 import { config } from './config.js';
-import { log } from './logger.js';
+import { loggers } from './logger.js';
 
 /**
  * Matter Server Implementation
  * Creates a discoverable Matter device that Google Home can commission
  */
 
-// Note: Default logging from matter.js is sufficient
+const log = loggers.matter;
 
 /**
  * Create Matter endpoint devices (Mode Select and Temperature Sensor)

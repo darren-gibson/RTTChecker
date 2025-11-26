@@ -92,13 +92,20 @@ export LOG_LEVEL="debug"          # error < warn < info < debug (default: info)
 
 ### Logging and Debugging
 
-The application uses a centralized logging system with configurable log levels:
+The application uses **matter.js's built-in Logger** for consistent, facility-based logging across the entire project:
 
 **Log Levels** (set via `LOG_LEVEL` environment variable):
 - `error`: Critical failures only (config validation, API auth errors)
 - `warn`: Warnings and retryable issues (API temporarily down, no train found)
 - `info`: Normal operation (status changes, periodic updates) - **default**
 - `debug`: Verbose details (API requests/responses, candidate train selection)
+
+**Logging Facilities:**
+The application organizes logs into facilities for granular control:
+- `rtt-checker`: Main application lifecycle and device updates
+- `matter-server`: Matter server initialization and commissioning
+- `rtt-bridge`: RTT API interactions and train selection
+- Plus all native matter.js facilities (e.g., `MatterServer`, `CommissioningServer`)
 
 **Examples:**
 ```bash
@@ -112,12 +119,20 @@ export LOG_LEVEL="debug"
 export LOG_LEVEL="info"
 ```
 
+**Log Format:**
+By default, logs use ANSI formatting for colored, structured output showing timestamps, log levels, and facility names. You can customize this:
+```bash
+# Change format (ansi, plain, or html)
+export MATTER_LOG_FORMAT="plain"  # Disable colors
+export MATTER_LOG_FORMAT="ansi"   # Colored output (default)
+```
+
 **Error Context:**
 The application provides structured error information:
 - Authentication failures point to credentials
 - Retryable errors (5xx) show retry indication
 - Network errors include endpoint and context
-- All errors are timestamped with relevant details
+- All errors are timestamped with relevant details via matter.js Logger
 
 ### Running the Device
 ```bash
@@ -230,7 +245,7 @@ Use the mode state in Matter automations:
 - `src/TrainStatusModeDevice.js`: Mode Select endpoint
 
 ### Infrastructure
-- `src/logger.js`: Centralized logging with level control (error/warn/info/debug)
+- `src/logger.js`: matter.js Logger wrapper with facility-based logging (rtt-checker, matter-server, rtt-bridge)
 - `src/errors.js`: Custom error classes for structured error handling
 - `src/types.js`: JSDoc type definitions for IDE support
 
@@ -238,13 +253,13 @@ Use the mode state in Matter automations:
 - `tests/`: Comprehensive Jest test suite (105 tests)
 - `docker/`: Container assets (Dockerfile, docker-compose, entrypoint)
 - `scripts/`: Build and utility scripts
-- `docs/`: Additional documentation and guides
+- `docs/`: Additional documentation and guides (includes `LOGGING.md`)
 
 ### Architecture Highlights
 - **Modular Design**: Separation of concerns with focused modules
 - **Type Safety**: JSDoc annotations for IDE autocomplete and documentation
 - **Error Handling**: Typed errors with context (RTTApiError, ConfigurationError, etc.)
-- **Logging**: Level-based logging controlled by `LOG_LEVEL` env var
+- **Unified Logging**: matter.js Logger with facility-based organization (see `docs/LOGGING.md`)
 - **Event-Driven**: Normalized event payloads for status changes
 - **Validated Config**: Fail-fast startup with descriptive error messages
 

@@ -89,8 +89,7 @@ export class TrainStatusTemperatureSensor extends Device {
     const tempValue = Math.round(tempCelsius * 100); // Convert to 0.01°C units
 
     cluster.setMeasuredValueAttribute(tempValue);
-    const status = delayMinutes < 0 ? 'early' : delayMinutes === 0 ? 'on time' : 'delayed';
-    console.log(`🌡️  Train ${status}: ${tempCelsius}°C (${delayMinutes} min)`);
+    // Temperature update logged by calling code via facility logger
   }
 
   /**
@@ -102,7 +101,7 @@ export class TrainStatusTemperatureSensor extends Device {
     if (cluster) {
       const tempValue = Math.round(tempCelsius * 100);
       cluster.setMeasuredValueAttribute(tempValue);
-      console.log(`�️  Temperature set to ${tempCelsius.toFixed(1)}°C`);
+      // Temperature update logged by calling code via facility logger
     }
   }
 }

@@ -1,6 +1,7 @@
 import { TrainStatusDevice } from "./src/MatterDevice.js";
 import { startMatterServer } from "./src/MatterServer.js";
 import { isTestEnv, validateConfig } from "./src/config.js";
+import { log } from "./src/logger.js";
 
 /**
  * Matter Train Status Device
@@ -19,20 +20,20 @@ if (!isTestEnv()) {
   try {
     validateConfig();
   } catch (error) {
-    console.error(error.message);
+    log.error(error.message);
     process.exit(1);
   }
   
-  console.log('🚆 Starting Matter Train Status Device...');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  log.info('🚆 Starting Matter Train Status Device...');
+  log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
   
   const deviceInfo = device.getDeviceInfo();
-  console.log('Device Information:');
-  console.log(`  Name: ${deviceInfo.deviceName}`);
-  console.log(`  Vendor: ${deviceInfo.vendorName}`);
-  console.log(`  Product: ${deviceInfo.productName}`);
-  console.log(`  Serial: ${deviceInfo.serialNumber}`);
-  console.log('');
+  log.info('Device Information:');
+  log.info(`  Name: ${deviceInfo.deviceName}`);
+  log.info(`  Vendor: ${deviceInfo.vendorName}`);
+  log.info(`  Product: ${deviceInfo.productName}`);
+  log.info(`  Serial: ${deviceInfo.serialNumber}`);
+  log.info('');
   
   // Start periodic status updates for train data
   device.startPeriodicUpdates();
