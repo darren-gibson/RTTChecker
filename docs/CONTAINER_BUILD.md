@@ -92,6 +92,23 @@ The compose override files specify the target architecture:
 
 Using separate tags prevents confusion and allows both to coexist.
 
+### Security: Alpine Version & Scanning
+- The Dockerfile pins the base to `node:24-alpine${ALPINE_VERSION}` (default `3.21`) and runs `apk upgrade --no-cache` to pick up security fixes.
+- To override Alpine at build time (e.g., to test a newer patch level):
+	```bash
+	podman build --build-arg ALPINE_VERSION=3.21 -f docker/Dockerfile -t train-status:test .
+	```
+- Scan images with Trivy (recommended):
+	```bash
+	brew install trivy            # macOS
+	trivy image train-status:latest-arm64
+	trivy image train-status:latest-amd64
+	```
+	Or without installing locally:
+	```bash
+	podman run --rm -v $PWD:/work aquasec/trivy:latest image train-status:latest-amd64
+	```
+
 ## Troubleshooting
 
 ### Check built images

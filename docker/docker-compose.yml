@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   train-status:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: train-status:latest
     container_name: train-status
     network_mode: host

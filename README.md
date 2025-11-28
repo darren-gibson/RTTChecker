@@ -54,10 +54,14 @@ This device exposes two endpoints:
 
 ### Prerequisites
 - Matter controller (Apple HomePod, Google Nest Hub, etc.)
-- Node.js 22.x for local development (matches Docker image)
-   - With nvm:
+- Node.js 24.x LTS for local development (matches Docker image)
+   - With Homebrew (macOS):
+      - `brew install node@24` (or `brew install node` if 24 is default)
+      - `brew unlink node && brew link --overwrite --force node@24`
+      - `node -v` should report v24.x
+   - With nvm (optional):
       - `nvm use` (uses `.nvmrc`)
-      - or `nvm install 22 && nvm use 22`
+      - or `nvm install 24 && nvm use 24`
 - RTT API credentials
 
 ### Installation

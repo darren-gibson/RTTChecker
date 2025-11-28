@@ -1,10 +1,13 @@
-# Use official Node.js LTS image
-FROM node:22-alpine
+# Use official Node.js LTS image (Node 24)
+# Pin Alpine via build-arg for easier security updates
+ARG ALPINE_VERSION=3.21
+FROM node:24-alpine${ALPINE_VERSION}
 
 # Install build dependencies for Matter.js native modules
 # python3, make, g++ are required for building native Node.js addons
 # iproute2 provides network utilities for diagnostics
-RUN apk add --no-cache \
+# Upgrade base packages to receive latest security patches in the base image
+RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3 \
     make \
     g++ \
@@ -13,9 +16,9 @@ RUN apk add --no-cache \
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package files and install dependencies deterministically
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --omit=dev
 
 # Copy source code
 COPY . .

@@ -5,6 +5,7 @@ services:
   train-status:
     build:
       context: .
+      dockerfile: docker/Dockerfile
       args:
         TARGETPLATFORM: linux/amd64
     image: train-status:latest-amd64
