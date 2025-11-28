@@ -4,7 +4,6 @@
  * @typedef {import('./types.js').TrainStatusResult} TrainStatusResult
  */
 
-import fetch from "node-fetch";
 import { TrainStatus, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { loggers } from "./logger.js";

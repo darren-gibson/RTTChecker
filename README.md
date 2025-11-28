@@ -54,7 +54,10 @@ This device exposes two endpoints:
 
 ### Prerequisites
 - Matter controller (Apple HomePod, Google Nest Hub, etc.)
-- Node.js 16+ installed
+- Node.js 22.x for local development (matches Docker image)
+   - With nvm:
+      - `nvm use` (uses `.nvmrc`)
+      - or `nvm install 22 && nvm use 22`
 - RTT API credentials
 
 ### Installation
