@@ -3,6 +3,7 @@ import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
 import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cluster';
 import { Aggregator } from '@project-chip/matter.js/device';
 import qr from 'qrcode-terminal';
+
 import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
 import { TrainStatusTemperatureSensor } from './TrainStatusTemperatureSensor.js';
@@ -184,8 +185,17 @@ export async function startMatterServer(trainDevice) {
   });
 
   log.info('📡 Matter server created');
-  log.info(`   Discriminator: ${config.matter.discriminator}`);
-  log.info(`   Passcode: ${config.matter.passcode}`);
+  // Mask discriminator and passcode at non-debug levels to avoid leaking full credentials.
+  const maskValue = (val, visible = 3) => {
+    const s = String(val);
+    if (log.debug) { // still log full when DEBUG level active
+      return s;
+    }
+    if (s.length <= visible) return '*'.repeat(s.length);
+    return '*'.repeat(Math.max(0, s.length - visible)) + s.slice(-visible);
+  };
+  log.info(`   Discriminator: ${maskValue(config.matter.discriminator)}`);
+  log.info(`   Passcode: ${maskValue(config.matter.passcode)}`);
 
   // Generate QR code for commissioning
   const { qrPairingCode, manualPairingCode } = commissioningServer.getPairingCode();
@@ -202,7 +212,8 @@ export async function startMatterServer(trainDevice) {
   } catch (e) {
     log.info(`QR: ${qrPairingCode}`);
   }
-  log.info(`\n   Manual pairing code: ${manualPairingCode}\n`);
+  const pairingMasked = maskValue(manualPairingCode, 4);
+  log.info(`\n   Manual pairing code: ${pairingMasked} (masked)\n`);
   log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // Create endpoints (with optional bridge)

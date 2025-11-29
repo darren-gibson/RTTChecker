@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 import { rttSearch, b64 } from '../src/RTTBridge.js';
 
 describe('rttSearch with example response', () => {

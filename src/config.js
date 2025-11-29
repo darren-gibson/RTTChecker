@@ -3,6 +3,8 @@
  * Loads and validates environment variables with sensible defaults
  */
 
+import { z } from 'zod';
+
 import { ConfigurationError } from './errors.js';
 
 export const config = {
@@ -71,34 +73,96 @@ export const isTestEnv = () => config.server.nodeEnv === 'test';
 export const isProductionEnv = () => config.server.nodeEnv === 'production';
 
 /**
+ * Zod schema for environment variable validation
+ */
+const envSchema = z.object({
+  // Required RTT API credentials
+  RTT_USER: z.string().min(1, 'RTT_USER must not be empty'),
+  RTT_PASS: z.string().min(1, 'RTT_PASS must not be empty'),
+  
+  // Optional train search configuration
+  ORIGIN_TIPLOC: z.string().regex(/^[A-Z0-9]{3,8}$/, 'ORIGIN_TIPLOC must be 3-8 uppercase alphanumeric characters').optional(),
+  DEST_TIPLOC: z.string().regex(/^[A-Z0-9]{3,8}$/, 'DEST_TIPLOC must be 3-8 uppercase alphanumeric characters').optional(),
+  MIN_AFTER_MINUTES: z.coerce.number().int().min(0).max(1440).optional(),
+  WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).optional(),
+  
+  // Optional server configuration
+  PORT: z.coerce.number().int().min(1).max(65535).optional(),
+  NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
+  
+  // Optional Matter device configuration
+  DEVICE_NAME: z.string().max(64).optional(),
+  VENDOR_NAME: z.string().max(64).optional(),
+  PRODUCT_NAME: z.string().max(64).optional(),
+  SERIAL_NUMBER: z.string().max(32).optional(),
+  DISCRIMINATOR: z.coerce.number().int().min(0).max(4095).optional(),
+  PASSCODE: z.coerce.number().int().min(1).max(99999999).optional(),
+  USE_BRIDGE: z.enum(['true', 'false']).optional(),
+  STATUS_DEVICE_NAME: z.string().max(64).optional(),
+  DELAY_DEVICE_NAME: z.string().max(64).optional(),
+  
+  // Optional logging configuration
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  MATTER_LOG_FORMAT: z.enum(['ansi', 'plain', 'html']).optional(),
+  EXIT_AFTER_MS: z.coerce.number().int().min(0).optional(),
+});
+
+/**
  * Validate required configuration
- * Throws ConfigurationError if critical config is missing
+ * Throws ConfigurationError if critical config is missing or invalid
  */
 export function validateConfig() {
-  const missingFields = [];
-  
-  if (!config.rtt.user) {
-    missingFields.push('RTT_USER');
-  }
-  if (!config.rtt.pass) {
-    missingFields.push('RTT_PASS');
-  }
-  
-  if (missingFields.length > 0) {
-    const msg = [
-      '❌ Configuration validation failed:',
-      ...missingFields.map(f => `   • ${f} environment variable is required`),
-      '',
-      'Please set the required environment variables and restart.',
-      'See README.md for configuration details.'
-    ].join('\n');
+  try {
+    // Validate only the fields that are actually set or required
+    const envToValidate = {};
     
-    throw new ConfigurationError(msg, {
-      missingFields,
-      context: {
-        rttUser: config.rtt.user ? '(set)' : '(not set)',
-        rttPass: config.rtt.pass ? '(set)' : '(not set)'
+    // Always validate required fields
+    envToValidate.RTT_USER = process.env.RTT_USER;
+    envToValidate.RTT_PASS = process.env.RTT_PASS;
+    
+    // Add optional fields if they exist
+    const optionalFields = [
+      'ORIGIN_TIPLOC', 'DEST_TIPLOC', 'MIN_AFTER_MINUTES', 'WINDOW_MINUTES',
+      'PORT', 'NODE_ENV', 'DEVICE_NAME', 'VENDOR_NAME', 'PRODUCT_NAME',
+      'SERIAL_NUMBER', 'DISCRIMINATOR', 'PASSCODE', 'USE_BRIDGE',
+      'STATUS_DEVICE_NAME', 'DELAY_DEVICE_NAME', 'LOG_LEVEL',
+      'MATTER_LOG_FORMAT', 'EXIT_AFTER_MS'
+    ];
+    
+    for (const field of optionalFields) {
+      if (process.env[field] !== undefined) {
+        envToValidate[field] = process.env[field];
       }
-    });
+    }
+    
+    // Validate with Zod schema
+    envSchema.parse(envToValidate);
+    
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.issues.map(issue => {
+        const path = issue.path.join('.');
+        return `   • ${path}: ${issue.message}`;
+      });
+      
+      const msg = [
+        '❌ Configuration validation failed:',
+        ...issues,
+        '',
+        'Please fix the configuration errors and restart.',
+        'See README.md for configuration details.'
+      ].join('\n');
+      
+      throw new ConfigurationError(msg, {
+        validationErrors: error.issues,
+        context: {
+          rttUser: config.rtt.user ? '(set)' : '(not set)',
+          rttPass: config.rtt.pass ? '(set)' : '(not set)'
+        }
+      });
+    }
+    
+    // Re-throw non-Zod errors
+    throw error;
   }
 }

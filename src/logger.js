@@ -2,115 +2,66 @@
 // Wraps matter.js Logger to maintain existing API while leveraging matter.js logging infrastructure
 
 import { Logger, Level } from '@project-chip/matter.js/log';
-// Attempt to also configure the logger from '@matter/general' if present to ensure
-// a single environment-driven log level is respected across both packages.
-let GeneralLogger; // will remain undefined if module not installed / different version.
-try {
-  // Some versions expose the same Logger through '@matter/general'
-  // We don't hard-fail if unavailable.
-  // eslint-disable-next-line import/no-extraneous-dependencies,global-require
-  GeneralLogger = require('@matter/general').Logger; // CommonJS require for optional import
-} catch (_) {
-  GeneralLogger = undefined;
+
+// Set default log level from environment (default to INFO)
+const levelMap = { debug: Level.DEBUG, info: Level.INFO, warn: Level.WARN, error: Level.ERROR };
+const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
+const defaultLevel = levelMap[envLevel] ?? Level.INFO;
+
+// Apply log level BEFORE creating any loggers
+Logger.defaultLogLevel = defaultLevel;
+Logger.format = process.env.MATTER_LOG_FORMAT || 'ansi';
+
+// Guard against Logger.defaultLogLevel being lowered after we set it
+const originalDefaultSetter = Object.getOwnPropertyDescriptor(Logger, 'defaultLogLevel')?.set;
+if (originalDefaultSetter) {
+  Object.defineProperty(Logger, 'defaultLogLevel', {
+    set(val) {
+      // Only allow raising the level, not lowering it below our env-configured floor
+      if (val >= defaultLevel) {
+        originalDefaultSetter.call(Logger, val);
+      }
+    },
+    get() {
+      return Logger.log.level;
+    },
+    configurable: true,
+    enumerable: true,
+  });
 }
 
-// Configure matter.js logger based on LOG_LEVEL environment variable
-const levelMap = {
-  'debug': Level.DEBUG,
-  'info': Level.INFO,
-  'warn': Level.WARN,
-  'error': Level.ERROR,
+// Monkey-patch Logger.get to enforce minimum level on all newly created facilities
+const originalGet = Logger.get.bind(Logger);
+Logger.get = function (name) {
+  const logger = originalGet(name);
+  // Enforce the minimum level for this facility
+  if ((Logger.logLevels[name] ?? Level.DEBUG) < defaultLevel) {
+    Logger.logLevels[name] = defaultLevel;
+  }
+  return logger;
 };
 
-// Set default log level for all facilities
-const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
-const resolvedLevel = levelMap[envLevel] ?? Level.INFO;
-// Prevent future code from lowering the default log level below our resolved level.
-function guardDefaultSetter(activeLogger) {
-  if (!activeLogger || activeLogger.__guardedDefaultSetter) return;
-  const original = activeLogger.setDefaultLoglevelForLogger?.bind(activeLogger);
-  if (original) {
-    activeLogger.setDefaultLoglevelForLogger = (identifier, level) => {
-      if (level < resolvedLevel) {
-        level = resolvedLevel; // enforce floor
-      }
-      return original(identifier, level);
-    };
-  }
-  activeLogger.__guardedDefaultSetter = true;
-}
-guardDefaultSetter(Logger);
-if (GeneralLogger) guardDefaultSetter(GeneralLogger);
-
-// Also guard per-facility assignments to avoid lowering below global.
-function guardFacilitySetter(activeLogger) {
-  if (!activeLogger || activeLogger.__guardedFacilitySetter) return;
-  const original = activeLogger.setLogLevelsForLogger?.bind(activeLogger);
-  if (original) {
-    activeLogger.setLogLevelsForLogger = (identifier, levels) => {
-      const adjusted = {};
-      for (const [k, v] of Object.entries(levels)) {
-        adjusted[k] = v < resolvedLevel ? resolvedLevel : v;
-      }
-      return original(identifier, adjusted);
-    };
-  }
-  activeLogger.__guardedFacilitySetter = true;
-}
-guardFacilitySetter(Logger);
-if (GeneralLogger) guardFacilitySetter(GeneralLogger);
-
-// Set (or re-set) defaults after guards installed.
-Logger.defaultLogLevel = resolvedLevel;
-if (GeneralLogger) GeneralLogger.defaultLogLevel = resolvedLevel;
-
-// Set ANSI format for consistent, readable output with level and facility names.
-// Override with MATTER_LOG_FORMAT env var if needed (plain, ansi, html).
-const chosenFormat = process.env.MATTER_LOG_FORMAT || 'ansi';
-Logger.format = chosenFormat;
-if (GeneralLogger) {
-  GeneralLogger.format = chosenFormat;
-}
-
-// Propagate the unified default level to all already-known facilities so that
-// any facility created earlier at a lower level (e.g. DEBUG) is raised.
-function normalizeFacilityLevels(activeLogger) {
-  if (!activeLogger || !activeLogger.logLevels) return;
-  const keys = Object.keys(activeLogger.logLevels);
-  for (const k of keys) {
-    if (activeLogger.logLevels[k] < resolvedLevel) {
-      activeLogger.logLevels[k] = resolvedLevel;
+// Guard against direct manipulation of Logger.logLevels to bypass our floor
+function normalizeFacilityLevels() {
+  for (const facility in Logger.logLevels) {
+    if (Logger.logLevels[facility] < defaultLevel) {
+      Logger.logLevels[facility] = defaultLevel;
     }
   }
 }
-normalizeFacilityLevels(Logger);
-if (GeneralLogger) normalizeFacilityLevels(GeneralLogger);
+
+// Periodically enforce level floor during initialization
+const enforcementInterval = setInterval(normalizeFacilityLevels, 10);
+setTimeout(() => {
+  clearInterval(enforcementInterval);
+  // Continue with less frequent enforcement
+  setInterval(normalizeFacilityLevels, 1000);
+}, 2000);
 
 // Create facility loggers for different parts of the application
 const rttLogger = Logger.get('rtt-checker');
 const matterLogger = Logger.get('matter-server');
 const bridgeLogger = Logger.get('rtt-bridge');
-
-// Normalize levels again now that we've created our own facilities.
-normalizeFacilityLevels(Logger);
-if (GeneralLogger) normalizeFacilityLevels(GeneralLogger);
-
-// Monkey-patch Logger.get to ensure any future facility respects the global level.
-function patchGet(activeLogger) {
-  if (!activeLogger || !activeLogger.get || activeLogger.__globalPatched) return;
-  const originalGet = activeLogger.get.bind(activeLogger);
-  activeLogger.get = (name) => {
-    const l = originalGet(name);
-    // After creation, raise level if below global.
-    if (activeLogger.logLevels && activeLogger.logLevels[name] < resolvedLevel) {
-      activeLogger.logLevels[name] = resolvedLevel;
-    }
-    return l;
-  };
-  activeLogger.__globalPatched = true;
-}
-patchGet(Logger);
-if (GeneralLogger) patchGet(GeneralLogger);
 
 // Export unified log interface that matches existing API
 export const log = {
@@ -132,9 +83,6 @@ export function setLogLevel(level) {
   const matterLevel = levelMap[level.toLowerCase()];
   if (matterLevel !== undefined) {
     Logger.defaultLogLevel = matterLevel;
-    if (GeneralLogger) GeneralLogger.defaultLogLevel = matterLevel;
-    normalizeFacilityLevels(Logger);
-    if (GeneralLogger) normalizeFacilityLevels(GeneralLogger);
     process.env.LOG_LEVEL = level;
   }
 }

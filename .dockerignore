@@ -30,3 +30,4 @@ jest.config.cjs
 # Build artifacts
 *.log
 npm-debug.log*
+train-status-*.tar.gz

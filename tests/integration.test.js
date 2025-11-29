@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+
 import { getTrainStatus } from '../src/RTTBridge.js';
 import { TrainStatus } from '../src/constants.js';
 

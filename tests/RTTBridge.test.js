@@ -117,7 +117,7 @@ describe('rttSearch', () => {
     expect(fakeFetch).toHaveBeenCalled();
   });
 
-  test('throws on non-ok', async () => {
+  test('throws on non-ok after retries', async () => {
     const fakeFetch = jest.fn(() => Promise.resolve({ 
       ok: false, 
       status: 502, 
@@ -126,7 +126,42 @@ describe('rttSearch', () => {
     }));
     await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch }))
       .rejects.toThrow('RTT API request failed: 502');
+    // Should have retried 3 times (initial + 3 retries = 4 total calls)
+    expect(fakeFetch).toHaveBeenCalledTimes(4);
+  }, 10000); // Increase timeout to account for retry delays
+
+  test('fast fails on 401 without retries', async () => {
+    const fakeFetch = jest.fn(() => Promise.resolve({ 
+      ok: false, 
+      status: 401, 
+      statusText: 'Unauthorized',
+      text: () => Promise.resolve('Invalid credentials')
+    }));
+    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch }))
+      .rejects.toThrow('RTT API request failed: 401');
+    // Should NOT retry on 401 (only 1 call)
+    expect(fakeFetch).toHaveBeenCalledTimes(1);
   });
+
+  test('retries on 429 rate limit', async () => {
+    let callCount = 0;
+    const fakeFetch = jest.fn(() => {
+      callCount++;
+      if (callCount <= 2) {
+        return Promise.resolve({ 
+          ok: false, 
+          status: 429, 
+          statusText: 'Too Many Requests',
+          text: () => Promise.resolve('Rate limit exceeded')
+        });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ services: [] }) });
+    });
+    const data = await rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch });
+    expect(data).toEqual({ services: [] });
+    // Should have succeeded on 3rd attempt
+    expect(fakeFetch).toHaveBeenCalledTimes(3);
+  }, 10000);
 });
 
 describe('b64', () => {
