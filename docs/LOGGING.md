@@ -106,6 +106,68 @@ export MATTER_LOG_FORMAT="plain"  # No colors
 export MATTER_LOG_LEVEL="MdnsScanner:warn,Storage:error"
 ```
 
+### Global Level Enforcement & Guards
+
+RTTChecker installs protective guards around the underlying matter.js logger so that the value from `LOG_LEVEL` acts as a **global minimum (floor)** for every facility:
+
+- Setting `LOG_LEVEL=info` suppresses all `DEBUG` output from both application and Matter protocol facilities.
+- Attempts (code or libraries) to later set a lower default/facility level are intercepted and raised back to the configured floor.
+- Raising verbosity (e.g. `LOG_LEVEL=debug`) immediately exposes all `DEBUG` messages again.
+
+Because of this enforcement:
+
+- Per‑facility overrides that specify a level < global (e.g. `Logger.logLevels = { 'MdnsScanner': Level.DEBUG }` when `LOG_LEVEL=info`) are automatically clamped to the global floor.
+- You can still raise a specific facility above the floor (e.g. set others to `WARN` while leaving `rtt-bridge` at `DEBUG` by choosing a global `LOG_LEVEL=debug` and then selectively lowering others to `WARN`). Lowering below the floor is not permitted at runtime.
+
+### Timed Exit for Local Verification
+
+Use `EXIT_AFTER_MS` to run the process briefly for manual or CI validation without leaving a long‑running server:
+
+```bash
+LOG_LEVEL=info EXIT_AFTER_MS=2500 RTT_USER=demo RTT_PASS=demo node index.js
+```
+
+This starts the app, emits a few log lines at the enforced level, then shuts down gracefully after the given milliseconds.
+
+### Runtime Verification (Manual)
+
+Quick checks:
+
+```bash
+# Suppress debug
+LOG_LEVEL=info EXIT_AFTER_MS=2500 RTT_USER=demo RTT_PASS=demo node index.js
+
+# Show debug
+LOG_LEVEL=debug EXIT_AFTER_MS=2000 RTT_USER=demo RTT_PASS=demo node index.js
+```
+
+If `LOG_LEVEL=info` shows any line with `DEBUG`, investigate; the guards should prevent this.
+
+### Automated Test
+
+The behavior is enforced by Jest test `tests/logger.runtime.test.js` which:
+- Spawns a child Node process with `LOG_LEVEL=info` and asserts absence of any `DEBUG` lines.
+- Repeats with `LOG_LEVEL=debug` and asserts presence of the verification debug message.
+- Forces `MATTER_LOG_FORMAT=plain` to simplify matching (ANSI colors removed).
+
+### Formatting Considerations
+
+- Default format is `ansi`. Use `MATTER_LOG_FORMAT=plain` for test or machine parsing.
+- Custom formatter assignments still work, but messages below the global level remain suppressed.
+
+### Caveats & Limitations
+
+- The global floor approach favors consistency over fine-grained lowering; you cannot view `DEBUG` for a single noisy facility while suppressing others unless you raise the global level and then selectively elevate only the desired facility via additional logic.
+- If future matter.js versions change internal setter method names, the guard logic may need adjustment.
+### Recommended Patterns
+
+| Goal | Recommendation |
+|------|----------------|
+| Quiet production | `LOG_LEVEL=warn` (optionally bump specific facility to `ERROR`) |
+| Standard monitoring | `LOG_LEVEL=info` |
+| Full troubleshooting | `LOG_LEVEL=debug` |
+| Short CI verification | Add `EXIT_AFTER_MS` (1–3s) and `MATTER_LOG_FORMAT=plain` |
+
 ## Log Output Examples
 
 ### INFO Level (Default)

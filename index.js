@@ -37,6 +37,9 @@ if (!isTestEnv()) {
   
   // Start periodic status updates for train data
   device.startPeriodicUpdates();
+
+  // Emit a debug message for runtime verification. Should only appear when LOG_LEVEL=debug.
+  log.debug('🔧 Debug verification: this should be hidden unless LOG_LEVEL=debug');
   
   // Start Matter server for Google Home integration
   let matterServer;
@@ -70,4 +73,13 @@ if (!isTestEnv()) {
   
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
+
+  // Allow short-lived runs for CI / manual verification using EXIT_AFTER_MS.
+  const exitAfterMs = parseInt(process.env.EXIT_AFTER_MS || '', 10);
+  if (!Number.isNaN(exitAfterMs) && exitAfterMs > 0) {
+    setTimeout(() => {
+      log.info(`⏱ Exiting after ${exitAfterMs}ms (EXIT_AFTER_MS) for verification.`);
+      shutdown();
+    }, exitAfterMs);
+  }
 }
