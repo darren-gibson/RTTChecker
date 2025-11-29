@@ -8,7 +8,7 @@ import { TrainStatus, Timing } from "./constants.js";
 import { config } from "./config.js";
 import { loggers } from "./logger.js";
 import { pickNextService } from "./trainSelection.js";
-import { RTTApiError, NoTrainFoundError } from "./errors.js";
+import { RTTApiError } from "./errors.js";
 
 const log = loggers.bridge;
 

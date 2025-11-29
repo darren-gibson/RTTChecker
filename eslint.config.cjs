@@ -16,7 +16,11 @@ module.exports = [
       import: importPlugin,
     },
     rules: {
-      'no-unused-vars': ['warn', { args: 'none', ignoreRestSiblings: true }],
+      'no-unused-vars': ['warn', { 
+        args: 'none', 
+        ignoreRestSiblings: true,
+        caughtErrors: 'none'
+      }],
       'no-console': 'off',
       'import/order': ['warn', { 'newlines-between': 'always' }],
       'prefer-const': ['warn', { destructuring: 'all' }],

@@ -4,7 +4,6 @@ import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cl
 import { Aggregator } from '@project-chip/matter.js/device';
 import qr from 'qrcode-terminal';
 
-import { TrainStatusDevice } from './MatterDevice.js';
 import { TrainStatusModeDevice } from './TrainStatusModeDevice.js';
 import { TrainStatusTemperatureSensor } from './TrainStatusTemperatureSensor.js';
 import { MatterDevice as MatterConstants } from './constants.js';
@@ -142,7 +141,7 @@ export async function startMatterServer(trainDevice) {
   await storageManager.initialize();
   
   // Check if device is already commissioned
-  const contexts = storageManager.createContext('0');
+  const _contexts = storageManager.createContext('0');
   try {
     // Check if FabricManager storage exists
     const fabricManagerContext = storageManager.createContext('FabricManager');
@@ -157,7 +156,7 @@ export async function startMatterServer(trainDevice) {
     } else {
   log.info('   ✓ No existing fabrics - ready for commissioning\n');
     }
-  } catch (error) {
+  } catch (_error) {
     // Storage key doesn't exist yet - device not commissioned
   log.info('   ✓ No existing fabrics - ready for commissioning\n');
   }
@@ -209,7 +208,7 @@ export async function startMatterServer(trainDevice) {
   log.info('4️⃣  Scan this QR code or enter manual code:\n');
   try {
     qr.generate(qrPairingCode, { small: true });
-  } catch (e) {
+  } catch (_e) {
     log.info(`QR: ${qrPairingCode}`);
   }
   const pairingMasked = maskValue(manualPairingCode, 4);

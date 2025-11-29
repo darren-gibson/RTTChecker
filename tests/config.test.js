@@ -1,4 +1,4 @@
-import { config, isTestEnv, isProductionEnv, validateConfig } from '../src/config.js';
+import { config, isTestEnv, isProductionEnv } from '../src/config.js';
 
 describe('Configuration', () => {
   test('config object has all required properties', () => {

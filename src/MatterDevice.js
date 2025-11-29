@@ -6,7 +6,7 @@
 
 import { EventEmitter } from 'events';
 
-import { TrainStatus, MatterDevice as MatterConstants, Timing } from "./constants.js";
+import { TrainStatus, MatterDevice as MatterConstants } from "./constants.js";
 import { config } from "./config.js";
 import { getTrainStatus } from "./RTTBridge.js";
 import { loggers } from "./logger.js";
