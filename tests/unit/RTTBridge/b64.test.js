@@ -1,4 +1,4 @@
-import { b64 } from '../src/RTTBridge.js';
+import { b64 } from '../../../src/RTTBridge.js';
 
 describe('b64', () => {
   test('encodes credentials', () => {

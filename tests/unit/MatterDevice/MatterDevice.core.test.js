@@ -1,12 +1,11 @@
-import { TrainStatusDevice } from '../src/MatterDevice.js';
-import { TrainStatus, MatterDevice } from '../src/constants.js';
-import { getTrainStatus } from '../src/RTTBridge.js';
-import { RTTApiError, NoTrainFoundError, RTTCheckerError } from '../src/errors.js';
+import { TrainStatusDevice } from '../../../src/MatterDevice.js';
+import { TrainStatus, MatterDevice } from '../../../src/constants.js';
+import { getTrainStatus } from '../../../src/RTTBridge.js';
+import { fixtures, clone } from '../../fixtures/services.js';
 
-// Mock the RTTBridge module
-jest.mock('../src/RTTBridge.js');
+jest.mock('../../../src/RTTBridge.js');
 
-describe.skip('TrainStatusDevice', () => {
+describe('TrainStatusDevice - core', () => {
   let device;
 
   beforeEach(() => {
@@ -47,7 +46,7 @@ describe.skip('TrainStatusDevice', () => {
     test('updates mode to ON_TIME when train is on time', async () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.ON_TIME,
-        selected: { locationDetail: { gbttBookedDeparture: '0630' } },
+        selected: clone(fixtures.onTime),
         raw: {}
       });
 
@@ -58,7 +57,7 @@ describe.skip('TrainStatusDevice', () => {
     test('updates mode to MINOR_DELAY when train is slightly late', async () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.MINOR_DELAY,
-        selected: { locationDetail: { gbttBookedDeparture: '0630' } },
+        selected: clone(fixtures.minorDelay),
         raw: {}
       });
 
@@ -69,7 +68,7 @@ describe.skip('TrainStatusDevice', () => {
     test('updates mode to DELAYED when train is moderately late', async () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.DELAYED,
-        selected: { locationDetail: { gbttBookedDeparture: '0630' } },
+        selected: clone(fixtures.delayed),
         raw: {}
       });
 
@@ -80,7 +79,7 @@ describe.skip('TrainStatusDevice', () => {
     test('updates mode to MAJOR_DELAY when train is very late or cancelled', async () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.MAJOR_DELAY,
-        selected: { locationDetail: { gbttBookedDeparture: '0630', cancelReasonCode: 'M8' } },
+        selected: clone(fixtures.majorDelay),
         raw: {}
       });
 
@@ -109,7 +108,7 @@ describe.skip('TrainStatusDevice', () => {
     test('does not change mode if status unchanged', async () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.ON_TIME,
-        selected: { locationDetail: { gbttBookedDeparture: '0630' } },
+        selected: clone(fixtures.onTime),
         raw: {}
       });
 
@@ -123,9 +122,4 @@ describe.skip('TrainStatusDevice', () => {
       expect(firstMode).toBe(MatterDevice.Modes.ON_TIME.mode);
     });
   });
-
-  // periodic updates moved to MatterDevice.periodic.test.js
-
-  // enhanced error handling moved to MatterDevice.errors.test.js
-  
 });

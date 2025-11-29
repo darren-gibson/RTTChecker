@@ -1,4 +1,4 @@
-import { calculateOnTimeStatus } from '../src/RTTBridge.js';
+import { calculateOnTimeStatus } from '../../../src/RTTBridge.js';
 
 describe('calculateOnTimeStatus', () => {
   test('returns unknown for null/undefined service', () => {

@@ -1,4 +1,4 @@
-import { rttSearch } from '../src/RTTBridge.js';
+import { rttSearch } from '../../../src/RTTBridge.js';
 
 describe('rttSearch - basic functionality', () => {
   test('calls fetch and returns json on ok', async () => {

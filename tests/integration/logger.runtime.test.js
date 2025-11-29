@@ -8,7 +8,7 @@ function runWithEnv(env) {
   return new Promise((resolve, reject) => {
     const stdoutChunks = [];
     const stderrChunks = [];
-    const child = spawn(process.execPath, [path.resolve(__dirname, '..', 'index.js')], {
+    const child = spawn(process.execPath, [path.resolve(__dirname, '../../index.js')], {
       env: {
         ...process.env,
         ...env,
@@ -29,23 +29,26 @@ describe('Runtime log level behavior (child process)', () => {
     NODE_ENV: 'development', // ensure index.js runs the device startup logic
     RTT_USER: 'demo',
     RTT_PASS: 'demo',
-    EXIT_AFTER_MS: '1000', // keep runtime short for faster tests
+    EXIT_AFTER_MS: '1500', // allow a bit more time to flush logs
     MATTER_LOG_FORMAT: 'plain', // avoid ANSI color codes for easier matching
+    FORCE_COLOR: '0', // ensure no color codes interfere
   };
 
   test('LOG_LEVEL=info suppresses all DEBUG logs', async () => {
-    const { stdout } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'info' });
+    const { stdout, stderr } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'info' });
+    const out = `${stdout}${stderr}`;
     // Should contain INFO lines but no DEBUG lines at all
-    expect(stdout).toMatch(/INFO\s+rtt-checker/);
-    expect(stdout).not.toMatch(/\bDEBUG\b/);
+    expect(out).toMatch(/INFO\s+rtt-checker/);
+    expect(out).not.toMatch(/\bDEBUG\b/);
     // The explicit verification debug message must be absent
-    expect(stdout).not.toContain('Debug verification');
+    expect(out).not.toContain('Debug verification');
   });
 
   test('LOG_LEVEL=debug includes DEBUG logs', async () => {
-    const { stdout } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'debug' });
+    const { stdout, stderr } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'debug' });
+    const out = `${stdout}${stderr}`;
     // Expect presence of debug lines from facilities and the verification message
-    expect(stdout).toMatch(/\bDEBUG\b/);
-    expect(stdout).toContain('Debug verification');
+    expect(out).toMatch(/\bDEBUG\b/);
+    expect(out).toContain('Debug verification');
   });
 });

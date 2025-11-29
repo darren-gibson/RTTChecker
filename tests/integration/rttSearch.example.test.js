@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
-import { rttSearch, b64 } from '../src/RTTBridge.js';
+import { rttSearch, b64 } from '../../src/RTTBridge.js';
 
 describe('rttSearch with example response', () => {
   test('returns parsed JSON from example search.json and calls fetch with proper headers', async () => {
-    const file = path.join(__dirname, 'examples', 'search.json');
+    const file = path.join(__dirname, '../examples', 'search.json');
     const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw);
 

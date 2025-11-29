@@ -1,4 +1,4 @@
-import { hhmmToMins } from '../src/RTTBridge.js';
+import { parseTime as hhmmToMins } from '../../../src/timeUtils.js';
 
 describe('time utilities', () => {
   test('hhmmToMins converts HHmm to minutes', () => {
