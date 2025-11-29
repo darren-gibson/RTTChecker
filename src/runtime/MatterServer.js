@@ -4,11 +4,11 @@ import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cl
 import { Aggregator } from '@project-chip/matter.js/device';
 import qr from 'qrcode-terminal';
 
-import { TrainStatusModeDevice } from '../TrainStatusModeDevice.js';
+import { TrainStatusModeDevice } from '../devices/TrainStatusModeDevice.js';
 import { TrainStatusTemperatureSensor } from '../devices/TrainStatusTemperatureSensor.js';
 import { MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';
-import { loggers } from '../logger.js';
+import { loggers } from '../utils/logger.js';
 
 /**
  * Matter Server Implementation

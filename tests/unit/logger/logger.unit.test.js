@@ -3,7 +3,7 @@
  * Tests enforcement logic, Logger.get patching, and edge cases
  */
 
-import { log, loggers, setLogLevel, Logger, Level, cleanupLoggerIntervals } from '../../../src/logger.js';
+import { log, loggers, setLogLevel, Logger, Level, cleanupLoggerIntervals } from '../../../src/utils/logger.js';
 
 describe('Logger enforcement logic', () => {
   afterAll(() => {

@@ -2,8 +2,8 @@ import { Device, DeviceTypes } from '@project-chip/matter.js/device';
 import { ClusterServer } from '@project-chip/matter.js/cluster';
 import { ModeSelectCluster, BasicInformationCluster } from '@project-chip/matter.js/cluster';
 
-import { MatterDevice as MatterConstants } from './constants.js';
-import { config } from './config.js';
+import { MatterDevice as MatterConstants } from '../constants.js';
+import { config } from '../config.js';
 
 /**
  * Train Status Mode Device

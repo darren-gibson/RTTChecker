@@ -1,4 +1,4 @@
-import { parseTime as hhmmToMins } from '../../../src/timeUtils.js';
+import { hhmmToMins } from '../../../src/utils/timeUtils.js';
 
 describe('time utilities', () => {
   test('hhmmToMins converts HHmm to minutes', () => {

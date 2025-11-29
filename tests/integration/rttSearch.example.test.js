@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { rttSearch, b64 } from '../../src/RTTBridge.js';
+import { rttSearch, b64 } from '../../src/api/rttApiClient.js';
 
 describe('rttSearch with example response', () => {
   test('returns parsed JSON from example search.json and calls fetch with proper headers', async () => {

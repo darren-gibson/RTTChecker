@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
 
-import { getTrainStatus } from '../src/RTTBridge.js';
-import { TrainStatus } from '../src/constants.js';
+import { getTrainStatus } from '../../src/services/trainStatusService.js';
+import { TrainStatus } from '../../src/constants.js';
 
 describe('Integration tests - getTrainStatus with real data', () => {
   test('normalCommute.json: at 06:05 BST selects 06:39 train as earliest arrival after offset', async () => {
-    const file = path.join(__dirname, 'examples', 'normalCommute.json');
+    const file = path.join(__dirname, '../examples', 'normalCommute.json');
     const json = fs.readFileSync(file, 'utf8');
     const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
 
@@ -32,7 +32,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
   });
   test('runningOnTime.json: at 12:20 selects 13:22 train running on time -> good', async () => {
     // Load the real API response example
-    const file = path.join(__dirname, 'examples', 'runningOnTime.json');
+    const file = path.join(__dirname, '../examples', 'runningOnTime.json');
     const json = fs.readFileSync(file, 'utf8');
 
     // Mock fetch to return the local JSON data
@@ -64,7 +64,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
   });
 
   test('runningOnTime.json: with narrow 10 min window selects fastest available train', async () => {
-    const file = path.join(__dirname, 'examples', 'runningOnTime.json');
+    const file = path.join(__dirname, '../examples', 'runningOnTime.json');
     const json = fs.readFileSync(file, 'utf8');
     const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
 
@@ -87,7 +87,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
   });
 
   test('cancelledTrain.json: cancelled train at 13:13 -> very poor', async () => {
-    const file = path.join(__dirname, 'examples', 'cancelledTrain.json');
+    const file = path.join(__dirname, '../examples', 'cancelledTrain.json');
     const json = fs.readFileSync(file, 'utf8');
     const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
 
@@ -112,7 +112,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
   });
 
   test('No matching service returns unknown status', async () => {
-    const file = path.join(__dirname, 'examples', 'runningOnTime.json');
+    const file = path.join(__dirname, '../examples', 'runningOnTime.json');
     const json = fs.readFileSync(file, 'utf8');
     const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
 
@@ -134,7 +134,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
   });
 
   test('lateTrain.json: 14:10 train running 12 minutes late -> major delay', async () => {
-    const file = path.join(__dirname, 'lateTrain.json');
+    const file = path.join(__dirname, '../lateTrain.json');
     const json = fs.readFileSync(file, 'utf8');
     const fetchMock = async () => ({ ok: true, json: async () => JSON.parse(json) });
 

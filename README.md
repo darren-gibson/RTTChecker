@@ -241,18 +241,20 @@ Use the mode state in Matter automations:
 - `src/constants.js`: Matter modes, train status constants, and timing thresholds
 
 ### Train Logic
-- `src/RTTBridge.js`: RTT API integration and train status calculation
-- `src/trainSelection.js`: Modular train selection algorithm
-- `src/timeUtils.js`: Time parsing and date handling utilities
+- `src/api/rttApiClient.js`: RTT API client with exponential backoff retry logic
+- `src/services/trainStatusService.js`: Train status orchestration and business logic
+- `src/services/trainSelectionService.js`: Train selection and filtering algorithm
+- `src/domain/trainStatus.js`: Pure domain logic for status calculation
+- `src/utils/timeUtils.js`: Time parsing, normalization, and window utilities
 
 ### Matter Device Implementation
-- `src/MatterServer.js`: Matter commissioning server setup and endpoint creation
-- `src/MatterDevice.js`: TrainStatusDevice class with periodic updates and event emission
-- `src/TrainStatusAirQualityDevice.js`: Temperature Sensor endpoint (1:1 delay→temp)
-- `src/TrainStatusModeDevice.js`: Mode Select endpoint
+- `src/runtime/MatterServer.js`: Matter commissioning server setup and endpoint creation
+- `src/devices/TrainStatusDevice.js`: TrainStatusDevice class with periodic updates and event emission
+- `src/devices/TrainStatusTemperatureSensor.js`: Temperature Sensor endpoint (1:1 delay→temp)
+- `src/devices/TrainStatusModeDevice.js`: Mode Select endpoint
 
 ### Infrastructure
-- `src/logger.js`: matter.js Logger wrapper with facility-based logging (rtt-checker, matter-server, rtt-bridge)
+- `src/utils/logger.js`: matter.js Logger wrapper with facility-based logging (rtt-checker, matter-server, rtt-bridge)
 - `src/errors.js`: Custom error classes for structured error handling
 - `src/types.js`: JSDoc type definitions for IDE support
 
@@ -263,12 +265,14 @@ Use the mode state in Matter automations:
 - `docs/`: Additional documentation and guides (includes `LOGGING.md`)
 
 ### Architecture Highlights
-- **Modular Design**: Separation of concerns with focused modules
+- **Layered Architecture**: Clear separation between API, services, domain logic, and infrastructure
 - **Type Safety**: JSDoc annotations for IDE autocomplete and documentation
 - **Error Handling**: Typed errors with context (RTTApiError, ConfigurationError, etc.)
 - **Unified Logging**: matter.js Logger with facility-based organization (see `docs/LOGGING.md`)
+- **Domain-Driven Design**: Pure business logic isolated in domain layer
 - **Event-Driven**: Normalized event payloads for status changes
 - **Validated Config**: Fail-fast startup with descriptive error messages
+- **Resilient API Client**: Exponential backoff retry with jitter for transient failures
 
 ## Container Deployment
 
@@ -502,14 +506,33 @@ The repository is organized for clear separation of concerns:
 ```
 .
 ├── src/                      # Application source code
-│   ├── config.js             # Environment configuration & validation
-│   ├── RTTBridge.js          # RTT API integration
-│   ├── MatterServer.js       # Matter server & commissioning
-│   ├── MatterDevice.js       # Device base class
-│   └── ...
-├── tests/                    # Jest test suite (105 tests)
-│   ├── integration.test.js   # End-to-end scenarios
-│   ├── RTTBridge.test.js     # API & train selection tests
+│   ├── api/                  # External API clients
+│   │   └── rttApiClient.js   # RTT API with retry logic
+│   ├── services/             # Business logic orchestration
+│   │   ├── trainStatusService.js
+│   │   └── trainSelectionService.js
+│   ├── domain/               # Pure domain logic
+│   │   └── trainStatus.js    # Status calculation
+│   ├── devices/              # Matter device implementations
+│   │   ├── TrainStatusDevice.js
+│   │   ├── TrainStatusTemperatureSensor.js
+│   │   └── TrainStatusModeDevice.js
+│   ├── runtime/              # Server orchestration
+│   │   └── MatterServer.js
+│   ├── utils/                # Utilities
+│   │   ├── logger.js
+│   │   └── timeUtils.js
+│   ├── config.js             # Configuration & validation
+│   ├── constants.js          # Application constants
+│   ├── errors.js             # Custom error classes
+│   └── types.js              # JSDoc type definitions
+├── tests/                    # Jest test suite (143 tests)
+│   ├── integration/          # End-to-end scenarios
+│   ├── unit/                 # Unit tests
+│   │   ├── api/              # API client tests
+│   │   ├── domain/           # Domain logic tests
+│   │   ├── devices/          # Device tests
+│   │   └── utils/            # Utility tests
 │   └── ...
 ├── docker/                   # Container deployment assets
 │   ├── Dockerfile            # Multi-arch container definition

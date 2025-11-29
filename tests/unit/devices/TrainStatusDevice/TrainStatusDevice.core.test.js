@@ -1,9 +1,9 @@
-import { TrainStatusDevice } from '../../../src/devices/TrainStatusDevice.js';
-import { TrainStatus, MatterDevice } from '../../../src/constants.js';
-import { getTrainStatus } from '../../../src/RTTBridge.js';
-import { fixtures, clone } from '../../fixtures/services.js';
+import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
+import { TrainStatus, MatterDevice } from '../../../../src/constants.js';
+import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
+import { fixtures, clone } from '../../../fixtures/services.js';
 
-jest.mock('../../../src/RTTBridge.js');
+jest.mock('../../../../src/services/trainStatusService.js');
 
 describe('TrainStatusDevice - core', () => {
   let device;

@@ -1,4 +1,4 @@
-import { pickNextService } from '../src/RTTBridge.js';
+import { pickNextService } from '../../../src/services/trainSelectionService.js';
 
 describe('pickNextService', () => {
   test('picks first service after given time', () => {

@@ -1,5 +1,5 @@
-// Silence or stub src/logger.js during tests to reduce noise
-import * as realLogger from '../src/logger.js';
+// Silence or stub src/utils/logger.js during tests to reduce noise
+import * as realLogger from '../src/utils/logger.js';
 
 // Replace console-level logging with no-ops in tests
 const noop = () => {};

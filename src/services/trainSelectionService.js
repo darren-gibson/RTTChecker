@@ -5,23 +5,13 @@
  * @typedef {import('./types.js').TrainCandidate} TrainCandidate
  */
 
-import { loggers } from './logger.js';
-import { config } from './config.js';
-import { parseTime, normalizeDepartureMinutes } from './timeUtils.js';
+import { loggers } from '../utils/logger.js';
+import { config } from '../config.js';
+import { hhmmToMins, normalizeDepartureMinutes, isWithinTimeWindow } from '../utils/timeUtils.js';
 
 const log = loggers.bridge;
 
-/**
- * Check if departure time falls within search window.
- * @private
- * @param {number} depMins - Departure time in minutes
- * @param {number} earliest - Window start in minutes
- * @param {number} latest - Window end in minutes
- * @returns {boolean} True if within window
- */
-function withinWindow(depMins, earliest, latest) {
-  return depMins >= earliest && depMins <= latest;
-}
+
 
 /**
  * Find destination entry in location's destination array.
@@ -49,8 +39,8 @@ function buildCandidate(service, destEntry, loc, depMins, depStr) {
   // Compute journey duration (origin to destination)
   const originTime = loc.origin?.[0]?.workingTime || loc.origin?.[0]?.publicTime || loc.gbttBookedDeparture;
   const destTime = destEntry.workingTime || destEntry.publicTime || loc.gbttBookedArrival || loc.realtimeArrival;
-  const o = parseTime(originTime?.toString?.());
-  const d = parseTime(destTime?.toString?.());
+  const o = hhmmToMins(originTime?.toString?.());
+  const d = hhmmToMins(destTime?.toString?.());
   let duration = NaN;
   if (!Number.isNaN(o) && !Number.isNaN(d)) {
     duration = d - o;
@@ -68,8 +58,8 @@ function buildCandidate(service, destEntry, loc, depMins, depStr) {
 function rankCandidates(candidates) {
   // Sort by arrival time then departure time
   candidates.sort((a,b) => {
-    const aArr = parseTime((a.destEntry.workingTime || a.destEntry.publicTime || a.loc.gbttBookedArrival || a.loc.realtimeArrival)?.toString?.());
-    const bArr = parseTime((b.destEntry.workingTime || b.destEntry.publicTime || b.loc.gbttBookedArrival || b.loc.realtimeArrival)?.toString?.());
+    const aArr = hhmmToMins((a.destEntry.workingTime || a.destEntry.publicTime || a.loc.gbttBookedArrival || a.loc.realtimeArrival)?.toString?.());
+    const bArr = hhmmToMins((b.destEntry.workingTime || b.destEntry.publicTime || b.loc.gbttBookedArrival || b.loc.realtimeArrival)?.toString?.());
     if (aArr !== bArr) return aArr - bArr;
     return a.depMins - b.depMins;
   });
@@ -128,10 +118,10 @@ export function pickNextService(services, destTiploc, opts = {}) {
   const candidates = services.map(s => {
     const loc = s.locationDetail || {};
     const depStr = loc.gbttBookedDeparture || loc.realtimeDeparture;
-    let depMins = parseTime(depStr);
+    let depMins = hhmmToMins(depStr);
     if (Number.isNaN(depMins)) return null;
     depMins = normalizeDepartureMinutes(depMins, nowMinutes);
-    if (!withinWindow(depMins, earliest, latest)) return null;
+    if (!isWithinTimeWindow(depMins, earliest, latest)) return null;
     const destEntry = findDestinationEntry(loc, destTiploc);
     if (!destEntry) {
       const id = s.serviceUid || s.trainIdentity || s.runningIdentity || 'unknown';
@@ -155,4 +145,3 @@ export function pickNextService(services, destTiploc, opts = {}) {
 }
 
 export default pickNextService;
-export { parseTime }; // Re-export for RTTBridge compatibility

@@ -8,8 +8,8 @@ import { EventEmitter } from 'events';
 
 import { TrainStatus, MatterDevice as MatterConstants } from "../constants.js";
 import { config } from "../config.js";
-import { getTrainStatus } from "../RTTBridge.js";
-import { loggers } from "../logger.js";
+import { getTrainStatus } from "../services/trainStatusService.js";
+import { loggers } from "../utils/logger.js";
 import { RTTApiError, NoTrainFoundError, RTTCheckerError } from "../errors.js";
 
 const log = loggers.rtt;

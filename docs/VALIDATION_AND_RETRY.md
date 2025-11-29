@@ -56,7 +56,7 @@ See README.md for configuration details.
 
 ### What Changed
 
-- Enhanced `rttSearch()` in `src/RTTBridge.js` with intelligent retry logic
+- Enhanced `rttSearch()` in `src/api/rttApiClient.js` with intelligent retry logic
 - Implements exponential backoff with jitter for retryable errors
 - Fast-fails on authentication/authorization errors
 
@@ -123,7 +123,7 @@ See README.md for configuration details.
 - ✓ Validates discriminator range
 - ✓ Passes with valid configuration
 
-**Retry Logic Tests** (`tests/RTTBridge.test.js`):
+**Retry Logic Tests** (`tests/unit/api/`):
 - ✓ Throws on non-ok after retries (502 server error)
 - ✓ Fast fails on 401 without retries (auth error)
 - ✓ Retries on 429 rate limit (eventually succeeds)
@@ -157,7 +157,7 @@ try {
 Retry logic is transparent and automatic:
 
 ```javascript
-import { rttSearch } from './src/RTTBridge.js';
+import { rttSearch } from './src/api/rttApiClient.js';
 
 // Automatically retries on 429/5xx, fast fails on 401/403
 const data = await rttSearch('CAMBDGE', 'KNGX', '2025/11/29');

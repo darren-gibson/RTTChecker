@@ -39,7 +39,7 @@ The application organizes logs into facilities for granular control:
 |----------|--------|---------|
 | `rtt-checker` | `MatterDevice.js` | Device lifecycle, periodic updates |
 | `matter-server` | `MatterServer.js` | Matter server initialization, commissioning |
-| `rtt-bridge` | `RTTBridge.js`, `trainSelection.js` | RTT API calls, train selection |
+| `rtt-bridge` | `api/rttApiClient.js`, `services/trainSelectionService.js` | RTT API calls, train selection |
 
 ### Matter.js Native Facilities
 
@@ -55,7 +55,7 @@ When matter.js is running, you'll also see logs from:
 ### Basic Usage
 
 ```javascript
-import { log, loggers } from './logger.js';
+import { log, loggers } from './utils/logger.js';
 
 // Use default logger (rtt-checker facility)
 log.info('Application started');
@@ -215,7 +215,7 @@ matter.js Logger is already included, no additional logging libraries needed.
 The logger exports facility-specific loggers that can be mocked in tests:
 
 ```javascript
-import { loggers } from '../src/logger.js';
+import { loggers } from './src/utils/logger.js';
 
 // Mock specific facility
 const originalBridge = loggers.bridge;

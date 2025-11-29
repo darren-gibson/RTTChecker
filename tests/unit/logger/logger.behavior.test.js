@@ -16,7 +16,7 @@ describe('logger behavior and enforcement', () => {
   });
 
   test('default level set from env and cannot be lowered', async () => {
-    const { Logger, Level } = await import('../../../src/logger.js');
+    const { Logger, Level } = await import('../../../src/utils/logger.js');
     // Attempt to lower below env-configured floor
     expect(() => {
       Logger.defaultLogLevel = Level.DEBUG;
@@ -26,7 +26,7 @@ describe('logger behavior and enforcement', () => {
   });
 
   test('Logger.get enforces minimum level per facility', async () => {
-    const { Logger, Level } = await import('../../../src/logger.js');
+    const { Logger, Level } = await import('../../../src/utils/logger.js');
     // Simulate a facility with a lower level
     Logger.logLevels['custom-facility'] = Level.DEBUG;
     const logger = Logger.get('custom-facility');
@@ -35,7 +35,7 @@ describe('logger behavior and enforcement', () => {
   });
 
   test('transition timers start and cleanup clears them', async () => {
-    const mod = await import('../../../src/logger.js');
+    const mod = await import('../../../src/utils/logger.js');
     const { cleanupLoggerIntervals, Logger } = mod;
     // Fast-forward to trigger transition from enforcementInterval to ongoingInterval
     await jest.advanceTimersByTimeAsync(2100);
@@ -54,7 +54,7 @@ describe('logger behavior and enforcement', () => {
   });
 
   test('setLogLevel raises default level and updates env', async () => {
-    const { setLogLevel } = await import('../../../src/logger.js');
+    const { setLogLevel } = await import('../../../src/utils/logger.js');
     setLogLevel('warn');
     expect(process.env.LOG_LEVEL).toBe('warn');
   });

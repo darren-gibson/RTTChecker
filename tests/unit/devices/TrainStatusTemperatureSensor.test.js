@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { TemperatureMeasurementCluster, IdentifyCluster } from '@project-chip/matter.js/cluster';
 
-import { TrainStatusTemperatureSensor } from '../src/devices/TrainStatusTemperatureSensor.js';
+import { TrainStatusTemperatureSensor } from '../../../src/devices/TrainStatusTemperatureSensor.js';
 
 describe('TrainStatusTemperatureSensor', () => {
   let sensor;
