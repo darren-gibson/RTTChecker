@@ -1,9 +1,8 @@
-import { TrainStatusDevice } from '../src/devices/TrainStatusDevice.js';
-import { TrainStatus, MatterDevice } from '../src/constants.js';
-import { getTrainStatus } from '../src/RTTBridge.js';
+import { TrainStatusDevice } from '../../../src/devices/TrainStatusDevice.js';
+import { TrainStatus, MatterDevice } from '../../../src/constants.js';
+import { getTrainStatus } from '../../../src/RTTBridge.js';
 
-// Mock the RTTBridge module
-jest.mock('../src/RTTBridge.js');
+jest.mock('../../../src/RTTBridge.js');
 
 describe('TrainStatusDevice events', () => {
   let device;
@@ -35,6 +34,7 @@ describe('TrainStatusDevice events', () => {
       previousMode: MatterDevice.Modes.UNKNOWN.mode,
       currentMode: MatterDevice.Modes.ON_TIME.mode,
       trainStatus: TrainStatus.ON_TIME,
+      modeChanged: true,
     });
   });
 
@@ -52,6 +52,11 @@ describe('TrainStatusDevice events', () => {
     await device.updateTrainStatus();
 
     // Second call also ON_TIME
+    getTrainStatus.mockResolvedValue({
+      status: TrainStatus.ON_TIME,
+      selected: { locationDetail: { gbttBookedDeparture: '0635' } },
+      raw: {}
+    });
     await device.updateTrainStatus();
 
     // Only one emission for the change from UNKNOWN -> ON_TIME
@@ -81,5 +86,6 @@ describe('TrainStatusDevice events', () => {
     expect(last.previousMode).toBe(MatterDevice.Modes.MINOR_DELAY.mode);
     expect(last.currentMode).toBe(MatterDevice.Modes.UNKNOWN.mode);
     expect(last.error).toBe('API down');
+    expect(last.modeChanged).toBe(true);
   });
 });

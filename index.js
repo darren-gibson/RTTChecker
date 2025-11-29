@@ -1,5 +1,5 @@
-import { TrainStatusDevice } from "./src/MatterDevice.js";
-import { startMatterServer } from "./src/MatterServer.js";
+import { TrainStatusDevice } from './src/devices/TrainStatusDevice.js';
+import { startMatterServer } from './src/runtime/MatterServer.js';
 import { isTestEnv, validateConfig } from "./src/config.js";
 import { log } from "./src/logger.js";
 
