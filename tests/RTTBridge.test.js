@@ -124,11 +124,11 @@ describe('rttSearch', () => {
       statusText: 'Bad Gateway',
       text: () => Promise.resolve('Service temporarily unavailable')
     }));
-    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch }))
+    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch, maxRetries: 2 }))
       .rejects.toThrow('RTT API request failed: 502');
-    // Should have retried 3 times (initial + 3 retries = 4 total calls)
-    expect(fakeFetch).toHaveBeenCalledTimes(4);
-  }, 10000); // Increase timeout to account for retry delays
+    // Should have retried 2 times (initial + 2 retries = 3 total calls)
+    expect(fakeFetch).toHaveBeenCalledTimes(3);
+  }, 6000); // Reduced timeout for faster tests
 
   test('fast fails on 401 without retries', async () => {
     const fakeFetch = jest.fn(() => Promise.resolve({ 
@@ -147,7 +147,7 @@ describe('rttSearch', () => {
     let callCount = 0;
     const fakeFetch = jest.fn(() => {
       callCount++;
-      if (callCount <= 2) {
+      if (callCount <= 1) {
         return Promise.resolve({ 
           ok: false, 
           status: 429, 
@@ -157,11 +157,11 @@ describe('rttSearch', () => {
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({ services: [] }) });
     });
-    const data = await rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch });
+    const data = await rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch, maxRetries: 2 });
     expect(data).toEqual({ services: [] });
-    // Should have succeeded on 3rd attempt
-    expect(fakeFetch).toHaveBeenCalledTimes(3);
-  }, 10000);
+    // Should have succeeded on 2nd attempt
+    expect(fakeFetch).toHaveBeenCalledTimes(2);
+  }, 4000); // Reduced timeout for faster tests
 });
 
 describe('b64', () => {

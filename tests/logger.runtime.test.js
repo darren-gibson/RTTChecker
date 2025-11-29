@@ -29,7 +29,7 @@ describe('Runtime log level behavior (child process)', () => {
     NODE_ENV: 'development', // ensure index.js runs the device startup logic
     RTT_USER: 'demo',
     RTT_PASS: 'demo',
-    EXIT_AFTER_MS: '1800', // keep runtime short
+    EXIT_AFTER_MS: '1000', // keep runtime short for faster tests
     MATTER_LOG_FORMAT: 'plain', // avoid ANSI color codes for easier matching
   };
 
