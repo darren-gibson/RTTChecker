@@ -162,6 +162,38 @@ describe('rttSearch', () => {
     // Should have succeeded on 2nd attempt
     expect(fakeFetch).toHaveBeenCalledTimes(2);
   }, 4000); // Reduced timeout for faster tests
+
+  test('wraps network errors and retries', async () => {
+    let callCount = 0;
+    const fakeFetch = jest.fn(() => {
+      callCount++;
+      if (callCount <= 1) {
+        // Simulate network error (fetch rejection)
+        return Promise.reject(new Error('ECONNREFUSED'));
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ services: [] }) });
+    });
+    const data = await rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch, maxRetries: 2 });
+    expect(data).toEqual({ services: [] });
+    // Should have succeeded on 2nd attempt after network error
+    expect(fakeFetch).toHaveBeenCalledTimes(2);
+  }, 4000);
+
+  test('throws wrapped network error after all retries exhausted', async () => {
+    const fakeFetch = jest.fn(() => Promise.reject(new Error('Network timeout')));
+    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch, maxRetries: 2 }))
+      .rejects.toThrow('Network error calling RTT API');
+    // Should have tried 3 times (initial + 2 retries)
+    expect(fakeFetch).toHaveBeenCalledTimes(3);
+  }, 6000);
+
+  test('does not retry network errors on final attempt', async () => {
+    const fakeFetch = jest.fn(() => Promise.reject(new Error('DNS lookup failed')));
+    await expect(rttSearch('search/CBG','KGX','2025/10/18', { user: 'u', pass: 'p', fetchImpl: fakeFetch, maxRetries: 1 }))
+      .rejects.toThrow('Network error calling RTT API: DNS lookup failed');
+    // Should have tried 2 times (initial + 1 retry)
+    expect(fakeFetch).toHaveBeenCalledTimes(2);
+  }, 4000);
 });
 
 describe('b64', () => {

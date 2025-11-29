@@ -50,13 +50,44 @@ function normalizeFacilityLevels() {
   }
 }
 
+// Track intervals for cleanup in test environments
+let enforcementInterval = null;
+let ongoingInterval = null;
+let transitionTimeout = null;
+
 // Periodically enforce level floor during initialization
-const enforcementInterval = setInterval(normalizeFacilityLevels, 10);
-setTimeout(() => {
+enforcementInterval = setInterval(normalizeFacilityLevels, 10);
+transitionTimeout = setTimeout(() => {
   clearInterval(enforcementInterval);
   // Continue with less frequent enforcement
-  setInterval(normalizeFacilityLevels, 1000);
+  ongoingInterval = setInterval(normalizeFacilityLevels, 1000);
+  // Allow interval to be unref'd in test environments to prevent hanging
+  if (process.env.NODE_ENV === 'test') {
+    ongoingInterval.unref();
+  }
 }, 2000);
+
+// In test environments, unref the initial timeout and interval
+if (process.env.NODE_ENV === 'test') {
+  transitionTimeout.unref();
+  enforcementInterval.unref();
+}
+
+// Cleanup function for test environments
+export function cleanupLoggerIntervals() {
+  if (enforcementInterval) {
+    clearInterval(enforcementInterval);
+    enforcementInterval = null;
+  }
+  if (ongoingInterval) {
+    clearInterval(ongoingInterval);
+    ongoingInterval = null;
+  }
+  if (transitionTimeout) {
+    clearTimeout(transitionTimeout);
+    transitionTimeout = null;
+  }
+}
 
 // Create facility loggers for different parts of the application
 const rttLogger = Logger.get('rtt-checker');

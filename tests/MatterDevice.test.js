@@ -1,6 +1,7 @@
 import { TrainStatusDevice } from '../src/MatterDevice.js';
 import { TrainStatus, MatterDevice } from '../src/constants.js';
 import { getTrainStatus } from '../src/RTTBridge.js';
+import { RTTApiError, NoTrainFoundError, RTTCheckerError } from '../src/errors.js';
 
 // Mock the RTTBridge module
 jest.mock('../src/RTTBridge.js');
@@ -186,6 +187,123 @@ describe('TrainStatusDevice', () => {
       
       // Should not be called again after stop
       expect(getTrainStatus.mock.calls.length).toBe(callCountAfterStart);
+    });
+  });
+
+  describe('Enhanced error handling', () => {
+    test('handles RTTApiError with isAuthError', async () => {
+      const authError = new RTTApiError('Unauthorized', { statusCode: 401 });
+      authError.isAuthError = () => true;
+      authError.isRetryable = () => false;
+      
+      getTrainStatus.mockRejectedValue(authError);
+      
+      const device = new TrainStatusDevice();
+      await expect(device.updateTrainStatus()).rejects.toThrow('Unauthorized');
+      
+      // Should emit statusChange with error
+      expect(device.currentMode).toBe(4); // UNKNOWN
+    });
+
+    test('handles RTTApiError with isRetryable', async () => {
+      const retryError = new RTTApiError('Service unavailable', { statusCode: 503 });
+      retryError.isAuthError = () => false;
+      retryError.isRetryable = () => true;
+      
+      getTrainStatus.mockRejectedValue(retryError);
+      
+      const device = new TrainStatusDevice();
+      await expect(device.updateTrainStatus()).rejects.toThrow('Service unavailable');
+      
+      // Should emit statusChange with error
+      expect(device.currentMode).toBe(4); // UNKNOWN
+    });
+
+    test('handles NoTrainFoundError', async () => {
+      const noTrainError = new NoTrainFoundError('No trains at this time');
+      
+      getTrainStatus.mockRejectedValue(noTrainError);
+      
+      const device = new TrainStatusDevice();
+      await expect(device.updateTrainStatus()).rejects.toThrow('No trains at this time');
+      
+      // Should emit statusChange with error
+      expect(device.currentMode).toBe(4); // UNKNOWN
+    });
+
+    test('handles RTTCheckerError with context', async () => {
+      const checkerError = new RTTCheckerError('Configuration error', { setting: 'ORIGIN_TIPLOC' });
+      
+      getTrainStatus.mockRejectedValue(checkerError);
+      
+      const device = new TrainStatusDevice();
+      await expect(device.updateTrainStatus()).rejects.toThrow('Configuration error');
+      
+      // Should emit statusChange with error
+      expect(device.currentMode).toBe(4); // UNKNOWN
+    });
+
+    test('handles generic errors', async () => {
+      const genericError = new Error('Something unexpected');
+      
+      getTrainStatus.mockRejectedValue(genericError);
+      
+      const device = new TrainStatusDevice();
+      await expect(device.updateTrainStatus()).rejects.toThrow('Something unexpected');
+      
+      // Should emit statusChange with error
+      expect(device.currentMode).toBe(4); // UNKNOWN
+    });
+
+    test('emits statusChange event on error with previous mode', async () => {
+      const device = new TrainStatusDevice();
+      
+      // Set initial successful state
+      getTrainStatus.mockResolvedValue({
+        status: TrainStatus.ON_TIME,
+        selected: { trainId: '123' },
+        raw: {}
+      });
+      await device.updateTrainStatus();
+      expect(device.currentMode).toBe(0); // ON_TIME
+      
+      // Now trigger an error
+      const error = new Error('Test error');
+      getTrainStatus.mockRejectedValue(error);
+      
+      const statusChangeHandler = jest.fn();
+      device.on('statusChange', statusChangeHandler);
+      
+      await expect(device.updateTrainStatus()).rejects.toThrow('Test error');
+      
+      // Should have emitted statusChange with mode change from ON_TIME to UNKNOWN
+      expect(statusChangeHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          previousMode: 0, // ON_TIME
+          currentMode: 4, // UNKNOWN
+          modeChanged: true,
+          error: 'Test error'
+        })
+      );
+    });
+
+    test('does not emit statusChange if mode stays UNKNOWN on consecutive errors', async () => {
+      const device = new TrainStatusDevice();
+      
+      // First error
+      getTrainStatus.mockRejectedValue(new Error('First error'));
+      await expect(device.updateTrainStatus()).rejects.toThrow('First error');
+      expect(device.currentMode).toBe(4); // UNKNOWN
+      
+      // Second error
+      const statusChangeHandler = jest.fn();
+      device.on('statusChange', statusChangeHandler);
+      
+      getTrainStatus.mockRejectedValue(new Error('Second error'));
+      await expect(device.updateTrainStatus()).rejects.toThrow('Second error');
+      
+      // Should not emit statusChange because mode didn't change (UNKNOWN -> UNKNOWN)
+      expect(statusChangeHandler).not.toHaveBeenCalled();
     });
   });
 });
