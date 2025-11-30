@@ -1,195 +1,126 @@
 # Train Status Matter Device
 
-A Matter smart home device that monitors real-time train status using the UK Rail Real-Time Trains (RTT) API. Exposes two Matter endpoints:
-- A Mode Select device for status (On Time / Minor / Delayed / Major / Unknown)
-- A Temperature Sensor that shows numeric delay in minutes (1:1 mapping)
+Real-time UK train punctuality exposed as a Matter device (Mode Select + Temperature Sensor) using the Real-Time Trains (RTT) API.
 
-## Overview
-Train Status is a Matter device that queries the RTT API to select the best train for a given journey and reports its punctuality via two representations:
-- Discrete status using the Matter Mode Select cluster
-- Numeric delay (in minutes) using the Temperature Measurement cluster (temperature value equals minutes delayed; negative values mean early)
+## 1. Overview
+This service picks the next best train for a configured origin → destination journey and surfaces two values:
+- Discrete status (Mode Select cluster) mapping five punctuality bands
+- Numeric delay in minutes (Temperature Measurement cluster; negative = early)
 
-## Key Behaviour
-- **Train Selection Logic:**
-	- Given an origin and destination TIPLOC, a minimum offset (minutes after now), and a time window, the service selects the train that arrives at the destination earliest after the offset.
-	- The train does not need to originate at the specified origin, but must pass through it (as a calling point or origin).
-	- Only trains within the offset and window are considered.
-	- If no suitable train is found, the service reports `UNKNOWN` status.
+## 2. Core Features
+- Smart train selection within a time offset + window (arrival-based ranking)
+- Minute-by-minute automatic refresh (interval configurable)
+- Robust retry & error classification (auth, transient API, network)
+- Matter-compatible with major smart home ecosystems
+- Clear utility functions for time parsing and date formatting
 
-- **Status Reporting (Matter Mode Select):**
-	- For the selected train, the service reports status as a Matter mode:
-		- **On Time** (mode 0): On time or ≤2 minutes late
-		- **Minor Delay** (mode 1): 3–5 minutes late
-		- **Delayed** (mode 2): 6–10 minutes late
-		- **Major Delay** (mode 3): >10 minutes late or cancelled
-		- **Unknown** (mode 4): No suitable train found
+## 3. Status Modes
+| Mode | Name        | Criteria                          |
+|------|-------------|-----------------------------------|
+| 0    | On Time     | ≤ 2 min late / early / on time    |
+| 1    | Minor Delay | 3–5 min late                      |
+| 2    | Delayed     | 6–10 min late                     |
+| 3    | Major Delay | >10 min late or cancelled         |
+| 4    | Unknown     | No suitable train found           |
 
-- **Matter Integration:**
-	- Implements Mode Select cluster for status
-	- Implements Temperature Measurement cluster for numeric delay (1:1 minutes ↔ °C)
-	- Compatible with Apple Home, Google Home, Amazon Alexa
-	- Updates automatically every minute (configurable)
+Numeric delay sensor: value = minutes late (negative = early). Extreme/unknown conditions map to sentinel values internally (see domain logic).
 
-## Example Scenario
-- At 06:05 BST, 20/Oct/2025, for Cambridge (CAMBDGE) to London Kings Cross (KNGX):
-	- With a 20-minute offset and 60-minute window, the service selects the 06:39 train, as it arrives at KNGX at 07:32 (earliest after offset).
-	- The device displays mode "On Time" if the train is running on schedule.
-
-## Matter Device Setup
-
-### Device Types
-This device exposes two endpoints:
-
-1) **Matter Mode Select** device type, representing the 5 discrete train status states:
-- **On Time** (mode 0): Train on schedule (≤2 min late)
-- **Minor Delay** (mode 1): Slightly delayed (3-5 min late)
-- **Delayed** (mode 2): Moderate delay (6-10 min late)
-- **Major Delay** (mode 3): Significant delay (>10 min late) or cancelled
-- **Unknown** (mode 4): No suitable train found
-
-2) **Matter Temperature Sensor** device type, representing the numeric delay with a simple, voice-friendly mapping:
-- Temperature value equals the number of minutes delayed (°C = minutes)
-- Negative values indicate early arrivals (e.g., -3°C = 3 minutes early)
-- Values are capped to a safe range: -10°C (very early) to 50°C (very late)
-
-### Prerequisites
-- Matter controller (Apple HomePod, Google Nest Hub, etc.)
-- Node.js 24.x LTS for local development (matches Docker image)
-   - With Homebrew (macOS):
-      - `brew install node@24` (or `brew install node` if 24 is default)
-      - `brew unlink node && brew link --overwrite --force node@24`
-      - `node -v` should report v24.x
-      - or `nvm install 24 && nvm use 24`
-- RTT API credentials
-```
-
-### Configuration
-Set environment variables:
+## 4. Quick Start
 ```bash
-# RTT API credentials (required)
-export RTT_USER="your_rtt_username"
-export RTT_PASS="your_rtt_password"
-
-# Train search parameters
-export ORIGIN_TIPLOC="CAMBDGE"  # Cambridge
-export DEST_TIPLOC="KNGX"       # London Kings Cross
-export MIN_AFTER_MINUTES=20     # Look for trains 20+ minutes from now
-export WINDOW_MINUTES=60        # Within next 60 minutes
-
-export DISCRIMINATOR=3840       # For Matter commissioning
-export PASSCODE=20202021        # For Matter commissioning
-export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
-# Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC-DEST_TIPLOC)
-export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"   # Mode Select endpoint name
-export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"     # Temperature Sensor endpoint name
-
-# Logging (optional)
-```
-# (Configure logging via LOG_LEVEL / MATTER_LOG_FORMAT environment variables)
-```
-### Logging and Debugging
-
-The application uses **matter.js's built-in Logger** for consistent, facility-based logging across the entire project:
-
-**Log Levels** (set via `LOG_LEVEL` environment variable):
-- `error`: Critical failures only (config validation, API auth errors)
-- `warn`: Warnings and retryable issues (API temporarily down, no train found)
-- `info`: Normal operation (status changes, periodic updates) - **default**
-**Logging Facilities:**
-The application organizes logs into facilities for granular control:
-- `rtt-checker`: Main application lifecycle and device updates
-- `matter-server`: Matter server initialization and commissioning
-- Plus all native matter.js facilities (e.g., `MatterServer`, `CommissioningServer`)
-# Production: errors and warnings only
-export LOG_LEVEL="warn"
-
-# Development: full debug output
-export LOG_LEVEL="debug"
-
-# Default: info level (status changes, updates)
-export LOG_LEVEL="info"
-```
-
-**Log Format:**
-By default, logs use ANSI formatting for colored, structured output showing timestamps, log levels, and facility names. You can customize this:
-```bash
-# Change format (ansi, plain, or html)
-export MATTER_LOG_FORMAT="plain"  # Disable colors
-export MATTER_LOG_FORMAT="ansi"   # Colored output (default)
-```
-
-**Error Context:**
-The application provides structured error information:
-- Authentication failures point to credentials
-- Retryable errors (5xx) show retry indication
-- Network errors include endpoint and context
-- All errors are timestamped with relevant details via matter.js Logger
-
-### Running the Device
-```bash
+git clone <repo>
+cd RTTChecker
+npm install
+export RTT_USER=your_rtt_username RTT_PASS=your_rtt_password
+export ORIGIN_TIPLOC=CAMBDGE DEST_TIPLOC=KNGX MIN_AFTER_MINUTES=20 WINDOW_MINUTES=60
 npm start
 ```
+Pair via QR code shown at startup (Google Home / Apple Home / etc.).
 
-### Commissioning with Google Home
+## 5. Configuration (Environment Variables)
+| Variable | Description | Example |
+|----------|-------------|---------|
+| RTT_USER / RTT_PASS | RTT API credentials | demo / secret |
+| ORIGIN_TIPLOC | Origin TIPLOC (must be a calling point) | CAMBDGE |
+| DEST_TIPLOC | Destination TIPLOC | KNGX |
+| MIN_AFTER_MINUTES | Minimum minutes from now before considering trains | 20 |
+| WINDOW_MINUTES | Size of search window (minutes) | 60 |
+| UPDATE_INTERVAL_MS | Polling interval | 60000 |
+| STATUS_DEVICE_NAME | Override Mode Select endpoint name | CAMBDGE-KNGX Train Status |
+| DELAY_DEVICE_NAME | Override delay sensor name | CAMBDGE-KNGX Train Delay |
+| LOG_LEVEL | error | warn | info | debug | info |
+| MATTER_LOG_FORMAT | ansi | plain | html | ansi |
+| DISCRIMINATOR / PASSCODE | Matter commissioning values | 3840 / 20202021 |
 
-1. **Start the Device:**
-   ```bash
-   npm start
-   ```
-   The terminal will display a QR code and manual pairing code
+## 6. Train Selection Logic
+Inputs: origin TIPLOC, destination TIPLOC, min offset, window.
+Process:
+1. Fetch candidate services from RTT.
+2. Filter to services that call at origin and reach destination.
+3. Reject departures before offset or outside window.
+4. Rank by earliest arrival after offset (tie-break by departure).
+5. Derive status & delay from real-time vs scheduled times.
 
-2. **Open Google Home App:**
-   - Launch the Google Home app on your phone
-   - Ensure your phone is on the same network
+If no candidate survives filtering → status Unknown (mode 4).
 
-3. **Add Device:**
-   - Tap the **+** button in the top left
-   - Select **Add device** → **New device**
-   - Choose your home
-   - Wait for Google Home to scan for devices
+## 7. Logging
+Configure via `LOG_LEVEL` / `MATTER_LOG_FORMAT`. Core facilities: `rtt-checker`, `matter-server`, `rtt-bridge`. Global level acts as minimum floor. See `docs/LOGGING.md` for patterns and examples.
 
-4. **Commission Device:**
-   - When prompted, scan the **QR code** shown in the terminal
-   - OR tap "Set up without QR code" and enter the **manual pairing code**
-   - Default passcode: `20202021`
-   - Default discriminator: `3840`
+## 8. Utilities
+`timeUtils.js` exports:
+- `hhmmToMins(hhmm)` → minutes since midnight
+- `adjustForDayRollover(depMins, nowMins)` → adds 1440 if departure is next day
+- `isWithinTimeWindow(target, start, end)` → inclusive range check
+- `formatDateYMD(date)` → `YYYY/MM/DD`
 
+## 9. Development & Testing
+```bash
+npm test            # Full Jest suite
+npm run coverage    # (if defined) open coverage report
+```
+Coverage includes selection logic, error handling, retry backoff jitter, and utility edge cases.
 
-5. **Verify:**
-	- The app exposes a Bridge (Aggregator) with two bridged devices that will appear in Google Home:
-	  - "CAMBDGE-KNGX Train Status" (or your override) – Mode Select with one of 5 modes
-	  - "CAMBDGE-KNGX Train Delay" (or your override) – Temperature Sensor showing numeric delay
-	- Temperature value equals minutes of delay (negative = early, zero = on time)
-	- Values update automatically every minute
-	- Devices are read-only (status comes from RTT updates)
+## 11. Deployment
+Run natively for quickest iteration:
+```bash
+npm install
+LOG_LEVEL=info node index.js
+```
+Container (Linux host networking for mDNS/Matter) & multi‑arch build instructions are in `docs/CONTAINER_BUILD.md`.
 
-### Testing
-	- Train selection logic with real API responses
-	- Edge cases (no train, cancelled, late, midnight wrap)
-	- Matter device behavior and status mapping
-	- Event payload normalization
-	- Configuration validation
-	- Error handling and classification
-	- Time utilities and parsing
-	```bash
-	npm test
-	```
+## 12. Troubleshooting (Quick)
+| Issue | Action |
+|-------|--------|
+| Not discoverable | Same network + host networking (Linux) |
+| No mDNS | Open UDP 5353 & 5540; avoid VPN |
+| Auth failures | Recheck `RTT_USER` / `RTT_PASS` |
+| Frequent Unknown | Adjust offset/window; verify route runs now |
+See `docs/GOOGLE_HOME_SETUP.md` for commissioning details.
 
-## Breaking Change: Removed Aliases
-
-The previously deprecated utility aliases have now been removed:
-
-- `formatDateForRTT` → use `formatDateYMD`
-- `normalizeDepartureMinutes` → use `adjustForDayRollover`
-
-Update any remaining imports:
-
-```diff
-import { formatDateYMD } from '.../timeUtils.js';
-import { adjustForDayRollover } from '.../timeUtils.js';
+## 13. Repository Structure (Condensed)
+```
+src/            core code (api/, services/, domain/, devices/, utils/)
+tests/          unit + integration Jest suites
+docker/         Dockerfile + compose overrides
+scripts/        helper scripts (build, diagnose, reset)
+docs/           supplemental guides
+matter-storage/ persistent commissioning data
 ```
 
-No behavioral changes were made; only the names were clarified. This is a breaking change because the old symbols no longer exist.
+## 14. Architectural Highlights
+- Layered separation (API → services → domain → devices)
+- Explicit typed errors with retry classification
+- Exponential backoff with jitter for resilient RTT requests
+- Facility-based logging for targeted diagnostics
+- Pure domain calculation isolated from I/O
+
+## 15. Contributions
+Open to small PRs improving selection heuristics, logging clarity, or test coverage. Propose changes via issue first.
+
+---
+For deeper insights, inspect tests and source modules in `src/`.
+
+## Supplementary Guides
+See `docs/GOOGLE_HOME_SETUP.md` (commissioning & naming), `docs/GOOGLE_HOME_VOICE_COMMANDS.md` (voice usage), `docs/VALIDATION_AND_RETRY.md` (config schema & retry design), and `docs/CONTAINER_BUILD.md` (multi-arch build).
 
 ### Device Types
 Mode Select endpoint:
@@ -269,208 +200,7 @@ Use the mode state in Matter automations:
 - **Validated Config**: Fail-fast startup with descriptive error messages
 - **Resilient API Client**: Exponential backoff retry with jitter for transient failures
 
-## Container Deployment
-
-### Multi-Architecture Builds
-
-This project supports building for both local development (ARM64/Apple Silicon) and production deployment (AMD64/x86_64).
-
-**Quick Start:**
-
-```bash
-# For local dev on Mac (ARM64)
-./scripts/build-container.sh dev
-
-# For production deployment (AMD64)
-./scripts/build-container.sh prod
-
-# Build both architectures
-./scripts/build-container.sh multi
-```
-
-### Building the Container
-
-**For local development (ARM64):**
-```bash
-podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml build
-# Creates: train-status:latest-arm64
-```
-
-**For production deployment (AMD64):**
-```bash
-podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml build
-# Creates: train-status:latest-amd64
-```
-
-**Manual build (specify architecture):**
-```bash
-# ARM64
-podman build --platform linux/arm64 -t train-status:latest-arm64 .
-
-# AMD64
-podman build --platform linux/amd64 -t train-status:latest-amd64 .
-```
-
-### Running with Docker
-
-```bash
-docker run -d \
-  --name train-status \
-  --network host \
-  --restart unless-stopped \
-  -e RTT_USER=your_username \
-  -e RTT_PASS=your_password \
-  -e ORIGIN_TIPLOC=CAMBDGE \
-  -e DEST_TIPLOC=KNGX \
-  -e USE_BRIDGE=true \
-  -v $(pwd)/.matter-storage:/app/.matter-storage \
-  train-status
-```
-
-### Running with Podman
-
-**⚠️ Important: macOS Limitation**
-
-Podman on macOS runs containers inside a virtual machine, which means `--network host` does **NOT** give access to your Mac's actual network. mDNS/Matter discovery will **NOT work** in Podman containers on macOS.
-
-**Solutions:**
-1. **Recommended**: Run the application directly on macOS without containerization:
-   ```bash
-   npm install
-   export RTT_USER=your_username RTT_PASS=your_password
-   node index.js
-   ```
-
-2. Use Docker Desktop instead of Podman (Docker Desktop has better macOS network integration)
-
-3. Deploy the container on a Linux host where `--network host` works as expected
-
-**For Linux hosts**, run the appropriate architecture:
-
-```bash
-# Run AMD64 image on Linux server
-podman run -d \
-  --name train-status \
-  --network host \
-  --restart unless-stopped \
-  --cap-add=NET_ADMIN \
-  --cap-add=NET_RAW \
-  -e RTT_USER=your_username \
-  -e RTT_PASS=your_password \
-  -e ORIGIN_TIPLOC=CAMBDGE \
-  -e DEST_TIPLOC=KNGX \
-  -e USE_BRIDGE=true \
-  -v $(pwd)/matter-storage:/app/.matter-storage:Z \
-  train-status:latest-amd64
-```
-
-**Transferring to Production Server:**
-
-```bash
-# Export on Mac
-podman save train-status:latest-amd64 | gzip > train-status-amd64.tar.gz
-
-# Transfer to server (scp, rsync, etc.)
-scp train-status-amd64.tar.gz user@server:/path/
-
-# Load on server
-podman load < train-status-amd64.tar.gz
-```
-
-**Important Podman Notes:**
-- `--network host` is **required** for Matter/mDNS discovery
-- `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` allow proper network access
-- `:Z` suffix on volume mount sets correct SELinux context on RHEL/Fedora
-- Matter.js handles mDNS directly (no Avahi needed)
-
-### Troubleshooting Container Discovery
-
-If the device isn't discovered by Google Home/Matter controllers:
-
-1. **Check Avahi is running inside container:**
-   ```bash
-   podman exec train-status pgrep avahi-daemon
-   ```
-
-2. **Verify mDNS traffic (on host):**
-   ```bash
-   sudo tcpdump -i any udp port 5353
-   ```
-
-3. **Test from another machine on same network:**
-   ```bash
-   avahi-browse -a -t
-   # Should show _matter._tcp and _matterc._udp services
-   ```
-
-4. **Check firewall (host machine):**
-   ```bash
-   # Allow UDP 5353 (mDNS) and 5540 (Matter)
-   sudo firewall-cmd --permanent --add-port=5353/udp
-   sudo firewall-cmd --permanent --add-port=5540/udp
-   sudo firewall-cmd --reload
-   ```
-
-5. **SELinux troubleshooting (if using Podman on Fedora/RHEL):**
-   ```bash
-   # Check for denials
-   sudo ausearch -m avc -ts recent
-   
-   # If Avahi is blocked, you may need:
-   sudo setsebool -P container_connect_any 1
-   ```
-
-6. **Manual commissioning (fallback):**
-   If discovery still fails, use the manual pairing code displayed in logs:
-   ```bash
-   podman logs train-status | grep -A5 "MANUAL PAIRING CODE"
-   ```
-
-### Docker Compose / Podman Compose (Recommended)
-
-For easier management, use the provided docker-compose files:
-
-**Local Development (ARM64/Mac):**
-```bash
-# 1. Copy example environment file
-cp .env.example .env
-
-# 2. Edit .env with your credentials
-nano .env
-
-# 3. Build and run for ARM64
-podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
-
-# View logs
-podman-compose logs -f train-status
-```
-
-**Production Deployment (AMD64/Linux):**
-```bash
-# 1. Ensure .env is configured
-cp .env.example .env
-nano .env
-
-# 2. Build and run for AMD64
-podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d
-
-# View logs
-podman-compose logs -f train-status
-
-# Stop
-podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml down
-podman-compose up -d
-
-# View logs
-docker-compose logs -f
-# or
-podman-compose logs -f
-
-# Stop
-docker-compose down
-# or
-podman-compose down
-```
+<!-- Container deployment details trimmed; see docs/CONTAINER_BUILD.md -->
 
 ### Monitoring
 

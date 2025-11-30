@@ -31,7 +31,20 @@ export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"
 export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"
 ```
 
-### 2. Start the Device
+## Essentials
+Set required env vars (see `README.md` for full list):
+```bash
+export RTT_USER=your_username
+export RTT_PASS=your_password
+export ORIGIN_TIPLOC=CAMBDGE
+export DEST_TIPLOC=KNGX
+```
+Optional (override names / interval):
+```bash
+export STATUS_DEVICE_NAME="Cambridge-London Status"
+export DELAY_DEVICE_NAME="Cambridge-London Delay"
+export UPDATE_INTERVAL_MS=60000
+```
 
 ```bash
 npm start
@@ -88,9 +101,6 @@ Device Information:
 
 **On First Pairing:**
 - You may be prompted to allow network access
-- Google Home will commission the device (takes ~30 seconds)
-- Device appears as "Train Status" in your home
-
 ### 4. Verify It's Working
 
 **In Terminal:**
@@ -102,13 +112,8 @@ You'll see updates like:
 
 **In Google Home App:**
 - You should see TWO endpoints/devices. Default names are derived from the route:
-  - `<ORIGIN>-<DEST> Train Status` (or your `STATUS_DEVICE_NAME` override) – Mode Select with 5 modes
   - `<ORIGIN>-<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
 - If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
-- The Temperature Sensor value equals minutes delayed (negative = early, 0 = on time)
-- Values update automatically every minute
-- Endpoints are read-only (status comes from RTT updates)
-
 ### Bridge mode and names
 - The app now exposes a Bridge (Aggregator) endpoint with two bridged devices under it.
 - Per-endpoint names are advertised via the Bridged Device Basic Information cluster using:
@@ -122,10 +127,6 @@ You'll see updates like:
 - "Hey Google, what's Train Delay Sensor's temperature?"
 - Assign to a room and ask: "Hey Google, what's the temperature in <room>?"
 
-Interpretation:
-- 0°C = on time
-- 5°C = 5 minutes late
-- -3°C = 3 minutes early
 
 ### 5. Create Automations
 
