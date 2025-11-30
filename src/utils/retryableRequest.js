@@ -30,6 +30,18 @@ export const DEFAULT_RETRY_CONFIG = {
 };
 
 /**
+ * Explicit wrapper for network-level failures (no HTTP response received)
+ */
+export class NetworkError extends Error {
+  constructor(message, originalError) {
+    super(message);
+    this.name = 'NetworkError';
+    this.isNetworkError = true;
+    this.originalError = originalError;
+  }
+}
+
+/**
  * Calculate exponential backoff delay with jitter
  * @param {number} attempt - Current attempt number (0-indexed)
  * @param {RetryConfig} config - Retry configuration
@@ -63,6 +75,12 @@ export function shouldRetry(error, attempt, config = DEFAULT_RETRY_CONFIG, logge
   if (attempt >= config.maxRetries) {
     return false;
   }
+
+  // Explicit network error case
+  if (error?.isNetworkError) {
+    logger?.debug?.('NetworkError detected, will retry');
+    return true;
+  }
   
   // Fast fail on non-retryable status codes (e.g., auth errors)
   if (error.statusCode && config.nonRetryableStatusCodes.includes(error.statusCode)) {
@@ -78,7 +96,7 @@ export function shouldRetry(error, attempt, config = DEFAULT_RETRY_CONFIG, logge
   
   // Retry on network errors (no status code)
   if (!error.statusCode) {
-    logger?.debug?.('Network error, will retry');
+    logger?.debug?.('Unclassified error without statusCode, treating as network and retrying');
     return true;
   }
   
@@ -133,4 +151,58 @@ export async function withRetry(operation, options = {}) {
       attempt++;
     }
   }
+}
+
+/**
+ * Perform an HTTP GET (or provided method) expecting JSON with retry logic.
+ * Extracts common attempt logging, status checks, body capture on errors, and JSON parsing.
+ * Domain-specific error construction can be injected via buildError / wrapNetworkError.
+ *
+ * @template T
+ * @param {string} url - The request URL
+ * @param {Object} fetchOptions - Options controlling fetch behavior
+ * @param {Function} [fetchOptions.fetchImpl] - Custom fetch implementation (defaults to global fetch)
+ * @param {Object} [fetchOptions.init] - Additional init options passed to fetch
+ * @param {Object} [fetchOptions.headers] - Headers merged into init.headers
+ * @param {Object} retryOptions - Options passed through to withRetry (e.g. maxRetries, logger)
+ * @param {Function} [retryOptions.buildError] - (res, body, attempt) => Error instance for HTTP error responses
+ * (Network errors are automatically wrapped in NetworkError.)
+ * @returns {Promise<T>} Parsed JSON response
+ */
+export async function fetchJsonWithRetry(
+  url,
+  { fetchImpl, init = {}, headers = {} } = {},
+  { buildError, ...retryOptions } = {}
+) {
+  const logger = retryOptions.logger;
+  const effectiveFetch = fetchImpl || fetch;
+  const mergedInit = { ...init, headers: { ...(init.headers || {}), ...headers } };
+
+  return withRetry(
+    async (attempt) => {
+      logger?.debug?.(`GET ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
+      try {
+        const res = await effectiveFetch(url, mergedInit);
+        logger?.debug?.(`Response: ${res.status}`);
+        if (!res.ok) {
+          const body = await res.text().catch(() => '');
+          const error = buildError
+            ? buildError(res, body, attempt)
+            : Object.assign(new Error(`HTTP request failed: ${res.status} ${res.statusText}`), {
+                statusCode: res.status,
+                responseBody: body
+              });
+          throw error;
+        }
+        return res.json();
+      } catch (err) {
+        if (err.statusCode || err.responseBody || err.isNetworkError) {
+          // Already classified error
+          throw err;
+        }
+        throw new NetworkError(err.message, err);
+      }
+    },
+    retryOptions
+  );
 }

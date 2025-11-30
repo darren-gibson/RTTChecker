@@ -4,7 +4,7 @@
 
 import { config } from "../config.js";
 import { loggers } from "../utils/logger.js";
-import { withRetry } from "../utils/retryableRequest.js";
+import { fetchJsonWithRetry } from "../utils/retryableRequest.js";
 
 import { RTTApiError } from "./errors.js";
 
@@ -48,44 +48,21 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
   
   try {
-    return await withRetry(
-      async (attempt) => {
-        log.debug(`GET ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
-        
-        try {
-          const res = await (fetchImpl || fetch)(url, { 
-            headers: { Authorization: `Basic ${encodeBasicAuth(RTT_USER, RTT_PASS)}` } 
-          });
-          
-          log.debug(`Response: ${res.status}`);
-          
-          if (!res.ok) {
-            const body = await res.text().catch(() => '');
-            throw new RTTApiError(`RTT API request failed: ${res.status} ${res.statusText}`, {
-              statusCode: res.status,
-              endpoint: url,
-              responseBody: body,
-              context: { from, to, date, attempt }
-            });
-          }
-          
-          return res.json();
-        } catch (error) {
-          // If it's already an RTTApiError, re-throw it
-          if (error instanceof RTTApiError) {
-            throw error;
-          }
-          // Wrap network errors in RTTApiError
-          throw new RTTApiError(`Network error calling RTT API: ${error.message}`, {
-            endpoint: url,
-            context: { from, to, date, attempt, originalError: error.message }
-          });
-        }
+    return await fetchJsonWithRetry(
+      url,
+      {
+        fetchImpl: fetchImpl || fetch,
+        headers: { Authorization: `Basic ${encodeBasicAuth(RTT_USER, RTT_PASS)}` }
       },
       {
-        // Only pass maxRetries if provided to override default
         ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
-        logger: log
+        logger: log,
+        buildError: (res, body, attempt) => new RTTApiError(`RTT API request failed: ${res.status} ${res.statusText}`, {
+          statusCode: res.status,
+          endpoint: url,
+          responseBody: body,
+          context: { from, to, date, attempt }
+        })
       }
     );
   } catch (error) {
