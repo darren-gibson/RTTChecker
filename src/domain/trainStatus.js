@@ -1,18 +1,18 @@
 /**
  * Domain logic for train status calculation.
  * Pure business logic without external dependencies.
- * 
+ *
  * @typedef {import('../types.js').RTTService} RTTService
  * @typedef {import('../types.js').RTTLocation} RTTLocation
  */
 
-import { TrainStatus, Timing } from "../constants.js";
-import { hhmmToMins } from "../utils/timeUtils.js";
+import { TrainStatus, Timing } from '../constants.js';
+import { hhmmToMins } from '../utils/timeUtils.js';
 
 /**
  * Calculate on-time status based on service lateness.
  * Maps lateness in minutes to categorical status (on_time, minor_delay, etc.).
- * 
+ *
  * @param {RTTService} service - Train service with location and timing details
  * @returns {string} Status constant from TrainStatus enum
  */

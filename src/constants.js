@@ -7,7 +7,7 @@ export const TrainStatus = {
   MINOR_DELAY: 'minor_delay',
   DELAYED: 'delayed',
   MAJOR_DELAY: 'major_delay',
-  UNKNOWN: 'unknown'
+  UNKNOWN: 'unknown',
 };
 
 /**
@@ -21,15 +21,15 @@ export const MatterDevice = {
     MINOR_DELAY: { mode: 1, label: 'Minor Delay' },
     DELAYED: { mode: 2, label: 'Delayed' },
     MAJOR_DELAY: { mode: 3, label: 'Major Delay' },
-    UNKNOWN: { mode: 4, label: 'Unknown' }
+    UNKNOWN: { mode: 4, label: 'Unknown' },
   },
 
   // Device identification
-  VendorId: 0xFFF1,  // Test vendor ID
+  VendorId: 0xfff1, // Test vendor ID
   ProductId: 0x8001, // Train status device
 
   // Device type (using Generic Switch as base for Mode Select)
-  DeviceType: 0x000F // Generic Switch with Mode Select
+  DeviceType: 0x000f, // Generic Switch with Mode Select
 };
 
 /**
@@ -45,7 +45,6 @@ export const Timing = {
   LATE_THRESHOLDS: {
     ON_TIME: 2,
     MINOR: 5,
-    DELAYED: 10
-  }
+    DELAYED: 10,
+  },
 };
-

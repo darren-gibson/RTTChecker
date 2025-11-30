@@ -1,526 +1,526 @@
 {
-    "location": {
-        "name": "Cambridge",
-        "crs": "CBG",
+  "location": {
+    "name": "Cambridge",
+    "crs": "CBG",
+    "tiploc": "CAMBDGE",
+    "country": "gb",
+    "system": "nr"
+  },
+  "filter": {
+    "destination": {
+      "name": "London Kings Cross",
+      "crs": "KGX",
+      "tiploc": "KNGX",
+      "country": "gb",
+      "system": "nr"
+    }
+  },
+  "services": [
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
         "tiploc": "CAMBDGE",
-        "country": "gb",
-        "system": "nr"
-    },
-    "filter": {
-        "destination": {
-            "name": "London Kings Cross",
-            "crs": "KGX",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedArrival": "1220",
+        "gbttBookedDeparture": "1222",
+        "origin": [
+          {
+            "tiploc": "CAMBNTH",
+            "description": "Cambridge North",
+            "workingTime": "121500",
+            "publicTime": "1215"
+          }
+        ],
+        "destination": [
+          {
             "tiploc": "KNGX",
-            "country": "gb",
-            "system": "nr"
-        }
+            "description": "London Kings Cross",
+            "workingTime": "131100",
+            "publicTime": "1311"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeArrival": "1219",
+        "realtimeArrivalActual": true,
+        "realtimeDeparture": "1222",
+        "realtimeDepartureActual": false,
+        "platform": "1",
+        "platformConfirmed": true,
+        "platformChanged": false,
+        "serviceLocation": "APPR_PLAT",
+        "displayAs": "CALL"
+      },
+      "serviceUid": "Y30284",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1T27",
+      "runningIdentity": "1T27",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
     },
-    "services": [
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedArrival": "1220",
-                "gbttBookedDeparture": "1222",
-                "origin": [
-                    {
-                        "tiploc": "CAMBNTH",
-                        "description": "Cambridge North",
-                        "workingTime": "121500",
-                        "publicTime": "1215"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "131100",
-                        "publicTime": "1311"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeArrival": "1219",
-                "realtimeArrivalActual": true,
-                "realtimeDeparture": "1222",
-                "realtimeDepartureActual": false,
-                "platform": "1",
-                "platformConfirmed": true,
-                "platformChanged": false,
-                "serviceLocation": "APPR_PLAT",
-                "displayAs": "CALL"
-            },
-            "serviceUid": "Y30284",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1T27",
-            "runningIdentity": "1T27",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1228",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "122800",
-                        "publicTime": "1228"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "133100",
-                        "publicTime": "1331"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1228",
-                "realtimeDepartureActual": false,
-                "platform": "7",
-                "platformConfirmed": true,
-                "platformChanged": false,
-                "serviceLocation": "AT_PLAT",
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "X73430",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1C33",
-            "runningIdentity": "1C33",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1255",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "125500",
-                        "publicTime": "1255"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "142100",
-                        "publicTime": "1421"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1255",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y31182",
-            "runDate": "2025-10-19",
-            "trainIdentity": "2C35",
-            "runningIdentity": "2C35",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedArrival": "1320",
-                "gbttBookedDeparture": "1322",
-                "origin": [
-                    {
-                        "tiploc": "CAMBNTH",
-                        "description": "Cambridge North",
-                        "workingTime": "131500",
-                        "publicTime": "1315"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "141100",
-                        "publicTime": "1411"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeArrival": "1320",
-                "realtimeArrivalActual": false,
-                "realtimeDeparture": "1322",
-                "realtimeDepartureActual": false,
-                "platform": "1",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "CALL"
-            },
-            "serviceUid": "Y30294",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1T31",
-            "runningIdentity": "1T31",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1328",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "132800",
-                        "publicTime": "1328"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "143100",
-                        "publicTime": "1431"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1328",
-                "realtimeDepartureActual": false,
-                "platform": "7",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "X73429",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1C37",
-            "runningIdentity": "1C37",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1355",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "135500",
-                        "publicTime": "1355"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "152100",
-                        "publicTime": "1521"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1355",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y31201",
-            "runDate": "2025-10-19",
-            "trainIdentity": "2C39",
-            "runningIdentity": "2C39",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedArrival": "1420",
-                "gbttBookedDeparture": "1422",
-                "origin": [
-                    {
-                        "tiploc": "CAMBNTH",
-                        "description": "Cambridge North",
-                        "workingTime": "141500",
-                        "publicTime": "1415"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "151100",
-                        "publicTime": "1511"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeArrival": "1420",
-                "realtimeArrivalActual": false,
-                "realtimeDeparture": "1422",
-                "realtimeDepartureActual": false,
-                "platform": "1",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "CALL"
-            },
-            "serviceUid": "Y30304",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1T35",
-            "runningIdentity": "1T35",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1428",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "142800",
-                        "publicTime": "1428"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "153100",
-                        "publicTime": "1531"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1428",
-                "realtimeDepartureActual": false,
-                "platform": "7",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "X73428",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1C41",
-            "runningIdentity": "1C41",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1455",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "145500",
-                        "publicTime": "1455"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "162100",
-                        "publicTime": "1621"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1455",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y31220",
-            "runDate": "2025-10-19",
-            "trainIdentity": "2C43",
-            "runningIdentity": "2C43",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedArrival": "1520",
-                "gbttBookedDeparture": "1522",
-                "origin": [
-                    {
-                        "tiploc": "CAMBNTH",
-                        "description": "Cambridge North",
-                        "workingTime": "151500",
-                        "publicTime": "1515"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "161100",
-                        "publicTime": "1611"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeArrival": "1520",
-                "realtimeArrivalActual": false,
-                "realtimeDeparture": "1522",
-                "realtimeDepartureActual": false,
-                "platform": "1",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "CALL"
-            },
-            "serviceUid": "Y30314",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1T39",
-            "runningIdentity": "1T39",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1528",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "152800",
-                        "publicTime": "1528"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "163100",
-                        "publicTime": "1631"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1528",
-                "realtimeDepartureActual": false,
-                "platform": "7",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "X73427",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1C45",
-            "runningIdentity": "1C45",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "CAMBDGE",
-                "crs": "CBG",
-                "description": "Cambridge",
-                "gbttBookedDeparture": "1555",
-                "origin": [
-                    {
-                        "tiploc": "CAMBDGE",
-                        "description": "Cambridge",
-                        "workingTime": "155500",
-                        "publicTime": "1555"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "172100",
-                        "publicTime": "1721"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1555",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y31241",
-            "runDate": "2025-10-19",
-            "trainIdentity": "2C47",
-            "runningIdentity": "2C47",
-            "atocCode": "GN",
-            "atocName": "Great Northern",
-            "serviceType": "train",
-            "isPassenger": true
-        }
-    ]
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1228",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "122800",
+            "publicTime": "1228"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "133100",
+            "publicTime": "1331"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1228",
+        "realtimeDepartureActual": false,
+        "platform": "7",
+        "platformConfirmed": true,
+        "platformChanged": false,
+        "serviceLocation": "AT_PLAT",
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "X73430",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1C33",
+      "runningIdentity": "1C33",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1255",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "125500",
+            "publicTime": "1255"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "142100",
+            "publicTime": "1421"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1255",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y31182",
+      "runDate": "2025-10-19",
+      "trainIdentity": "2C35",
+      "runningIdentity": "2C35",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedArrival": "1320",
+        "gbttBookedDeparture": "1322",
+        "origin": [
+          {
+            "tiploc": "CAMBNTH",
+            "description": "Cambridge North",
+            "workingTime": "131500",
+            "publicTime": "1315"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "141100",
+            "publicTime": "1411"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeArrival": "1320",
+        "realtimeArrivalActual": false,
+        "realtimeDeparture": "1322",
+        "realtimeDepartureActual": false,
+        "platform": "1",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "CALL"
+      },
+      "serviceUid": "Y30294",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1T31",
+      "runningIdentity": "1T31",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1328",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "132800",
+            "publicTime": "1328"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "143100",
+            "publicTime": "1431"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1328",
+        "realtimeDepartureActual": false,
+        "platform": "7",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "X73429",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1C37",
+      "runningIdentity": "1C37",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1355",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "135500",
+            "publicTime": "1355"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "152100",
+            "publicTime": "1521"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1355",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y31201",
+      "runDate": "2025-10-19",
+      "trainIdentity": "2C39",
+      "runningIdentity": "2C39",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedArrival": "1420",
+        "gbttBookedDeparture": "1422",
+        "origin": [
+          {
+            "tiploc": "CAMBNTH",
+            "description": "Cambridge North",
+            "workingTime": "141500",
+            "publicTime": "1415"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "151100",
+            "publicTime": "1511"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeArrival": "1420",
+        "realtimeArrivalActual": false,
+        "realtimeDeparture": "1422",
+        "realtimeDepartureActual": false,
+        "platform": "1",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "CALL"
+      },
+      "serviceUid": "Y30304",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1T35",
+      "runningIdentity": "1T35",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1428",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "142800",
+            "publicTime": "1428"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "153100",
+            "publicTime": "1531"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1428",
+        "realtimeDepartureActual": false,
+        "platform": "7",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "X73428",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1C41",
+      "runningIdentity": "1C41",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1455",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "145500",
+            "publicTime": "1455"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "162100",
+            "publicTime": "1621"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1455",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y31220",
+      "runDate": "2025-10-19",
+      "trainIdentity": "2C43",
+      "runningIdentity": "2C43",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedArrival": "1520",
+        "gbttBookedDeparture": "1522",
+        "origin": [
+          {
+            "tiploc": "CAMBNTH",
+            "description": "Cambridge North",
+            "workingTime": "151500",
+            "publicTime": "1515"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "161100",
+            "publicTime": "1611"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeArrival": "1520",
+        "realtimeArrivalActual": false,
+        "realtimeDeparture": "1522",
+        "realtimeDepartureActual": false,
+        "platform": "1",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "CALL"
+      },
+      "serviceUid": "Y30314",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1T39",
+      "runningIdentity": "1T39",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1528",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "152800",
+            "publicTime": "1528"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "163100",
+            "publicTime": "1631"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1528",
+        "realtimeDepartureActual": false,
+        "platform": "7",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "X73427",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1C45",
+      "runningIdentity": "1C45",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "CAMBDGE",
+        "crs": "CBG",
+        "description": "Cambridge",
+        "gbttBookedDeparture": "1555",
+        "origin": [
+          {
+            "tiploc": "CAMBDGE",
+            "description": "Cambridge",
+            "workingTime": "155500",
+            "publicTime": "1555"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "172100",
+            "publicTime": "1721"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1555",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y31241",
+      "runDate": "2025-10-19",
+      "trainIdentity": "2C47",
+      "runningIdentity": "2C47",
+      "atocCode": "GN",
+      "atocName": "Great Northern",
+      "serviceType": "train",
+      "isPassenger": true
+    }
+  ]
 }

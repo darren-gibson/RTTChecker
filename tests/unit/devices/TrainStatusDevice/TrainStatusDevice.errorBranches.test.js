@@ -14,7 +14,7 @@ describe('TrainStatusDevice - RTTApiError branches', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0700' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
   });

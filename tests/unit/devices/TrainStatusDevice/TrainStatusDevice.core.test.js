@@ -36,7 +36,7 @@ describe('TrainStatusDevice - core', () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.ON_TIME,
         selected: clone(fixtures.onTime),
-        raw: {}
+        raw: {},
       });
 
       await device.updateTrainStatus();
@@ -47,11 +47,11 @@ describe('TrainStatusDevice - core', () => {
       getTrainStatus.mockResolvedValue({
         status: TrainStatus.MINOR_DELAY,
         selected: clone(fixtures.minorDelay),
-        raw: { ok: true }
+        raw: { ok: true },
       });
 
       const events = [];
-      device.on('statusChange', e => events.push(e));
+      device.on('statusChange', (e) => events.push(e));
       await device.updateTrainStatus();
       expect(events).toHaveLength(1);
       const e = events[0];

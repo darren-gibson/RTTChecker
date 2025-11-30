@@ -9,43 +9,43 @@ services:
     container_name: train-status
     network_mode: host
     restart: unless-stopped
-    
+
     # Required capabilities for mDNS/Avahi in container
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    
+
     # Environment variables - configure these for your journey
     environment:
       # RTT API Credentials (required)
       - RTT_USER=${RTT_USER}
       - RTT_PASS=${RTT_PASS}
-      
+
       # Journey Configuration
       - ORIGIN_TIPLOC=${ORIGIN_TIPLOC:-CAMBDGE}
       - DEST_TIPLOC=${DEST_TIPLOC:-KNGX}
       - OFFSET_MINUTES=${OFFSET_MINUTES:-30}
       - WINDOW_MINUTES=${WINDOW_MINUTES:-60}
-      
+
       # Matter Device Configuration
       - USE_BRIDGE=${USE_BRIDGE:-true}
       - DEVICE_NAME=${DEVICE_NAME:-Train Status Monitor}
       - STATUS_DEVICE_NAME=${STATUS_DEVICE_NAME}
       - DELAY_DEVICE_NAME=${DELAY_DEVICE_NAME}
-      
+
       # Update frequency (milliseconds)
       - UPDATE_INTERVAL_MS=${UPDATE_INTERVAL_MS:-60000}
-      
+
       # Logging
       - LOG_LEVEL=${LOG_LEVEL:-info}
-    
+
     # Persist Matter commissioning data
     volumes:
       - ./matter-storage:/app/.matter-storage:Z
-    
+
     # Logging configuration
     logging:
       driver: json-file
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: '10m'
+        max-file: '3'

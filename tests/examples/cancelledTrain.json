@@ -1,763 +1,763 @@
 {
-    "location": {
-        "name": "London Kings Cross",
-        "crs": "KGX",
+  "location": {
+    "name": "London Kings Cross",
+    "crs": "KGX",
+    "tiploc": "KNGX",
+    "country": "gb",
+    "system": "nr"
+  },
+  "filter": {
+    "destination": {
+      "name": "Peterborough",
+      "crs": "PBO",
+      "tiploc": "PBRO",
+      "country": "gb",
+      "system": "nr"
+    }
+  },
+  "services": [
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
         "tiploc": "KNGX",
-        "country": "gb",
-        "system": "nr"
-    },
-    "filter": {
-        "destination": {
-            "name": "Peterborough",
-            "crs": "PBO",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1213",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "121300",
+            "publicTime": "1213"
+          }
+        ],
+        "destination": [
+          {
             "tiploc": "PBRO",
-            "country": "gb",
-            "system": "nr"
-        }
+            "description": "Peterborough",
+            "workingTime": "133100",
+            "publicTime": "1331"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1213",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": true,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y29692",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1P30",
+      "runningIdentity": "1P30",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
     },
-    "services": [
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1213",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "121300",
-                        "publicTime": "1213"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "PBRO",
-                        "description": "Peterborough",
-                        "workingTime": "133100",
-                        "publicTime": "1331"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1213",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": true,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y29692",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1P30",
-            "runningIdentity": "1P30",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1222",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "122200",
-                        "publicTime": "1222"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "NWCSTLE",
-                        "description": "Newcastle",
-                        "workingTime": "152100",
-                        "publicTime": "1523"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1222",
-                "realtimeDepartureActual": false,
-                "platform": "0",
-                "platformConfirmed": true,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03298",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03369",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1N16",
-            "runningIdentity": "1N16",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1230",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "123000",
-                        "publicTime": "1230"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "EDINBUR",
-                        "description": "Edinburgh",
-                        "workingTime": "170700",
-                        "publicTime": "1709"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1230",
-                "realtimeDepartureActual": false,
-                "platform": "3",
-                "platformConfirmed": true,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03402",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03386",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1S17",
-            "runningIdentity": "1S17",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1303",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "130300",
-                        "publicTime": "1303"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "HAGT",
-                        "description": "Harrogate",
-                        "workingTime": "155700",
-                        "publicTime": "1559"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1303",
-                "realtimeDepartureActual": false,
-                "platform": "6",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03301",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03333",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D15",
-            "runningIdentity": "1D15",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1313",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "131300",
-                        "publicTime": "1313"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "PBRO",
-                        "description": "Peterborough",
-                        "workingTime": "143100",
-                        "publicTime": "1431"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1313",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "cancelReasonCode": "M8",
-                "cancelReasonShortText": "problem with train",
-                "cancelReasonLongText": "a problem with the train",
-                "displayAs": "CANCELLED_CALL",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "Y29696",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "Y29706",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1P34",
-            "runningIdentity": "1P34",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1330",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "133000",
-                        "publicTime": "1330"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "EDINBUR",
-                        "description": "Edinburgh",
-                        "workingTime": "180500",
-                        "publicTime": "1807"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1330",
-                "realtimeDepartureActual": false,
-                "platform": "5",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03403",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03388",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1S19",
-            "runningIdentity": "1S19",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1333",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "133300",
-                        "publicTime": "1333"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "LEEDS",
-                        "description": "Leeds",
-                        "workingTime": "161700",
-                        "publicTime": "1619"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1333",
-                "realtimeDepartureActual": false,
-                "platform": "0",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03404",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03334",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D16",
-            "runningIdentity": "1D16",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1403",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "140300",
-                        "publicTime": "1403"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "BRADFS",
-                        "description": "Bradford Forster Square",
-                        "workingTime": "165200",
-                        "publicTime": "1654"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1403",
-                "realtimeDepartureActual": false,
-                "platform": "2",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03303",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "P00096",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D17",
-            "runningIdentity": "1D17",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1413",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "141300",
-                        "publicTime": "1413"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "PBRO",
-                        "description": "Peterborough",
-                        "workingTime": "153100",
-                        "publicTime": "1531"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1413",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "Y29710",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "Y29720",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1P38",
-            "runningIdentity": "1P38",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1430",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "143000",
-                        "publicTime": "1430"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "EDINBUR",
-                        "description": "Edinburgh",
-                        "workingTime": "190700",
-                        "publicTime": "1909"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1430",
-                "realtimeDepartureActual": false,
-                "platform": "4",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03347",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03389",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1S21",
-            "runningIdentity": "1S21",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1433",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "143300",
-                        "publicTime": "1433"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "LEEDS",
-                        "description": "Leeds",
-                        "workingTime": "165000",
-                        "publicTime": "1652"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1433",
-                "realtimeDepartureActual": false,
-                "platform": "5",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y23225",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D18",
-            "runningIdentity": "1D18",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1503",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "150300",
-                        "publicTime": "1503"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "HAGT",
-                        "description": "Harrogate",
-                        "workingTime": "180500",
-                        "publicTime": "1807"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1503",
-                "realtimeDepartureActual": false,
-                "platform": "3",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03305",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03335",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D19",
-            "runningIdentity": "1D19",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1513",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "151300",
-                        "publicTime": "1513"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "PBRO",
-                        "description": "Peterborough",
-                        "workingTime": "163100",
-                        "publicTime": "1631"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1513",
-                "realtimeDepartureActual": false,
-                "platform": "8",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "Y29734",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1P42",
-            "runningIdentity": "1P42",
-            "atocCode": "TL",
-            "atocName": "Thameslink",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1530",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "153000",
-                        "publicTime": "1530"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "EDINBUR",
-                        "description": "Edinburgh",
-                        "workingTime": "201000",
-                        "publicTime": "2012"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1530",
-                "realtimeDepartureActual": false,
-                "platform": "5",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "Y23290",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03391",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1S23",
-            "runningIdentity": "1S23",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1533",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "153300",
-                        "publicTime": "1533"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "LINCLNC",
-                        "description": "Lincoln Central",
-                        "workingTime": "173000",
-                        "publicTime": "1732"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1533",
-                "realtimeDepartureActual": false,
-                "platform": "1",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN",
-                "associations": [
-                    {
-                        "type": "next",
-                        "associatedUid": "W03320",
-                        "associatedRunDate": "2025-10-19"
-                    }
-                ]
-            },
-            "serviceUid": "W03324",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1B88",
-            "runningIdentity": "1B88",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        },
-        {
-            "locationDetail": {
-                "realtimeActivated": true,
-                "tiploc": "KNGX",
-                "crs": "KGX",
-                "description": "London Kings Cross",
-                "gbttBookedDeparture": "1605",
-                "origin": [
-                    {
-                        "tiploc": "KNGX",
-                        "description": "London Kings Cross",
-                        "workingTime": "160500",
-                        "publicTime": "1605"
-                    }
-                ],
-                "destination": [
-                    {
-                        "tiploc": "LEEDS",
-                        "description": "Leeds",
-                        "workingTime": "182100",
-                        "publicTime": "1823"
-                    }
-                ],
-                "isCall": true,
-                "isPublicCall": true,
-                "realtimeDeparture": "1605",
-                "realtimeDepartureActual": false,
-                "platform": "3",
-                "platformConfirmed": false,
-                "platformChanged": false,
-                "displayAs": "ORIGIN"
-            },
-            "serviceUid": "W03336",
-            "runDate": "2025-10-19",
-            "trainIdentity": "1D21",
-            "runningIdentity": "1D21",
-            "atocCode": "GR",
-            "atocName": "LNER",
-            "serviceType": "train",
-            "isPassenger": true
-        }
-    ]
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1222",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "122200",
+            "publicTime": "1222"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "NWCSTLE",
+            "description": "Newcastle",
+            "workingTime": "152100",
+            "publicTime": "1523"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1222",
+        "realtimeDepartureActual": false,
+        "platform": "0",
+        "platformConfirmed": true,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03298",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03369",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1N16",
+      "runningIdentity": "1N16",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1230",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "123000",
+            "publicTime": "1230"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "EDINBUR",
+            "description": "Edinburgh",
+            "workingTime": "170700",
+            "publicTime": "1709"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1230",
+        "realtimeDepartureActual": false,
+        "platform": "3",
+        "platformConfirmed": true,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03402",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03386",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1S17",
+      "runningIdentity": "1S17",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1303",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "130300",
+            "publicTime": "1303"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "HAGT",
+            "description": "Harrogate",
+            "workingTime": "155700",
+            "publicTime": "1559"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1303",
+        "realtimeDepartureActual": false,
+        "platform": "6",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03301",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03333",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D15",
+      "runningIdentity": "1D15",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1313",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "131300",
+            "publicTime": "1313"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "PBRO",
+            "description": "Peterborough",
+            "workingTime": "143100",
+            "publicTime": "1431"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1313",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "cancelReasonCode": "M8",
+        "cancelReasonShortText": "problem with train",
+        "cancelReasonLongText": "a problem with the train",
+        "displayAs": "CANCELLED_CALL",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "Y29696",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "Y29706",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1P34",
+      "runningIdentity": "1P34",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1330",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "133000",
+            "publicTime": "1330"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "EDINBUR",
+            "description": "Edinburgh",
+            "workingTime": "180500",
+            "publicTime": "1807"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1330",
+        "realtimeDepartureActual": false,
+        "platform": "5",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03403",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03388",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1S19",
+      "runningIdentity": "1S19",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1333",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "133300",
+            "publicTime": "1333"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "LEEDS",
+            "description": "Leeds",
+            "workingTime": "161700",
+            "publicTime": "1619"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1333",
+        "realtimeDepartureActual": false,
+        "platform": "0",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03404",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03334",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D16",
+      "runningIdentity": "1D16",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1403",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "140300",
+            "publicTime": "1403"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "BRADFS",
+            "description": "Bradford Forster Square",
+            "workingTime": "165200",
+            "publicTime": "1654"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1403",
+        "realtimeDepartureActual": false,
+        "platform": "2",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03303",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "P00096",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D17",
+      "runningIdentity": "1D17",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1413",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "141300",
+            "publicTime": "1413"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "PBRO",
+            "description": "Peterborough",
+            "workingTime": "153100",
+            "publicTime": "1531"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1413",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "Y29710",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "Y29720",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1P38",
+      "runningIdentity": "1P38",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1430",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "143000",
+            "publicTime": "1430"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "EDINBUR",
+            "description": "Edinburgh",
+            "workingTime": "190700",
+            "publicTime": "1909"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1430",
+        "realtimeDepartureActual": false,
+        "platform": "4",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03347",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03389",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1S21",
+      "runningIdentity": "1S21",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1433",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "143300",
+            "publicTime": "1433"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "LEEDS",
+            "description": "Leeds",
+            "workingTime": "165000",
+            "publicTime": "1652"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1433",
+        "realtimeDepartureActual": false,
+        "platform": "5",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y23225",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D18",
+      "runningIdentity": "1D18",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1503",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "150300",
+            "publicTime": "1503"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "HAGT",
+            "description": "Harrogate",
+            "workingTime": "180500",
+            "publicTime": "1807"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1503",
+        "realtimeDepartureActual": false,
+        "platform": "3",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03305",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03335",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D19",
+      "runningIdentity": "1D19",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1513",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "151300",
+            "publicTime": "1513"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "PBRO",
+            "description": "Peterborough",
+            "workingTime": "163100",
+            "publicTime": "1631"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1513",
+        "realtimeDepartureActual": false,
+        "platform": "8",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "Y29734",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1P42",
+      "runningIdentity": "1P42",
+      "atocCode": "TL",
+      "atocName": "Thameslink",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1530",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "153000",
+            "publicTime": "1530"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "EDINBUR",
+            "description": "Edinburgh",
+            "workingTime": "201000",
+            "publicTime": "2012"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1530",
+        "realtimeDepartureActual": false,
+        "platform": "5",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "Y23290",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03391",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1S23",
+      "runningIdentity": "1S23",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1533",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "153300",
+            "publicTime": "1533"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "LINCLNC",
+            "description": "Lincoln Central",
+            "workingTime": "173000",
+            "publicTime": "1732"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1533",
+        "realtimeDepartureActual": false,
+        "platform": "1",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN",
+        "associations": [
+          {
+            "type": "next",
+            "associatedUid": "W03320",
+            "associatedRunDate": "2025-10-19"
+          }
+        ]
+      },
+      "serviceUid": "W03324",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1B88",
+      "runningIdentity": "1B88",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    },
+    {
+      "locationDetail": {
+        "realtimeActivated": true,
+        "tiploc": "KNGX",
+        "crs": "KGX",
+        "description": "London Kings Cross",
+        "gbttBookedDeparture": "1605",
+        "origin": [
+          {
+            "tiploc": "KNGX",
+            "description": "London Kings Cross",
+            "workingTime": "160500",
+            "publicTime": "1605"
+          }
+        ],
+        "destination": [
+          {
+            "tiploc": "LEEDS",
+            "description": "Leeds",
+            "workingTime": "182100",
+            "publicTime": "1823"
+          }
+        ],
+        "isCall": true,
+        "isPublicCall": true,
+        "realtimeDeparture": "1605",
+        "realtimeDepartureActual": false,
+        "platform": "3",
+        "platformConfirmed": false,
+        "platformChanged": false,
+        "displayAs": "ORIGIN"
+      },
+      "serviceUid": "W03336",
+      "runDate": "2025-10-19",
+      "trainIdentity": "1D21",
+      "runningIdentity": "1D21",
+      "atocCode": "GR",
+      "atocName": "LNER",
+      "serviceType": "train",
+      "isPassenger": true
+    }
+  ]
 }

@@ -26,7 +26,7 @@ describe('TrainStatusDevice additional coverage', () => {
 
     const current = device.getCurrentMode();
     expect(typeof current).toBe('number');
-    const modeIds = modes.map(m => m.mode);
+    const modeIds = modes.map((m) => m.mode);
     expect(modeIds).toContain(current);
   });
 
@@ -39,13 +39,13 @@ describe('TrainStatusDevice additional coverage', () => {
 
   test('no mode change results in modeChanged=false event', async () => {
     const events = [];
-    device.on('statusChange', e => events.push(e));
+    device.on('statusChange', (e) => events.push(e));
 
     // Mock first response
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0700' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
 
@@ -53,7 +53,7 @@ describe('TrainStatusDevice additional coverage', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0705' } },
-      raw: {}
+      raw: {},
     });
     const before = device.getCurrentMode();
     await device.updateTrainStatus();
@@ -74,7 +74,7 @@ describe('TrainStatusDevice additional coverage', () => {
       getTrainStatus.mockResolvedValueOnce({
         status: s,
         selected: { locationDetail: { gbttBookedDeparture: '0710' } },
-        raw: {}
+        raw: {},
       });
       await device.updateTrainStatus();
       expect(device.getCurrentMode()).toBe(expected);
@@ -83,13 +83,13 @@ describe('TrainStatusDevice additional coverage', () => {
 
   test('error path emits event when mode changes to UNKNOWN', async () => {
     const events = [];
-    device.on('statusChange', e => events.push(e));
+    device.on('statusChange', (e) => events.push(e));
 
     // Set a non-UNKNOWN mode first
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0720' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
 

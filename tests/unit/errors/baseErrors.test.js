@@ -30,7 +30,7 @@ describe('ConfigurationError', () => {
   test('creates error with missing fields', () => {
     const error = new ConfigurationError('Config invalid', {
       missingFields: ['RTT_USER', 'RTT_PASS'],
-      invalidFields: []
+      invalidFields: [],
     });
     expect(error).toBeInstanceOf(RTTCheckerError);
     expect(error.name).toBe('ConfigurationError');
@@ -41,7 +41,7 @@ describe('ConfigurationError', () => {
   test('creates error with invalid fields', () => {
     const error = new ConfigurationError('Bad config', {
       missingFields: [],
-      invalidFields: ['UPDATE_INTERVAL_MS']
+      invalidFields: ['UPDATE_INTERVAL_MS'],
     });
     expect(error.invalidFields).toEqual(['UPDATE_INTERVAL_MS']);
   });
@@ -55,7 +55,7 @@ describe('ConfigurationError', () => {
   test('serializes with config details', () => {
     const error = new ConfigurationError('Failed', {
       missingFields: ['API_KEY'],
-      invalidFields: ['TIMEOUT']
+      invalidFields: ['TIMEOUT'],
     });
     const json = error.toJSON();
     expect(json.missingFields).toEqual(['API_KEY']);

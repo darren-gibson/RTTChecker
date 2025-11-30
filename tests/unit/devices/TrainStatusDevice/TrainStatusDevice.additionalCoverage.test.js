@@ -16,7 +16,7 @@ describe('TrainStatusDevice - additional coverage', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0700' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
     jest.clearAllMocks();
@@ -66,12 +66,12 @@ describe('TrainStatusDevice - additional coverage', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.MINOR_DELAY,
       selected: { locationDetail: { gbttBookedDeparture: '0710' } },
-      raw: {}
+      raw: {},
     });
 
     freshDevice.startPeriodicUpdates();
-    await new Promise(resolve => setImmediate(resolve));
-    
+    await new Promise((resolve) => setImmediate(resolve));
+
     expect(getTrainStatus).toHaveBeenCalled();
     freshDevice.stopPeriodicUpdates();
   });
@@ -79,7 +79,7 @@ describe('TrainStatusDevice - additional coverage', () => {
   test('stopPeriodicUpdates clears interval when interval exists', () => {
     device.startPeriodicUpdates();
     expect(device.updateInterval).not.toBeNull();
-    
+
     device.stopPeriodicUpdates();
     expect(device.updateInterval).toBeNull();
   });

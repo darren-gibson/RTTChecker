@@ -15,11 +15,15 @@ function runWithEnv(env) {
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    child.stdout.on('data', d => stdoutChunks.push(d));
-    child.stderr.on('data', d => stderrChunks.push(d));
+    child.stdout.on('data', (d) => stdoutChunks.push(d));
+    child.stderr.on('data', (d) => stderrChunks.push(d));
     child.on('error', reject);
-    child.on('close', code => {
-      resolve({ code, stdout: Buffer.concat(stdoutChunks).toString('utf8'), stderr: Buffer.concat(stderrChunks).toString('utf8') });
+    child.on('close', (code) => {
+      resolve({
+        code,
+        stdout: Buffer.concat(stdoutChunks).toString('utf8'),
+        stderr: Buffer.concat(stderrChunks).toString('utf8'),
+      });
     });
   });
 }

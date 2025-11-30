@@ -21,7 +21,7 @@ describe('TrainStatus constants', () => {
 
   test('constants are valid strings', () => {
     const values = Object.values(TrainStatus);
-    values.forEach(value => {
+    values.forEach((value) => {
       expect(typeof value).toBe('string');
       expect(value.length).toBeGreaterThan(0);
     });
@@ -46,14 +46,14 @@ describe('MatterDevice constants', () => {
   });
 
   test('Device identification constants are defined', () => {
-    expect(MatterDevice.VendorId).toBe(0xFFF1);
+    expect(MatterDevice.VendorId).toBe(0xfff1);
     expect(MatterDevice.ProductId).toBe(0x8001);
-    expect(MatterDevice.DeviceType).toBe(0x000F);
+    expect(MatterDevice.DeviceType).toBe(0x000f);
   });
 
   test('all mode labels are user-friendly strings', () => {
     const modes = Object.values(MatterDevice.Modes);
-    modes.forEach(mode => {
+    modes.forEach((mode) => {
       expect(typeof mode.label).toBe('string');
       expect(mode.label.length).toBeGreaterThan(0);
       expect(mode.label).toMatch(/^[A-Z]/); // Starts with capital letter

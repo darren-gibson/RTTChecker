@@ -12,7 +12,13 @@ export class NoTrainFoundError extends RTTCheckerError {
     this.candidateCount = options.candidateCount || 0;
   }
   toJSON() {
-    return { ...super.toJSON(), originTiploc: this.originTiploc, destTiploc: this.destTiploc, searchWindow: this.searchWindow, candidateCount: this.candidateCount };
+    return {
+      ...super.toJSON(),
+      originTiploc: this.originTiploc,
+      destTiploc: this.destTiploc,
+      searchWindow: this.searchWindow,
+      candidateCount: this.candidateCount,
+    };
   }
 }
 
@@ -25,5 +31,7 @@ export class InvalidTrainDataError extends RTTCheckerError {
     this.serviceId = options.serviceId;
     this.missingField = options.missingField;
   }
-  toJSON() { return { ...super.toJSON(), serviceId: this.serviceId, missingField: this.missingField }; }
+  toJSON() {
+    return { ...super.toJSON(), serviceId: this.serviceId, missingField: this.missingField };
+  }
 }

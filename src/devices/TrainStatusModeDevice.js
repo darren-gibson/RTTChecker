@@ -12,10 +12,10 @@ import { config } from '../config.js';
 export class TrainStatusModeDevice extends Device {
   constructor(name = 'Train Status') {
     super(DeviceTypes.MODE_SELECT);
-    
+
     // Set device name (must be done after super() call)
     this.name = name;
-    
+
     // Add BasicInformation cluster when NOT using bridge so controllers use these name attributes directly
     if (!config.matter.useBridge) {
       this.addClusterServer(
@@ -39,34 +39,34 @@ export class TrainStatusModeDevice extends Device {
         )
       );
     }
-    
+
     // Map our train status modes to Matter Mode Select format
     const supportedModes = [
       {
         label: MatterConstants.Modes.ON_TIME.label,
         mode: MatterConstants.Modes.ON_TIME.mode,
-        semanticTags: []
+        semanticTags: [],
       },
       {
         label: MatterConstants.Modes.MINOR_DELAY.label,
         mode: MatterConstants.Modes.MINOR_DELAY.mode,
-        semanticTags: []
+        semanticTags: [],
       },
       {
         label: MatterConstants.Modes.DELAYED.label,
         mode: MatterConstants.Modes.DELAYED.mode,
-        semanticTags: []
+        semanticTags: [],
       },
       {
         label: MatterConstants.Modes.MAJOR_DELAY.label,
         mode: MatterConstants.Modes.MAJOR_DELAY.mode,
-        semanticTags: []
+        semanticTags: [],
       },
       {
         label: MatterConstants.Modes.UNKNOWN.label,
         mode: MatterConstants.Modes.UNKNOWN.mode,
-        semanticTags: []
-      }
+        semanticTags: [],
+      },
     ];
 
     // Create Mode Select cluster server
@@ -78,13 +78,13 @@ export class TrainStatusModeDevice extends Device {
           standardNamespace: null,
           supportedModes,
           currentMode: MatterConstants.Modes.UNKNOWN.mode,
-          startUpMode: null
+          startUpMode: null,
         },
         {
           // Handle mode change requests (optional - we're read-only)
           changeToMode: async ({ request: { newMode } }) => {
             // For a read-only device, we ignore manual changes
-          }
+          },
         }
       )
     );
@@ -95,7 +95,7 @@ export class TrainStatusModeDevice extends Device {
    * @param {number} mode - Mode number from MatterConstants.Modes
    */
   setCurrentMode(mode) {
-  const cluster = this.getClusterServer(ModeSelectCluster);
+    const cluster = this.getClusterServer(ModeSelectCluster);
     if (cluster) {
       cluster.setCurrentModeAttribute(mode);
       // Mode update logged by calling code via facility logger
@@ -107,7 +107,7 @@ export class TrainStatusModeDevice extends Device {
    * @returns {number}
    */
   getCurrentMode() {
-  const cluster = this.getClusterServer(ModeSelectCluster);
+    const cluster = this.getClusterServer(ModeSelectCluster);
     return cluster?.getCurrentModeAttribute() ?? MatterConstants.Modes.UNKNOWN.mode;
   }
 
@@ -117,7 +117,7 @@ export class TrainStatusModeDevice extends Device {
    * @returns {string}
    */
   getModeLabel(mode) {
-    const modeEntry = Object.values(MatterConstants.Modes).find(m => m.mode === mode);
+    const modeEntry = Object.values(MatterConstants.Modes).find((m) => m.mode === mode);
     return modeEntry?.label ?? 'Unknown';
   }
 }

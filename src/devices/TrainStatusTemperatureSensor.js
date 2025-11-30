@@ -1,6 +1,10 @@
 import { Device, DeviceTypes } from '@project-chip/matter.js/device';
 import { ClusterServer } from '@project-chip/matter.js/cluster';
-import { TemperatureMeasurementCluster, IdentifyCluster, BasicInformationCluster } from '@project-chip/matter.js/cluster';
+import {
+  TemperatureMeasurementCluster,
+  IdentifyCluster,
+  BasicInformationCluster,
+} from '@project-chip/matter.js/cluster';
 
 import { MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';
@@ -49,13 +53,7 @@ export class TrainStatusTemperatureSensor extends Device {
       )
     );
 
-    this.addClusterServer(
-      ClusterServer(
-        IdentifyCluster,
-        { identifyTime: 0 },
-        {}
-      )
-    );
+    this.addClusterServer(ClusterServer(IdentifyCluster, { identifyTime: 0 }, {}));
   }
 
   setDelayMinutes(delayMinutes) {

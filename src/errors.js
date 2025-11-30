@@ -14,7 +14,7 @@ export class RTTCheckerError extends Error {
     this.name = this.constructor.name;
     this.timestamp = new Date();
     this.context = options.context || {};
-    
+
     // Maintains proper stack trace for where error was thrown (V8 only)
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
@@ -31,7 +31,7 @@ export class RTTCheckerError extends Error {
       message: this.message,
       timestamp: this.timestamp.toISOString(),
       context: this.context,
-      stack: this.stack
+      stack: this.stack,
     };
   }
 }
@@ -63,7 +63,7 @@ export class ConfigurationError extends RTTCheckerError {
     return {
       ...super.toJSON(),
       missingFields: this.missingFields,
-      invalidFields: this.invalidFields
+      invalidFields: this.invalidFields,
     };
   }
 }

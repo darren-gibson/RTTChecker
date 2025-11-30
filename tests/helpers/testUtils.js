@@ -13,12 +13,14 @@ export function makeOkFetch(json) {
 }
 
 export function makeErrorFetch(status = 500, body = 'Error') {
-  return jest.fn(() => Promise.resolve({
-    ok: false,
-    status,
-    statusText: 'Error',
-    text: () => Promise.resolve(body),
-  }));
+  return jest.fn(() =>
+    Promise.resolve({
+      ok: false,
+      status,
+      statusText: 'Error',
+      text: () => Promise.resolve(body),
+    })
+  );
 }
 
 export function makeNetworkErrorFetch(err = new Error('Network error')) {
@@ -26,12 +28,7 @@ export function makeNetworkErrorFetch(err = new Error('Network error')) {
 }
 
 // Service factory
-export function makeService({
-  lateness,
-  cancelled = false,
-  booked,
-  realtime,
-} = {}) {
+export function makeService({ lateness, cancelled = false, booked, realtime } = {}) {
   const locationDetail = {};
   if (cancelled) {
     locationDetail.cancelReasonCode = 'CANCEL';

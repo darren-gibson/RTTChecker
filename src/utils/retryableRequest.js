@@ -26,7 +26,7 @@ export const DEFAULT_RETRY_CONFIG = {
   baseDelayMs: 1000,
   maxDelayMs: 10000,
   retryableStatusCodes: [429, 500, 502, 503, 504],
-  nonRetryableStatusCodes: [400, 401, 403, 404]
+  nonRetryableStatusCodes: [400, 401, 403, 404],
 };
 
 /**
@@ -59,7 +59,7 @@ export function calculateBackoffDelay(attempt, config = DEFAULT_RETRY_CONFIG) {
  * @returns {Promise<void>}
  */
 export function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -81,25 +81,25 @@ export function shouldRetry(error, attempt, config = DEFAULT_RETRY_CONFIG, logge
     logger?.debug?.('NetworkError detected, will retry');
     return true;
   }
-  
+
   // Fast fail on non-retryable status codes (e.g., auth errors)
   if (error.statusCode && config.nonRetryableStatusCodes.includes(error.statusCode)) {
     logger?.debug?.(`Non-retryable status code ${error.statusCode}, failing immediately`);
     return false;
   }
-  
+
   // Retry on retryable status codes (rate limiting, server errors)
   if (error.statusCode && config.retryableStatusCodes.includes(error.statusCode)) {
     logger?.debug?.(`Retryable status code ${error.statusCode}, will retry`);
     return true;
   }
-  
+
   // Retry on network errors (no status code)
   if (!error.statusCode) {
     logger?.debug?.('Unclassified error without statusCode, treating as network and retrying');
     return true;
   }
-  
+
   return false;
 }
 
@@ -117,37 +117,40 @@ export async function withRetry(operation, options = {}) {
   const config = { ...DEFAULT_RETRY_CONFIG, ...options };
   const logger = options.logger;
   const shouldRetryFn = options.shouldRetryFn || shouldRetry;
-  
+
   let lastError;
   let attempt = 0;
-  
+
   while (true) {
     try {
       // Add delay before retry attempts
       if (attempt > 0) {
         const delay = calculateBackoffDelay(attempt - 1, config);
-        logger?.info?.(`Retry attempt ${attempt}/${config.maxRetries} after ${Math.round(delay)}ms delay`);
+        logger?.info?.(
+          `Retry attempt ${attempt}/${config.maxRetries} after ${Math.round(delay)}ms delay`
+        );
         await sleep(delay);
       }
-      
+
       // Execute the operation
       const result = await operation(attempt);
-      
+
       // Log success after retries
       if (attempt > 0) {
-        logger?.info?.(`Operation succeeded after ${attempt} ${attempt === 1 ? 'retry' : 'retries'}`);
+        logger?.info?.(
+          `Operation succeeded after ${attempt} ${attempt === 1 ? 'retry' : 'retries'}`
+        );
       }
-      
+
       return result;
-      
     } catch (error) {
       lastError = error;
-      
+
       // Check if we should retry this error
       if (!shouldRetryFn(error, attempt, config, logger)) {
         throw error;
       }
-      
+
       attempt++;
     }
   }
@@ -178,31 +181,28 @@ export async function fetchJsonWithRetry(
   const effectiveFetch = fetchImpl || fetch;
   const mergedInit = { ...init, headers: { ...(init.headers || {}), ...headers } };
 
-  return withRetry(
-    async (attempt) => {
-      logger?.debug?.(`GET ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
-      try {
-        const res = await effectiveFetch(url, mergedInit);
-        logger?.debug?.(`Response: ${res.status}`);
-        if (!res.ok) {
-          const body = await res.text().catch(() => '');
-          const error = buildError
-            ? buildError(res, body, attempt)
-            : Object.assign(new Error(`HTTP request failed: ${res.status} ${res.statusText}`), {
-                statusCode: res.status,
-                responseBody: body
-              });
-          throw error;
-        }
-        return res.json();
-      } catch (err) {
-        if (err.statusCode || err.responseBody || err.isNetworkError) {
-          // Already classified error
-          throw err;
-        }
-        throw new NetworkError(err.message, err);
+  return withRetry(async (attempt) => {
+    logger?.debug?.(`GET ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
+    try {
+      const res = await effectiveFetch(url, mergedInit);
+      logger?.debug?.(`Response: ${res.status}`);
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        const error = buildError
+          ? buildError(res, body, attempt)
+          : Object.assign(new Error(`HTTP request failed: ${res.status} ${res.statusText}`), {
+              statusCode: res.status,
+              responseBody: body,
+            });
+        throw error;
       }
-    },
-    retryOptions
-  );
+      return res.json();
+    } catch (err) {
+      if (err.statusCode || err.responseBody || err.isNetworkError) {
+        // Already classified error
+        throw err;
+      }
+      throw new NetworkError(err.message, err);
+    }
+  }, retryOptions);
 }

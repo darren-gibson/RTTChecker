@@ -19,14 +19,14 @@ describe('Integration tests - getTrainStatus with real data', () => {
       minAfterMinutes: 20,
       windowMinutes: 60,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     // Should select the 06:39 train (arrives at KNGX at 07:32, earliest after offset)
     expect(result.selected).toBeDefined();
-  expect(result.selected.locationDetail.gbttBookedDeparture).toBe('0639');
-  expect(result.selected.locationDetail.destination[0].tiploc).toBe('KNGX');
-  expect(result.selected.locationDetail.destination[0].publicTime).toBe('0732');
+    expect(result.selected.locationDetail.gbttBookedDeparture).toBe('0639');
+    expect(result.selected.locationDetail.destination[0].tiploc).toBe('KNGX');
+    expect(result.selected.locationDetail.destination[0].publicTime).toBe('0732');
     // Should be on time (or update as needed)
     expect(result.status).toBe(TrainStatus.ON_TIME);
   });
@@ -38,7 +38,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
     // Mock fetch to return the local JSON data
     const fetchMock = async () => ({
       ok: true,
-      json: async () => JSON.parse(json)
+      json: async () => JSON.parse(json),
     });
 
     // Simulate current time at 12:20 BST
@@ -51,14 +51,14 @@ describe('Integration tests - getTrainStatus with real data', () => {
       minAfterMinutes: 20,
       windowMinutes: 60,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     // Verify the selected train
     expect(result.selected).toBeDefined();
     expect(result.selected.locationDetail.gbttBookedDeparture).toBe('1322');
     expect(result.selected.trainIdentity).toBe('1T31');
-    
+
     // Verify the status is 'on time' (running on time)
     expect(result.status).toBe(TrainStatus.ON_TIME);
   });
@@ -77,7 +77,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
       minAfterMinutes: 5,
       windowMinutes: 10,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     expect(result.selected).toBeDefined();
@@ -100,13 +100,13 @@ describe('Integration tests - getTrainStatus with real data', () => {
       minAfterMinutes: 5,
       windowMinutes: 30,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     expect(result.selected).toBeDefined();
     expect(result.selected.locationDetail.gbttBookedDeparture).toBe('1313');
     expect(result.selected.locationDetail.displayAs).toBe('CANCELLED_CALL');
-    
+
     // Cancelled trains should be marked as 'major delay'
     expect(result.status).toBe(TrainStatus.MAJOR_DELAY);
   });
@@ -123,10 +123,10 @@ describe('Integration tests - getTrainStatus with real data', () => {
     const result = await getTrainStatus({
       originTiploc: 'CAMBDGE',
       destTiploc: 'KNGX',
-      minAfterMinutes: 500,  // 500 minutes in the future
+      minAfterMinutes: 500, // 500 minutes in the future
       windowMinutes: 10,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     expect(result.selected).toBeNull();
@@ -147,7 +147,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
       minAfterMinutes: 5,
       windowMinutes: 60,
       now,
-      fetchImpl: fetchMock
+      fetchImpl: fetchMock,
     });
 
     // Verify the selected train
@@ -155,7 +155,7 @@ describe('Integration tests - getTrainStatus with real data', () => {
     expect(result.selected.locationDetail.gbttBookedDeparture).toBe('1410');
     expect(result.selected.locationDetail.realtimeDeparture).toBe('1422');
     expect(result.selected.trainIdentity).toBe('1B78');
-    
+
     // Verify the status - 12 minutes late (calculated from 1410 booked vs 1422 realtime) should be 'major delay' (>10 mins)
     expect(result.status).toBe(TrainStatus.MAJOR_DELAY);
   });

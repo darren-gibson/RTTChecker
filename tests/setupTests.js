@@ -20,8 +20,8 @@ try {
     // Monkey-patch get() to always return silent logger in tests
     const originalGet = realLogger.Logger.get.bind(realLogger.Logger);
     realLogger.Logger.get = (...args) => {
-      try { 
-        originalGet(...args); 
+      try {
+        originalGet(...args);
       } catch (_) {
         // Ignore logger initialization errors
       }

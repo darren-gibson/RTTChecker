@@ -32,14 +32,18 @@ export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"
 ```
 
 ## Essentials
+
 Set required env vars (see [README](../README.md) for full list):
+
 ```bash
 export RTT_USER=your_username
 export RTT_PASS=your_password
 export ORIGIN_TIPLOC=CAMBDGE
 export DEST_TIPLOC=KNGX
 ```
+
 Optional (override names / interval):
+
 ```bash
 export STATUS_DEVICE_NAME="Cambridge-London Status"
 export DELAY_DEVICE_NAME="Cambridge-London Delay"
@@ -100,42 +104,50 @@ Device Information:
    - OR tap "Set up without QR code" and enter manual code
 
 **On First Pairing:**
+
 - You may be prompted to allow network access
+
 ### 4. Verify It's Working
 
 **In Terminal:**
 You'll see updates like:
+
 ```
 🔄 Train status changed: 4 -> 0 (on_time)
 💡 Device state: ON (on time)
 ```
 
 **In Google Home App:**
+
 - You should see TWO endpoints/devices. Default names are derived from the route:
   - `<ORIGIN>-<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
 - If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
+
 ### Bridge mode and names
+
 - The app now exposes a Bridge (Aggregator) endpoint with two bridged devices under it.
 - Per-endpoint names are advertised via the Bridged Device Basic Information cluster using:
-   - `nodeLabel`: endpoint-specific label (Status/Delay names)
-   - `productName` and `productLabel`: a friendly product identifier
+  - `nodeLabel`: endpoint-specific label (Status/Delay names)
+  - `productName` and `productLabel`: a friendly product identifier
 - Google Home should display these bridged devices with their labels beneath a single bridge.
 - If Google Home shows generic names, you can rename each bridged device in the app after commissioning.
 
 **Voice Control (Recommended):**
+
 - "Hey Google, what's the temperature of Train Delay Sensor?"
 - "Hey Google, what's Train Delay Sensor's temperature?"
 - Assign to a room and ask: "Hey Google, what's the temperature in <room>?"
 
-
 ### 5. Create Automations
 
 **Example: Alert on Delay**
+
 1. Google Home app → Automations
 2. When: Train Status turns OFF
 3. Then: Send notification "Train is delayed!"
 
 **Example: All Clear Light**
+
 1. When: Train Status turns ON
 2. Then: Turn living room light green
 
@@ -144,11 +156,13 @@ You'll see updates like:
 ### Device Won't Commission
 
 **Check Network:**
+
 - Device and phone must be on same network
 - Firewall may block mDNS (port 5353)
 - Try disabling VPN
 
 **Reset Commissioning:**
+
 ```bash
 # Stop the device (Ctrl+C)
 # Delete storage
@@ -160,6 +174,7 @@ npm start
 ### Device Shows as Offline
 
 **Check Process:**
+
 ```bash
 # Device must be running continuously
 npm start
@@ -172,6 +187,7 @@ Look for errors in terminal output
 ### Status Not Updating
 
 **Verify RTT Credentials:**
+
 ```bash
 # Test API access
 curl -u "$RTT_USER:$RTT_PASS" \
@@ -179,6 +195,7 @@ curl -u "$RTT_USER:$RTT_PASS" \
 ```
 
 **Check Train Parameters:**
+
 - Ensure `ORIGIN_TIPLOC` and `DEST_TIPLOC` are valid
 - Verify trains run during current time
 - Check `MIN_AFTER_MINUTES` isn't too large
@@ -187,15 +204,16 @@ curl -u "$RTT_USER:$RTT_PASS" \
 
 - Mode Select endpoint shows the discrete status (On Time / Minor / Delayed / Major / Unknown)
 - Temperature Sensor endpoint shows numeric delay with a simple mapping:
-   - Temperature (°C) = Minutes delayed
-   - Negative values = minutes early
-   - Range capped to -10°C … 50°C
+  - Temperature (°C) = Minutes delayed
+  - Negative values = minutes early
+  - Range capped to -10°C … 50°C
 
 ## Advanced Configuration
 
 ### Running in Background
 
 **Using PM2:**
+
 ```bash
 npm install -g pm2
 pm2 start index.js --name train-status
@@ -204,6 +222,7 @@ pm2 stop train-status
 ```
 
 **Using systemd (Linux):**
+
 ```bash
 # Create /etc/systemd/system/train-status.service
 sudo systemctl enable train-status
@@ -229,6 +248,7 @@ docker run -d \
 ```
 
 **Important:** `--network host` is **required** for Matter commissioning because:
+
 - Matter uses UDP port 5540 for device communication
 - mDNS uses UDP port 5353 for device discovery
 - Bridge networking breaks mDNS multicast packets
@@ -247,7 +267,8 @@ npm start
 ### Multiple Devices
 
 To run multiple instances (different routes):
-```bash
+
+````bash
 # Terminal 1: Cambridge → London
 export DEVICE_NAME="Cambridge Train"
 export DISCRIMINATOR=3840
@@ -267,14 +288,16 @@ Override with:
 ```bash
 export STATUS_DEVICE_NAME="Cambridge-London Train Status"
 export DELAY_DEVICE_NAME="Cambridge-London Train Delay"
-```
+````
 
 Guidelines:
+
 - Keep names unique across simultaneous instances to avoid confusion in controllers.
 - Shorter names improve voice commands (you can further rename inside Google Home).
 - Avoid emojis or special characters if a controller strips them.
 
 Example two-route setup:
+
 ```bash
 # Cambridge → London
 export ORIGIN_TIPLOC=CAMBDGE
@@ -291,14 +314,16 @@ export DELAY_DEVICE_NAME="L→C Delay"
 npm start
 ```
 
-# Terminal 2: London → Cambridge  
+# Terminal 2: London → Cambridge
+
 export DEVICE_NAME="London Train"
-export DISCRIMINATOR=3841  # Must be different!
-export PASSCODE=20202022   # Must be different!
+export DISCRIMINATOR=3841 # Must be different!
+export PASSCODE=20202022 # Must be different!
 export ORIGIN_TIPLOC="KNGX"
 export DEST_TIPLOC="CAMBDGE"
 npm start
-```
+
+````
 
 ### Viewing Matter Communication
 
@@ -306,11 +331,12 @@ npm start
 ```bash
 export MATTER_LOG_LEVEL=debug
 npm start
-```
+````
 
 ### Simulating Status Changes
 
 For testing automations without waiting for real trains:
+
 ```javascript
 // Temporarily modify src/MatterDevice.js updateTrainStatus()
 // to return different statuses manually
@@ -321,6 +347,7 @@ For testing automations without waiting for real trains:
 ✅ Device is commissioned and working!
 
 Now you can:
+
 - Create automations based on train status
 - Monitor status from anywhere via Google Home app
 - Set up notifications for delays
@@ -329,6 +356,7 @@ Now you can:
 ---
 
 **Need Help?**
+
 - Check [README](../README.md) for device architecture details
 - Review [tests/](../tests/) folder for behavior examples
 - Enable debug logging for detailed output

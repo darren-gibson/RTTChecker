@@ -1,673 +1,673 @@
 {
-    "serviceUid": "Y31127",
-    "runDate": "2025-10-17",
-    "serviceType": "train",
-    "isPassenger": true,
-    "trainIdentity": "2C23",
-    "powerType": "EMU",
-    "trainClass": "B",
-    "atocCode": "GN",
-    "atocName": "Great Northern",
-    "performanceMonitored": true,
-    "origin": [
+  "serviceUid": "Y31127",
+  "runDate": "2025-10-17",
+  "serviceType": "train",
+  "isPassenger": true,
+  "trainIdentity": "2C23",
+  "powerType": "EMU",
+  "trainClass": "B",
+  "atocCode": "GN",
+  "atocName": "Great Northern",
+  "performanceMonitored": true,
+  "origin": [
+    {
+      "tiploc": "CAMBDGE",
+      "description": "Cambridge",
+      "workingTime": "095700",
+      "publicTime": "0957"
+    }
+  ],
+  "destination": [
+    {
+      "tiploc": "KNGX",
+      "description": "London Kings Cross",
+      "workingTime": "112000",
+      "publicTime": "1120"
+    }
+  ],
+  "locations": [
+    {
+      "realtimeActivated": true,
+      "tiploc": "CAMBDGE",
+      "crs": "CBG",
+      "description": "Cambridge",
+      "gbttBookedDeparture": "0957",
+      "origin": [
         {
-            "tiploc": "CAMBDGE",
-            "description": "Cambridge",
-            "workingTime": "095700",
-            "publicTime": "0957"
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
         }
-    ],
-    "destination": [
+      ],
+      "destination": [
         {
-            "tiploc": "KNGX",
-            "description": "London Kings Cross",
-            "workingTime": "112000",
-            "publicTime": "1120"
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
         }
-    ],
-    "locations": [
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeDeparture": "0959",
+      "realtimeDepartureActual": true,
+      "realtimeGbttDepartureLateness": 2,
+      "platform": "2",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "UM",
+      "lineConfirmed": true,
+      "displayAs": "ORIGIN"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "FOXTON",
+      "crs": "FXN",
+      "description": "Foxton",
+      "gbttBookedArrival": "1006",
+      "gbttBookedDeparture": "1006",
+      "origin": [
         {
-            "realtimeActivated": true,
-            "tiploc": "CAMBDGE",
-            "crs": "CBG",
-            "description": "Cambridge",
-            "gbttBookedDeparture": "0957",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeDeparture": "0959",
-            "realtimeDepartureActual": true,
-            "realtimeGbttDepartureLateness": 2,
-            "platform": "2",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "UM",
-            "lineConfirmed": true,
-            "displayAs": "ORIGIN"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "FOXTON",
-            "crs": "FXN",
-            "description": "Foxton",
-            "gbttBookedArrival": "1006",
-            "gbttBookedDeparture": "1006",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1010",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1010",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 4,
-            "realtimeGbttDepartureLateness": 4,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "SHPRTH",
-            "crs": "STH",
-            "description": "Shepreth",
-            "gbttBookedArrival": "1009",
-            "gbttBookedDeparture": "1009",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1012",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1013",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 4,
-            "realtimeGbttDepartureLateness": 4,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "MELDRTH",
-            "crs": "MEL",
-            "description": "Meldreth",
-            "gbttBookedArrival": "1012",
-            "gbttBookedDeparture": "1012",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1016",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1017",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 4,
-            "realtimeGbttDepartureLateness": 5,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "ROYSTON",
-            "crs": "RYS",
-            "description": "Royston",
-            "gbttBookedArrival": "1017",
-            "gbttBookedDeparture": "1017",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1021",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1022",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 4,
-            "realtimeGbttDepartureLateness": 4,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "UR",
-            "lineConfirmed": true,
-            "path": "UR",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "BALDOCK",
-            "crs": "BDK",
-            "description": "Baldock",
-            "gbttBookedArrival": "1025",
-            "gbttBookedDeparture": "1025",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1029",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1030",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 4,
-            "realtimeGbttDepartureLateness": 5,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "LTCE",
-            "crs": "LET",
-            "description": "Letchworth",
-            "gbttBookedArrival": "1028",
-            "gbttBookedDeparture": "1028",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1033",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1034",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 5,
-            "realtimeGbttDepartureLateness": 5,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "UR",
-            "lineConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "HITCHIN",
-            "crs": "HIT",
-            "description": "Hitchin",
-            "gbttBookedArrival": "1033",
-            "gbttBookedDeparture": "1033",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1038",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1038",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 5,
-            "realtimeGbttDepartureLateness": 5,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "US",
-            "lineConfirmed": true,
-            "path": "UR",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "STEVNGE",
-            "crs": "SVG",
-            "description": "Stevenage",
-            "gbttBookedArrival": "1038",
-            "gbttBookedDeparture": "1039",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1043",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1044",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 5,
-            "realtimeGbttDepartureLateness": 5,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "US",
-            "lineConfirmed": true,
-            "path": "US",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "KNEBWTH",
-            "crs": "KBW",
-            "description": "Knebworth",
-            "gbttBookedArrival": "1042",
-            "gbttBookedDeparture": "1042",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1048",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1048",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 6,
-            "realtimeGbttDepartureLateness": 6,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "WLWYNN",
-            "crs": "WLW",
-            "description": "Welwyn North",
-            "gbttBookedArrival": "1046",
-            "gbttBookedDeparture": "1046",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1052",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1053",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 7,
-            "realtimeGbttDepartureLateness": 7,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "WLWYNGC",
-            "crs": "WGC",
-            "description": "Welwyn Garden City",
-            "gbttBookedArrival": "1050",
-            "gbttBookedDeparture": "1051",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1056",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1057",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 7,
-            "realtimeGbttDepartureLateness": 6,
-            "platform": "2",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "US",
-            "lineConfirmed": true,
-            "path": "US",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "HATFILD",
-            "crs": "HAT",
-            "description": "Hatfield",
-            "gbttBookedArrival": "1054",
-            "gbttBookedDeparture": "1054",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1101",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1101",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 7,
-            "realtimeGbttDepartureLateness": 7,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "POTRSBR",
-            "crs": "PBR",
-            "description": "Potters Bar",
-            "gbttBookedArrival": "1100",
-            "gbttBookedDeparture": "1100",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1106",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1107",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 7,
-            "realtimeGbttDepartureLateness": 7,
-            "platform": "1",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "ALEXNDP",
-            "crs": "AAP",
-            "description": "Alexandra Palace",
-            "gbttBookedArrival": "1108",
-            "gbttBookedDeparture": "1109",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1116",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1116",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 8,
-            "realtimeGbttDepartureLateness": 7,
-            "platform": "2",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "US1",
-            "lineConfirmed": true,
-            "path": "US",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "FNPK",
-            "crs": "FPK",
-            "description": "Finsbury Park",
-            "gbttBookedArrival": "1113",
-            "gbttBookedDeparture": "1114",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1126",
-            "realtimeArrivalActual": true,
-            "realtimeDeparture": "1127",
-            "realtimeDepartureActual": true,
-            "realtimeGbttArrivalLateness": 13,
-            "realtimeGbttDepartureLateness": 13,
-            "platform": "2",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "line": "US1",
-            "lineConfirmed": true,
-            "path": "US1",
-            "pathConfirmed": true,
-            "displayAs": "CALL"
-        },
-        {
-            "realtimeActivated": true,
-            "tiploc": "KNGX",
-            "crs": "KGX",
-            "description": "London Kings Cross",
-            "gbttBookedArrival": "1120",
-            "origin": [
-                {
-                    "tiploc": "CAMBDGE",
-                    "description": "Cambridge",
-                    "workingTime": "095700",
-                    "publicTime": "0957"
-                }
-            ],
-            "destination": [
-                {
-                    "tiploc": "KNGX",
-                    "description": "London Kings Cross",
-                    "workingTime": "112000",
-                    "publicTime": "1120"
-                }
-            ],
-            "isCall": true,
-            "isPublicCall": true,
-            "realtimeArrival": "1132",
-            "realtimeArrivalActual": true,
-            "realtimeGbttArrivalLateness": 12,
-            "platform": "9",
-            "platformConfirmed": true,
-            "platformChanged": false,
-            "path": "E",
-            "pathConfirmed": true,
-            "displayAs": "DESTINATION",
-            "associations": [
-                {
-                    "type": "next",
-                    "associatedUid": "Y30281",
-                    "associatedRunDate": "2025-10-17"
-                }
-            ]
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
         }
-    ],
-    "realtimeActivated": true,
-    "runningIdentity": "2C23"
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1010",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1010",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 4,
+      "realtimeGbttDepartureLateness": 4,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "SHPRTH",
+      "crs": "STH",
+      "description": "Shepreth",
+      "gbttBookedArrival": "1009",
+      "gbttBookedDeparture": "1009",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1012",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1013",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 4,
+      "realtimeGbttDepartureLateness": 4,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "MELDRTH",
+      "crs": "MEL",
+      "description": "Meldreth",
+      "gbttBookedArrival": "1012",
+      "gbttBookedDeparture": "1012",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1016",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1017",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 4,
+      "realtimeGbttDepartureLateness": 5,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "ROYSTON",
+      "crs": "RYS",
+      "description": "Royston",
+      "gbttBookedArrival": "1017",
+      "gbttBookedDeparture": "1017",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1021",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1022",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 4,
+      "realtimeGbttDepartureLateness": 4,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "UR",
+      "lineConfirmed": true,
+      "path": "UR",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "BALDOCK",
+      "crs": "BDK",
+      "description": "Baldock",
+      "gbttBookedArrival": "1025",
+      "gbttBookedDeparture": "1025",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1029",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1030",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 4,
+      "realtimeGbttDepartureLateness": 5,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "LTCE",
+      "crs": "LET",
+      "description": "Letchworth",
+      "gbttBookedArrival": "1028",
+      "gbttBookedDeparture": "1028",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1033",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1034",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 5,
+      "realtimeGbttDepartureLateness": 5,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "UR",
+      "lineConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "HITCHIN",
+      "crs": "HIT",
+      "description": "Hitchin",
+      "gbttBookedArrival": "1033",
+      "gbttBookedDeparture": "1033",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1038",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1038",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 5,
+      "realtimeGbttDepartureLateness": 5,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "US",
+      "lineConfirmed": true,
+      "path": "UR",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "STEVNGE",
+      "crs": "SVG",
+      "description": "Stevenage",
+      "gbttBookedArrival": "1038",
+      "gbttBookedDeparture": "1039",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1043",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1044",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 5,
+      "realtimeGbttDepartureLateness": 5,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "US",
+      "lineConfirmed": true,
+      "path": "US",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "KNEBWTH",
+      "crs": "KBW",
+      "description": "Knebworth",
+      "gbttBookedArrival": "1042",
+      "gbttBookedDeparture": "1042",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1048",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1048",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 6,
+      "realtimeGbttDepartureLateness": 6,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "WLWYNN",
+      "crs": "WLW",
+      "description": "Welwyn North",
+      "gbttBookedArrival": "1046",
+      "gbttBookedDeparture": "1046",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1052",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1053",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 7,
+      "realtimeGbttDepartureLateness": 7,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "WLWYNGC",
+      "crs": "WGC",
+      "description": "Welwyn Garden City",
+      "gbttBookedArrival": "1050",
+      "gbttBookedDeparture": "1051",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1056",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1057",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 7,
+      "realtimeGbttDepartureLateness": 6,
+      "platform": "2",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "US",
+      "lineConfirmed": true,
+      "path": "US",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "HATFILD",
+      "crs": "HAT",
+      "description": "Hatfield",
+      "gbttBookedArrival": "1054",
+      "gbttBookedDeparture": "1054",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1101",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1101",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 7,
+      "realtimeGbttDepartureLateness": 7,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "POTRSBR",
+      "crs": "PBR",
+      "description": "Potters Bar",
+      "gbttBookedArrival": "1100",
+      "gbttBookedDeparture": "1100",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1106",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1107",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 7,
+      "realtimeGbttDepartureLateness": 7,
+      "platform": "1",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "ALEXNDP",
+      "crs": "AAP",
+      "description": "Alexandra Palace",
+      "gbttBookedArrival": "1108",
+      "gbttBookedDeparture": "1109",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1116",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1116",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 8,
+      "realtimeGbttDepartureLateness": 7,
+      "platform": "2",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "US1",
+      "lineConfirmed": true,
+      "path": "US",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "FNPK",
+      "crs": "FPK",
+      "description": "Finsbury Park",
+      "gbttBookedArrival": "1113",
+      "gbttBookedDeparture": "1114",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1126",
+      "realtimeArrivalActual": true,
+      "realtimeDeparture": "1127",
+      "realtimeDepartureActual": true,
+      "realtimeGbttArrivalLateness": 13,
+      "realtimeGbttDepartureLateness": 13,
+      "platform": "2",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "line": "US1",
+      "lineConfirmed": true,
+      "path": "US1",
+      "pathConfirmed": true,
+      "displayAs": "CALL"
+    },
+    {
+      "realtimeActivated": true,
+      "tiploc": "KNGX",
+      "crs": "KGX",
+      "description": "London Kings Cross",
+      "gbttBookedArrival": "1120",
+      "origin": [
+        {
+          "tiploc": "CAMBDGE",
+          "description": "Cambridge",
+          "workingTime": "095700",
+          "publicTime": "0957"
+        }
+      ],
+      "destination": [
+        {
+          "tiploc": "KNGX",
+          "description": "London Kings Cross",
+          "workingTime": "112000",
+          "publicTime": "1120"
+        }
+      ],
+      "isCall": true,
+      "isPublicCall": true,
+      "realtimeArrival": "1132",
+      "realtimeArrivalActual": true,
+      "realtimeGbttArrivalLateness": 12,
+      "platform": "9",
+      "platformConfirmed": true,
+      "platformChanged": false,
+      "path": "E",
+      "pathConfirmed": true,
+      "displayAs": "DESTINATION",
+      "associations": [
+        {
+          "type": "next",
+          "associatedUid": "Y30281",
+          "associatedRunDate": "2025-10-17"
+        }
+      ]
+    }
+  ],
+  "realtimeActivated": true,
+  "runningIdentity": "2C23"
 }

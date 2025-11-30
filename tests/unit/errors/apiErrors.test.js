@@ -6,7 +6,7 @@ describe('RTTApiError', () => {
     const error = new RTTApiError('Request failed', {
       statusCode: 502,
       endpoint: 'https://api.example.com/data',
-      responseBody: 'Bad Gateway'
+      responseBody: 'Bad Gateway',
     });
     expect(error).toBeInstanceOf(RTTCheckerError);
     expect(error.name).toBe('RTTApiError');
@@ -41,7 +41,7 @@ describe('RTTApiError', () => {
   test('serializes with API-specific fields', () => {
     const error = new RTTApiError('Failed', {
       statusCode: 500,
-      endpoint: 'https://api.test.com'
+      endpoint: 'https://api.test.com',
     });
     const json = error.toJSON();
     expect(json.statusCode).toBe(500);

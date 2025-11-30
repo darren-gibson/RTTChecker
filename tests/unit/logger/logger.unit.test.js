@@ -3,7 +3,14 @@
  * Tests enforcement logic, Logger.get patching, and edge cases
  */
 
-import { log, loggers, setLogLevel, Logger, Level, cleanupLoggerIntervals } from '../../../src/utils/logger.js';
+import {
+  log,
+  loggers,
+  setLogLevel,
+  Logger,
+  Level,
+  cleanupLoggerIntervals,
+} from '../../../src/utils/logger.js';
 
 describe('Logger enforcement logic', () => {
   afterAll(() => {
@@ -12,13 +19,13 @@ describe('Logger enforcement logic', () => {
   });
   test('setLogLevel changes the log level', () => {
     const originalLevel = Logger.defaultLogLevel;
-    
+
     setLogLevel('warn');
     expect(process.env.LOG_LEVEL).toBe('warn');
-    
+
     setLogLevel('error');
     expect(process.env.LOG_LEVEL).toBe('error');
-    
+
     // Restore
     setLogLevel('info');
     Logger.defaultLogLevel = originalLevel;
@@ -27,24 +34,24 @@ describe('Logger enforcement logic', () => {
   test('setLogLevel ignores invalid levels', () => {
     const originalLevel = Logger.defaultLogLevel;
     const originalEnv = process.env.LOG_LEVEL;
-    
+
     setLogLevel('invalid-level');
     // Level should not have changed
     expect(Logger.defaultLogLevel).toBe(originalLevel);
-    
+
     // Restore
     process.env.LOG_LEVEL = originalEnv;
   });
 
   test('setLogLevel with case variations', () => {
     const originalLevel = Logger.defaultLogLevel;
-    
+
     setLogLevel('DEBUG');
     expect(process.env.LOG_LEVEL).toBe('DEBUG');
-    
+
     setLogLevel('WaRn');
     expect(process.env.LOG_LEVEL).toBe('WaRn');
-    
+
     // Restore
     setLogLevel('info');
     Logger.defaultLogLevel = originalLevel;
@@ -53,35 +60,35 @@ describe('Logger enforcement logic', () => {
   test('Logger.get creates facility loggers', () => {
     const testFacility = 'test-facility-' + Date.now();
     const testLogger = Logger.get(testFacility);
-    
+
     expect(testLogger).toBeDefined();
     expect(typeof testLogger.error).toBe('function');
     expect(typeof testLogger.warn).toBe('function');
     expect(typeof testLogger.info).toBe('function');
     expect(typeof testLogger.debug).toBe('function');
-    
+
     // Verify it's in the logLevels registry
     expect(Logger.logLevels[testFacility]).toBeDefined();
-    
+
     // Clean up
     delete Logger.logLevels[testFacility];
   });
 
   test('Logger.get respects minimum log level for new facilities', () => {
     const testFacility = 'test-min-level-' + Date.now();
-    
+
     // Create a new facility
     const testLogger = Logger.get(testFacility);
     expect(testLogger).toBeDefined();
-    
+
     // Verify it was created with a defined level
     const facilityLevel = Logger.logLevels[testFacility];
     expect(facilityLevel).toBeDefined();
     expect(typeof facilityLevel).toBe('number');
-    
+
     // Should be at least INFO level (1) in test environment
     expect(facilityLevel).toBeGreaterThanOrEqual(Level.INFO);
-    
+
     // Clean up
     delete Logger.logLevels[testFacility];
   });
@@ -104,7 +111,7 @@ describe('Logger enforcement logic', () => {
     expect(loggers.rtt).toBeDefined();
     expect(loggers.matter).toBeDefined();
     expect(loggers.bridge).toBeDefined();
-    
+
     // Verify they're actual logger instances
     expect(typeof loggers.rtt.error).toBe('function');
     expect(typeof loggers.matter.warn).toBe('function');

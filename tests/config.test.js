@@ -68,13 +68,15 @@ describe('validateConfig', () => {
     const mockConfig = { rtt: { pass: 'test' } };
     const validateFn = () => {
       const errors = [];
-      if (!mockConfig.rtt.user) errors.push('RTT_USER environment variable is required (RTT API username)');
-      if (!mockConfig.rtt.pass) errors.push('RTT_PASS environment variable is required (RTT API password)');
+      if (!mockConfig.rtt.user)
+        errors.push('RTT_USER environment variable is required (RTT API username)');
+      if (!mockConfig.rtt.pass)
+        errors.push('RTT_PASS environment variable is required (RTT API password)');
       if (errors.length > 0) throw new Error('Configuration validation failed');
     };
     expect(() => validateFn()).toThrow(/Configuration validation failed/);
   });
-  
+
   test('throws error when RTT_PASS is missing', () => {
     const mockConfig = { rtt: { user: 'test' } };
     const validateFn = () => {
@@ -85,7 +87,7 @@ describe('validateConfig', () => {
     };
     expect(() => validateFn()).toThrow(/Configuration validation failed/);
   });
-  
+
   test('throws error when both credentials are missing', () => {
     const mockConfig = { rtt: {} };
     const validateFn = () => {
@@ -96,7 +98,7 @@ describe('validateConfig', () => {
     };
     expect(() => validateFn()).toThrow(/Configuration validation failed/);
   });
-  
+
   test('passes validation when both credentials present', () => {
     const mockConfig = { rtt: { user: 'test', pass: 'pass' } };
     const validateFn = () => {

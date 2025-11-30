@@ -12,8 +12,12 @@ export class RTTApiError extends RTTCheckerError {
     this.endpoint = options.endpoint;
   }
 
-  isAuthError() { return this.statusCode === 401 || this.statusCode === 403; }
-  isRetryable() { return this.statusCode >= 500 || !this.statusCode; }
+  isAuthError() {
+    return this.statusCode === 401 || this.statusCode === 403;
+  }
+  isRetryable() {
+    return this.statusCode >= 500 || !this.statusCode;
+  }
 
   toJSON() {
     return {
@@ -21,7 +25,7 @@ export class RTTApiError extends RTTCheckerError {
       statusCode: this.statusCode,
       endpoint: this.endpoint,
       isAuthError: this.isAuthError(),
-      isRetryable: this.isRetryable()
+      isRetryable: this.isRetryable(),
     };
   }
 }

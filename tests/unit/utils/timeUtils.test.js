@@ -1,4 +1,9 @@
-import { hhmmToMins, adjustForDayRollover, isWithinTimeWindow, formatDateYMD } from '../../../src/utils/timeUtils.js';
+import {
+  hhmmToMins,
+  adjustForDayRollover,
+  isWithinTimeWindow,
+  formatDateYMD,
+} from '../../../src/utils/timeUtils.js';
 
 describe('time utilities', () => {
   describe('hhmmToMins', () => {

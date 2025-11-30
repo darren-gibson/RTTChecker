@@ -1,7 +1,7 @@
 module.exports = {
   testEnvironment: 'node',
   transform: {
-    '^.+\\.js$': 'babel-jest'
+    '^.+\\.js$': 'babel-jest',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setupTests.js'],
   coverageThreshold: {
@@ -23,5 +23,5 @@ module.exports = {
       lines: 90,
       statements: 90,
     },
-  }
+  },
 };

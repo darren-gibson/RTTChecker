@@ -10,15 +10,15 @@ describe('calculateOnTimeStatus', () => {
     const service = {
       locationDetail: {
         cancelReasonCode: 'CANCEL',
-        displayAs: 'CANCELLED_CALL'
-      }
+        displayAs: 'CANCELLED_CALL',
+      },
     };
     expect(calculateOnTimeStatus(service)).toBe('major_delay');
   });
 
   test('maps lateness ranges correctly', () => {
     const createService = (lateness) => ({
-      locationDetail: { realtimeActivated: true, realtimeGbttDepartureLateness: lateness }
+      locationDetail: { realtimeActivated: true, realtimeGbttDepartureLateness: lateness },
     });
 
     // Note: Uses absolute value, so -2 early = 2 minutes = on_time, -5 early = 5 minutes = minor_delay
@@ -38,8 +38,8 @@ describe('calculateOnTimeStatus', () => {
       locationDetail: {
         realtimeActivated: true,
         gbttBookedDeparture: '1030',
-        realtimeDeparture: '1040'
-      }
+        realtimeDeparture: '1040',
+      },
     };
     // 10:40 - 10:30 = 10 minutes late
     expect(calculateOnTimeStatus(service)).toBe('delayed');

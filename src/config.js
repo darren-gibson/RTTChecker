@@ -11,7 +11,7 @@ export const config = {
   // RTT API credentials
   rtt: {
     user: process.env.RTT_USER,
-    pass: process.env.RTT_PASS
+    pass: process.env.RTT_PASS,
   },
 
   // Train search defaults
@@ -19,13 +19,13 @@ export const config = {
     originTiploc: process.env.ORIGIN_TIPLOC || 'CAMBDGE',
     destTiploc: process.env.DEST_TIPLOC || 'KNGX',
     minAfterMinutes: Number(process.env.MIN_AFTER_MINUTES || 20),
-    windowMinutes: Number(process.env.WINDOW_MINUTES || 60)
+    windowMinutes: Number(process.env.WINDOW_MINUTES || 60),
   },
 
   // Server configuration (for testing/debugging)
   server: {
     port: Number(process.env.PORT || 8080),
-    nodeEnv: process.env.NODE_ENV
+    nodeEnv: process.env.NODE_ENV,
   },
 
   // Matter device configuration
@@ -38,8 +38,8 @@ export const config = {
     passcode: Number(process.env.PASSCODE || 20202021),
     // Use a Bridge (Aggregator) to group endpoints under a single device.
     // Set USE_BRIDGE=false to expose endpoints directly without a bridge in controllers like Google Home.
-    useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false'
-  }
+    useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false',
+  },
 };
 
 /**
@@ -59,8 +59,12 @@ function sanitizeDeviceName(name) {
 const defaultStatusName = `${config.train.originTiploc}-${config.train.destTiploc} Train Status`;
 const defaultDelayName = `${config.train.originTiploc}-${config.train.destTiploc} Train Delay`;
 
-config.matter.statusDeviceName = sanitizeDeviceName(process.env.STATUS_DEVICE_NAME || defaultStatusName);
-config.matter.delayDeviceName = sanitizeDeviceName(process.env.DELAY_DEVICE_NAME || defaultDelayName);
+config.matter.statusDeviceName = sanitizeDeviceName(
+  process.env.STATUS_DEVICE_NAME || defaultStatusName
+);
+config.matter.delayDeviceName = sanitizeDeviceName(
+  process.env.DELAY_DEVICE_NAME || defaultDelayName
+);
 
 /**
  * Check if running in test environment
@@ -79,17 +83,23 @@ const envSchema = z.object({
   // Required RTT API credentials
   RTT_USER: z.string().min(1, 'RTT_USER must not be empty'),
   RTT_PASS: z.string().min(1, 'RTT_PASS must not be empty'),
-  
+
   // Optional train search configuration
-  ORIGIN_TIPLOC: z.string().regex(/^[A-Z0-9]{3,8}$/, 'ORIGIN_TIPLOC must be 3-8 uppercase alphanumeric characters').optional(),
-  DEST_TIPLOC: z.string().regex(/^[A-Z0-9]{3,8}$/, 'DEST_TIPLOC must be 3-8 uppercase alphanumeric characters').optional(),
+  ORIGIN_TIPLOC: z
+    .string()
+    .regex(/^[A-Z0-9]{3,8}$/, 'ORIGIN_TIPLOC must be 3-8 uppercase alphanumeric characters')
+    .optional(),
+  DEST_TIPLOC: z
+    .string()
+    .regex(/^[A-Z0-9]{3,8}$/, 'DEST_TIPLOC must be 3-8 uppercase alphanumeric characters')
+    .optional(),
   MIN_AFTER_MINUTES: z.coerce.number().int().min(0).max(1440).optional(),
   WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).optional(),
-  
+
   // Optional server configuration
   PORT: z.coerce.number().int().min(1).max(65535).optional(),
   NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
-  
+
   // Optional Matter device configuration
   DEVICE_NAME: z.string().max(64).optional(),
   VENDOR_NAME: z.string().max(64).optional(),
@@ -100,7 +110,7 @@ const envSchema = z.object({
   USE_BRIDGE: z.enum(['true', 'false']).optional(),
   STATUS_DEVICE_NAME: z.string().max(64).optional(),
   DELAY_DEVICE_NAME: z.string().max(64).optional(),
-  
+
   // Optional logging configuration
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
   MATTER_LOG_FORMAT: z.enum(['ansi', 'plain', 'html']).optional(),
@@ -115,53 +125,65 @@ export function validateConfig() {
   try {
     // Validate only the fields that are actually set or required
     const envToValidate = {};
-    
+
     // Always validate required fields
     envToValidate.RTT_USER = process.env.RTT_USER;
     envToValidate.RTT_PASS = process.env.RTT_PASS;
-    
+
     // Add optional fields if they exist
     const optionalFields = [
-      'ORIGIN_TIPLOC', 'DEST_TIPLOC', 'MIN_AFTER_MINUTES', 'WINDOW_MINUTES',
-      'PORT', 'NODE_ENV', 'DEVICE_NAME', 'VENDOR_NAME', 'PRODUCT_NAME',
-      'SERIAL_NUMBER', 'DISCRIMINATOR', 'PASSCODE', 'USE_BRIDGE',
-      'STATUS_DEVICE_NAME', 'DELAY_DEVICE_NAME', 'LOG_LEVEL',
-      'MATTER_LOG_FORMAT', 'EXIT_AFTER_MS'
+      'ORIGIN_TIPLOC',
+      'DEST_TIPLOC',
+      'MIN_AFTER_MINUTES',
+      'WINDOW_MINUTES',
+      'PORT',
+      'NODE_ENV',
+      'DEVICE_NAME',
+      'VENDOR_NAME',
+      'PRODUCT_NAME',
+      'SERIAL_NUMBER',
+      'DISCRIMINATOR',
+      'PASSCODE',
+      'USE_BRIDGE',
+      'STATUS_DEVICE_NAME',
+      'DELAY_DEVICE_NAME',
+      'LOG_LEVEL',
+      'MATTER_LOG_FORMAT',
+      'EXIT_AFTER_MS',
     ];
-    
+
     for (const field of optionalFields) {
       if (process.env[field] !== undefined) {
         envToValidate[field] = process.env[field];
       }
     }
-    
+
     // Validate with Zod schema
     envSchema.parse(envToValidate);
-    
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const issues = error.issues.map(issue => {
+      const issues = error.issues.map((issue) => {
         const path = issue.path.join('.');
         return `   • ${path}: ${issue.message}`;
       });
-      
+
       const msg = [
         '❌ Configuration validation failed:',
         ...issues,
         '',
         'Please fix the configuration errors and restart.',
-        'See README.md for configuration details.'
+        'See README.md for configuration details.',
       ].join('\n');
-      
+
       throw new ConfigurationError(msg, {
         validationErrors: error.issues,
         context: {
           rttUser: config.rtt.user ? '(set)' : '(not set)',
-          rttPass: config.rtt.pass ? '(set)' : '(not set)'
-        }
+          rttPass: config.rtt.pass ? '(set)' : '(not set)',
+        },
       });
     }
-    
+
     // Re-throw non-Zod errors
     throw error;
   }

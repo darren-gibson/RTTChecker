@@ -22,7 +22,7 @@ describe('TrainStatusDevice - periodic updates', () => {
     getTrainStatus.mockResolvedValue({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0630' } },
-      raw: {}
+      raw: {},
     });
 
     device.startPeriodicUpdates();
@@ -34,13 +34,13 @@ describe('TrainStatusDevice - periodic updates', () => {
     getTrainStatus.mockResolvedValue({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0630' } },
-      raw: {}
+      raw: {},
     });
     device.startPeriodicUpdates();
     await Promise.resolve();
     device.stopPeriodicUpdates();
     // advance timers to ensure no further calls
-    await jest.advanceTimersByTimeAsync(2 * (Number(process.env.UPDATE_INTERVAL_MS || 60000)));
+    await jest.advanceTimersByTimeAsync(2 * Number(process.env.UPDATE_INTERVAL_MS || 60000));
     expect(getTrainStatus.mock.calls.length).toBeGreaterThan(0);
   });
 });

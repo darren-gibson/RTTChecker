@@ -23,7 +23,7 @@ describe('TrainStatusDevice events', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0630' } },
-      raw: {}
+      raw: {},
     });
 
     await device.updateTrainStatus();
@@ -46,7 +46,7 @@ describe('TrainStatusDevice events', () => {
     getTrainStatus.mockResolvedValue({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0630' } },
-      raw: {}
+      raw: {},
     });
 
     await device.updateTrainStatus();
@@ -55,7 +55,7 @@ describe('TrainStatusDevice events', () => {
     getTrainStatus.mockResolvedValue({
       status: TrainStatus.ON_TIME,
       selected: { locationDetail: { gbttBookedDeparture: '0635' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
 
@@ -71,7 +71,7 @@ describe('TrainStatusDevice events', () => {
     getTrainStatus.mockResolvedValueOnce({
       status: TrainStatus.MINOR_DELAY,
       selected: { locationDetail: { gbttBookedDeparture: '0630' } },
-      raw: {}
+      raw: {},
     });
     await device.updateTrainStatus();
     expect(device.getCurrentMode()).toBe(MatterDevice.Modes.MINOR_DELAY.mode);

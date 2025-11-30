@@ -21,8 +21,10 @@ describe('rttSearch with example response', () => {
     expect(result).toEqual(parsed);
     expect(fakeFetch).toHaveBeenCalledTimes(1);
     expect(fakeFetch).toHaveBeenCalledWith(
-  `https://api.rtt.io/api/v1/json/search/${crs}/to/KNGX/${date}`,
-      expect.objectContaining({ headers: { Authorization: `Basic ${encodeBasicAuth(user, pass)}` } })
+      `https://api.rtt.io/api/v1/json/search/${crs}/to/KNGX/${date}`,
+      expect.objectContaining({
+        headers: { Authorization: `Basic ${encodeBasicAuth(user, pass)}` },
+      })
     );
   });
 });

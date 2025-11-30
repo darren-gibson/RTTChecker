@@ -1,7 +1,7 @@
 import { TrainStatusDevice } from './src/devices/TrainStatusDevice.js';
 import { startMatterServer } from './src/runtime/MatterServer.js';
-import { isTestEnv, validateConfig } from "./src/config.js";
-import { log } from "./src/utils/logger.js";
+import { isTestEnv, validateConfig } from './src/config.js';
+import { log } from './src/utils/logger.js';
 
 /**
  * Matter Train Status Device
@@ -23,10 +23,10 @@ if (!isTestEnv()) {
     log.error(error.message);
     process.exit(1);
   }
-  
+
   log.info('🚆 Starting Matter Train Status Device...');
   log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-  
+
   const deviceInfo = device.getDeviceInfo();
   log.info('Device Information:');
   log.info(`  Name: ${deviceInfo.deviceName}`);
@@ -34,13 +34,13 @@ if (!isTestEnv()) {
   log.info(`  Product: ${deviceInfo.productName}`);
   log.info(`  Serial: ${deviceInfo.serialNumber}`);
   log.info('');
-  
+
   // Start periodic status updates for train data
   device.startPeriodicUpdates();
 
   // Emit a debug message for runtime verification. Should only appear when LOG_LEVEL=debug.
   log.debug('🔧 Debug verification: this should be hidden unless LOG_LEVEL=debug');
-  
+
   // Start Matter server for Google Home integration
   let matterServer;
   startMatterServer(device)
@@ -52,12 +52,12 @@ if (!isTestEnv()) {
       log.error('❌ Failed to start Matter server:', error);
       process.exit(1);
     });
-  
+
   // Handle graceful shutdown
   const shutdown = async () => {
     log.info('\n\n🛑 Shutting down gracefully...');
     device.stopPeriodicUpdates();
-    
+
     if (matterServer) {
       try {
         await matterServer.close();
@@ -66,11 +66,11 @@ if (!isTestEnv()) {
         log.error('Error closing Matter server:', err);
       }
     }
-    
+
     log.info('👋 Goodbye!');
     process.exit(0);
   };
-  
+
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
 

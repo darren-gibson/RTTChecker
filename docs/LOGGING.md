@@ -41,9 +41,9 @@ import { Logger, Level } from '@project-chip/matter.js/log';
 
 // Set level for specific facility
 Logger.logLevels = {
-  'rtt-bridge': Level.DEBUG,        // Verbose RTT API logs
-  'matter-server': Level.INFO,      // Normal Matter logs
-  'MdnsScanner': Level.WARN,        // Quiet mDNS scanner
+  'rtt-bridge': Level.DEBUG, // Verbose RTT API logs
+  'matter-server': Level.INFO, // Normal Matter logs
+  MdnsScanner: Level.WARN, // Quiet mDNS scanner
 };
 
 // Enable colored output
@@ -70,9 +70,11 @@ export MATTER_LOG_LEVEL="MdnsScanner:warn,Storage:error"
 ```
 
 ### Global Floor
+
 Lower-level output (< global `LOG_LEVEL`) is suppressed; per‑facility debug only visible if global level permits.
 
 ### Timed Exit
+
 Use `EXIT_AFTER_MS` for short runs:
 
 ```bash
@@ -94,22 +96,26 @@ LOG_LEVEL=debug EXIT_AFTER_MS=2000 RTT_USER=demo RTT_PASS=demo node index.js
 If `LOG_LEVEL=info` shows any line with `DEBUG`, investigate; the guards should prevent this.
 
 ### Test
+
 `tests/logger.runtime.test.js` asserts suppression at `info` and presence at `debug`.
 
 ### Format
+
 `MATTER_LOG_FORMAT=ansi|plain|html` (default `ansi`).
 
 ### Patterns
 
-| Goal | Recommendation |
-|------|----------------|
-| Quiet production | `LOG_LEVEL=warn` (optionally bump specific facility to `ERROR`) |
-| Standard monitoring | `LOG_LEVEL=info` |
-| Full troubleshooting | `LOG_LEVEL=debug` |
-| Short CI verification | Add `EXIT_AFTER_MS` (1–3s) and `MATTER_LOG_FORMAT=plain` |
+| Goal                  | Recommendation                                                  |
+| --------------------- | --------------------------------------------------------------- |
+| Quiet production      | `LOG_LEVEL=warn` (optionally bump specific facility to `ERROR`) |
+| Standard monitoring   | `LOG_LEVEL=info`                                                |
+| Full troubleshooting  | `LOG_LEVEL=debug`                                               |
+| Short CI verification | Add `EXIT_AFTER_MS` (1–3s) and `MATTER_LOG_FORMAT=plain`        |
 
 ## Examples
+
 INFO:
+
 ```
 2024-11-26 14:30:15.123 [rtt-checker] INFO: 🚆 Device started
 2024-11-26 14:30:15.456 [matter-server] INFO: 📡 Matter server created
@@ -118,6 +124,7 @@ INFO:
 ```
 
 DEBUG:
+
 ```
 2024-11-26 14:30:15.123 [rtt-checker] DEBUG: Initializing device with update interval 60000ms
 2024-11-26 14:30:15.456 [matter-server] DEBUG: Creating endpoints with bridge enabled
@@ -128,10 +135,12 @@ DEBUG:
 ```
 
 ## Benefits
+
 1. Unified formatting
 2. Facility granularity
 3. Colored / custom formatting
 4. No extra dependency
+
 ```javascript
 // Debug only RTT API, quiet everything else
 Logger.defaultLogLevel = Level.WARN;
@@ -159,6 +168,7 @@ loggers.bridge = originalBridge;
 ```
 
 ## Migration
+
 Previous custom logger replaced; public API unchanged (`log.*`, `setLogLevel`). Facility loggers added.
 
 ## See Also
