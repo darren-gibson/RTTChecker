@@ -32,7 +32,7 @@ export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"
 ```
 
 ## Essentials
-Set required env vars (see `README.md` for full list):
+Set required env vars (see [README](../README.md) for full list):
 ```bash
 export RTT_USER=your_username
 export RTT_PASS=your_password
@@ -329,6 +329,6 @@ Now you can:
 ---
 
 **Need Help?**
-- Check `README.md` for device architecture details
-- Review `tests/` folder for behavior examples
+- Check [README](../README.md) for device architecture details
+- Review [tests/](../tests/) folder for behavior examples
 - Enable debug logging for detailed output

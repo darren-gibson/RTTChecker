@@ -63,40 +63,33 @@ Process:
 If no candidate survives filtering → status Unknown (mode 4).
 
 ## 7. Logging
-Configure via `LOG_LEVEL` / `MATTER_LOG_FORMAT`. Core facilities: `rtt-checker`, `matter-server`, `rtt-bridge`. Global level acts as minimum floor. See `docs/LOGGING.md` for patterns and examples.
+Configure via `LOG_LEVEL` / `MATTER_LOG_FORMAT`. Core facilities: `rtt-checker`, `matter-server`, `rtt-bridge`. Global level acts as minimum floor. See [docs/LOGGING.md](docs/LOGGING.md) for patterns and examples.
 
-## 8. Utilities
-`timeUtils.js` exports:
-- `hhmmToMins(hhmm)` → minutes since midnight
-- `adjustForDayRollover(depMins, nowMins)` → adds 1440 if departure is next day
-- `isWithinTimeWindow(target, start, end)` → inclusive range check
-- `formatDateYMD(date)` → `YYYY/MM/DD`
-
-## 9. Development & Testing
+## 8. Development & Testing
 ```bash
 npm test            # Full Jest suite
 npm run coverage    # (if defined) open coverage report
 ```
 Coverage includes selection logic, error handling, retry backoff jitter, and utility edge cases.
 
-## 11. Deployment
+## 10. Deployment
 Run natively for quickest iteration:
 ```bash
 npm install
 LOG_LEVEL=info node index.js
 ```
-Container (Linux host networking for mDNS/Matter) & multi‑arch build instructions are in `docs/CONTAINER_BUILD.md`.
+Container (Linux host networking for mDNS/Matter) & multi‑arch build instructions are in [docs/CONTAINER_BUILD.md](docs/CONTAINER_BUILD.md).
 
-## 12. Troubleshooting (Quick)
+## 11. Troubleshooting (Quick)
 | Issue | Action |
 |-------|--------|
 | Not discoverable | Same network + host networking (Linux) |
 | No mDNS | Open UDP 5353 & 5540; avoid VPN |
 | Auth failures | Recheck `RTT_USER` / `RTT_PASS` |
 | Frequent Unknown | Adjust offset/window; verify route runs now |
-See `docs/GOOGLE_HOME_SETUP.md` for commissioning details.
+See [docs/GOOGLE_HOME_SETUP.md](docs/GOOGLE_HOME_SETUP.md) for commissioning details.
 
-## 13. Repository Structure (Condensed)
+## 12. Repository Structure (Condensed)
 ```
 src/            core code (api/, services/, domain/, devices/, utils/)
 tests/          unit + integration Jest suites
@@ -106,21 +99,21 @@ docs/           supplemental guides
 matter-storage/ persistent commissioning data
 ```
 
-## 14. Architectural Highlights
+## 13. Architectural Highlights
 - Layered separation (API → services → domain → devices)
 - Explicit typed errors with retry classification
 - Exponential backoff with jitter for resilient RTT requests
 - Facility-based logging for targeted diagnostics
 - Pure domain calculation isolated from I/O
 
-## 15. Contributions
+## 14. Contributions
 Open to small PRs improving selection heuristics, logging clarity, or test coverage. Propose changes via issue first.
 
 ---
 For deeper insights, inspect tests and source modules in `src/`.
 
 ## Supplementary Guides
-See `docs/GOOGLE_HOME_SETUP.md` (commissioning & naming), `docs/GOOGLE_HOME_VOICE_COMMANDS.md` (voice usage), `docs/VALIDATION_AND_RETRY.md` (config schema & retry design), and `docs/CONTAINER_BUILD.md` (multi-arch build).
+See [docs/GOOGLE_HOME_SETUP.md](docs/GOOGLE_HOME_SETUP.md) (commissioning & naming), [docs/GOOGLE_HOME_VOICE_COMMANDS.md](docs/GOOGLE_HOME_VOICE_COMMANDS.md) (voice usage), [docs/VALIDATION_AND_RETRY.md](docs/VALIDATION_AND_RETRY.md) (config schema & retry design), and [docs/CONTAINER_BUILD.md](docs/CONTAINER_BUILD.md) (multi-arch build).
 
 ### Device Types
 Mode Select endpoint:
@@ -194,7 +187,7 @@ Use the mode state in Matter automations:
 - **Layered Architecture**: Clear separation between API, services, domain logic, and infrastructure
 - **Type Safety**: JSDoc annotations for IDE autocomplete and documentation
 - **Error Handling**: Typed errors with context (RTTApiError, ConfigurationError, etc.)
-- **Unified Logging**: matter.js Logger with facility-based organization (see `docs/LOGGING.md`)
+- **Unified Logging**: matter.js Logger with facility-based organization (see [docs/LOGGING.md](docs/LOGGING.md))
 - **Domain-Driven Design**: Pure business logic isolated in domain layer
 - **Event-Driven**: Normalized event payloads for status changes
 - **Validated Config**: Fail-fast startup with descriptive error messages
