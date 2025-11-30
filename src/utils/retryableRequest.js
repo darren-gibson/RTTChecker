@@ -118,7 +118,6 @@ export async function withRetry(operation, options = {}) {
   const logger = options.logger;
   const shouldRetryFn = options.shouldRetryFn || shouldRetry;
 
-  let lastError;
   let attempt = 0;
 
   while (true) {
@@ -144,8 +143,6 @@ export async function withRetry(operation, options = {}) {
 
       return result;
     } catch (error) {
-      lastError = error;
-
       // Check if we should retry this error
       if (!shouldRetryFn(error, attempt, config, logger)) {
         throw error;
