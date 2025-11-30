@@ -54,13 +54,14 @@ describe('time utilities', () => {
 
   describe('formatDateYMD', () => {
     test('pads month and day', () => {
-      expect(formatDateYMD(new Date('2025-01-05'))).toBe('2025/01/05');
+      // Use explicit date constructor to avoid timezone issues
+      expect(formatDateYMD(new Date(2025, 0, 5, 12, 0, 0))).toBe('2025/01/05');
     });
     test('handles double-digit month and day', () => {
-      expect(formatDateYMD(new Date('2025-11-30'))).toBe('2025/11/30');
+      expect(formatDateYMD(new Date(2025, 10, 30, 12, 0, 0))).toBe('2025/11/30');
     });
     test('leap day formatting', () => {
-      expect(formatDateYMD(new Date('2024-02-29'))).toBe('2024/02/29');
+      expect(formatDateYMD(new Date(2024, 1, 29, 12, 0, 0))).toBe('2024/02/29');
     });
   });
 });

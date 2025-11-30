@@ -31,7 +31,7 @@ describe('pickNextService', () => {
     const inWindow = baseService({ dep: '0815' });
     const outWindow = baseService({ dep: '0500', serviceUid: 'EARLY' });
     const selected = pickNextService([outWindow, inWindow], 'DEST', {
-      now: new Date('2025-11-30T08:00:00Z'),
+      now: new Date(2025, 10, 30, 8, 0, 0),
       minAfterMinutes: 5,
       windowMinutes: 30,
     });
@@ -40,7 +40,7 @@ describe('pickNextService', () => {
 
   test('rolls over next-day departure (>1440 minutes) still considered', () => {
     // current time late night 23:50, target dep 00:10 next day
-    const now = new Date('2025-11-30T23:50:00');
+    const now = new Date(2025, 10, 30, 23, 50, 0);
     const depStr = '0010';
     const svc = baseService({ dep: depStr });
     const selected = pickNextService([svc], 'DEST', {
@@ -68,7 +68,7 @@ describe('pickNextService', () => {
     });
     // B arrives earlier (0920 vs 0930) despite later departure
     const selected = pickNextService([svcA, svcB], 'DEST', {
-      now: new Date('2025-11-30T08:00:00Z'),
+      now: new Date(2025, 10, 30, 8, 0, 0),
       minAfterMinutes: 5,
       windowMinutes: 120,
     });
@@ -87,7 +87,7 @@ describe('pickNextService', () => {
       serviceUid: 'B',
     });
     const selected = pickNextService([svcA, svcB], 'DEST', {
-      now: new Date('2025-11-30T08:00:00Z'),
+      now: new Date(2025, 10, 30, 8, 0, 0),
       minAfterMinutes: 5,
       windowMinutes: 120,
     });
