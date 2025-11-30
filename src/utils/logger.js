@@ -8,21 +8,37 @@ import { Logger as MatterLogger, Level as MatterLevel } from '@project-chip/matt
 const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const isTest = process.env.NODE_ENV === 'test';
+const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execArgv.join(' '));
 
 // Configure Pino logger with pretty printing in development
+// Use sync pretty print when debugging (VS Code) to avoid worker thread issues
 const pinoConfig = {
   level: isTest ? 'silent' : envLevel,
   ...(isDevelopment && !isTest
-    ? {
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'yyyy-mm-dd HH:MM:ss.l',
-            ignore: 'pid,hostname',
+    ? isDebugger
+      ? {
+          // Synchronous pretty printing for debuggers (VS Code, etc.)
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'yyyy-mm-dd HH:MM:ss.l',
+              ignore: 'pid,hostname',
+              sync: true, // Critical: prevents worker thread issues in debuggers
+            },
           },
-        },
-      }
+        }
+      : {
+          // Async pretty printing for normal terminal use
+          transport: {
+            target: 'pino-pretty',
+            options: {
+              colorize: true,
+              translateTime: 'yyyy-mm-dd HH:MM:ss.l',
+              ignore: 'pid,hostname',
+            },
+          },
+        }
     : {}),
 };
 
