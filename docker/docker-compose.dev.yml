@@ -4,8 +4,10 @@ version: '3.8'
 services:
   train-status:
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
       args:
         TARGETPLATFORM: linux/arm64
     image: train-status:latest-arm64
+    env_file:
+      - ../.env

@@ -45,6 +45,87 @@ docker compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up
 
 Podman alternative: replace `docker` with `podman` / `podman-compose`.
 
+## Podman Usage
+
+Install Podman (macOS):
+
+```bash
+brew install podman podman-compose
+podman machine init
+podman machine start
+```
+
+Build with Podman:
+
+```bash
+podman build -f docker/Dockerfile -t rttchecker:latest .
+```
+
+Run with Podman Compose (dev):
+
+```bash
+cd /path/to/RTTChecker
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up --build
+```
+
+Run with Podman Compose (prod):
+
+```bash
+podman-compose -f docker/docker-compose.yml -f docker/docker-compose.prod.yml up -d --build
+```
+
+### Environment Variables
+
+The compose files use `env_file` to load environment variables from `.env`.
+
+**Setup:**
+
+1. Copy the example file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` with your credentials and settings:
+
+   ```bash
+   RTT_USER=your_user
+   RTT_PASS=your_pass
+   LOG_FORMAT=plain
+   LOG_LEVEL=info
+   # ... other variables
+   ```
+
+3. Run compose:
+   ```bash
+   podman-compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up --build
+   ```
+
+All environment variables and their defaults are documented in `.env.example`.
+
+### Log Formatting
+
+Set `LOG_FORMAT=plain` to get human-readable logs with timestamp, level, facility, and message:
+
+```
+2025-11-30 14:28:37.093 ERROR rtt-checker          ❌ Configuration validation failed
+```
+
+Without `LOG_FORMAT=plain`, logs default to JSON (useful for structured log aggregation).
+
+To verify the environment reached the container:
+
+```bash
+podman ps -a --format '{{.Names}} {{.Image}}'
+podman exec -it train-status env | grep -E 'LOG_FORMAT|LOG_LEVEL|RTT_USER'
+```
+
+To view recent logs:
+
+```bash
+podman logs --tail=100 train-status
+```
+
 ## Runtime
 
 Basic run:
@@ -102,9 +183,12 @@ docker logs <container>
 ## Troubleshooting
 
 - Buildx errors: `docker buildx ls`; recreate builder; ensure QEMU present.
-- Missing env vars: set `RTT_API_KEY`, `STATION_FROM`, `STATION_TO`, `MATTER_PORT`.
+- Missing env vars: set `RTT_USER`, `RTT_PASS`, and other required variables. Use `.env` file or inline exports.
 - Port conflict: change `MATTER_PORT` / host mapping.
 - Architecture mismatch: rebuild with `--platform` or use script.
+- Logs still JSON: confirm `LOG_FORMAT=plain` is set and passed to compose; check with `podman exec -it <container> env | grep LOG_FORMAT`.
+- Podman context errors: ensure compose files use `context: ..` (parent directory) and `dockerfile: docker/Dockerfile` (relative to repo root).
+- Podman machine not started: run `podman machine start` before building or running containers.
 
 ## CI (Hint)
 

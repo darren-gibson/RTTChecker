@@ -2,6 +2,7 @@
 // Provides bridge to configure matter.js Logger to use our logging system
 
 import pino from 'pino';
+import pinoPretty from 'pino-pretty';
 import { Logger as MatterLogger, Level as MatterLevel } from '@project-chip/matter.js/log';
 
 // Determine log level from environment
@@ -12,8 +13,14 @@ const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execA
 const logFormat = (process.env.LOG_FORMAT || process.env.MATTER_LOG_FORMAT || 'auto').toLowerCase();
 
 // Determine pretty stream usage: prefer programmatic pretty in dev or LOG_FORMAT=plain
+const usePretty = (isDevelopment && !isTest) || logFormat === 'plain';
 let baseLogger;
-if ((isDevelopment && !isTest) || logFormat === 'plain') {
+
+if (isTest) {
+  // Test mode: simple silent logger
+  baseLogger = pino({ level: 'silent' });
+} else if (usePretty) {
+  // Development/plain format mode: use pino-pretty with custom formatter
   const pad = (s, n) => String(s).padEnd(n, ' ');
   const lvlMap = { 10: 'TRACE', 20: 'DEBUG', 30: 'INFO', 40: 'WARN', 50: 'ERROR', 60: 'FATAL' };
   const messageFormat = (log, messageKey) => {
@@ -24,20 +31,19 @@ if ((isDevelopment && !isTest) || logFormat === 'plain') {
     const timeStr = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}-${String(ts.getDate()).padStart(2, '0')} ${String(ts.getHours()).padStart(2, '0')}:${String(ts.getMinutes()).padStart(2, '0')}:${String(ts.getSeconds()).padStart(2, '0')}.${String(ts.getMilliseconds()).padStart(3, '0')}`;
     return `${timeStr} ${lvl} ${facility} ${msg}`;
   };
-  const createPrettyStream = async () => {
-    const pinoPretty = (await import('pino-pretty')).default;
-    return pinoPretty({
-      colorize: isDevelopment,
-      sync: true,
-      ignore: 'pid,hostname,facility',
-      messageFormat,
-    });
-  };
-  // Top-level await to create pretty stream synchronously
-  const prettyStream = await createPrettyStream();
-  baseLogger = pino({ level: isTest ? 'silent' : envLevel }, prettyStream);
+  
+  const prettyStream = pinoPretty({
+    colorize: isDevelopment,
+    sync: true,
+    ignore: 'pid,hostname,facility,time,level',
+    messageFormat,
+    hideObject: true,
+    customPrettifiers: {},
+  });
+  baseLogger = pino({ level: envLevel }, prettyStream);
 } else {
-  baseLogger = pino({ level: isTest ? 'silent' : envLevel });
+  // Production JSON mode
+  baseLogger = pino({ level: envLevel });
 }
 
 // Create child loggers for different facilities
@@ -105,7 +111,20 @@ const originalConsoleLogger = MatterLogger.log;
 if (originalConsoleLogger) {
   // Intercept matter.js log output and route through Pino
   MatterLogger.log = function (level, formattedLog) {
-    const logMsg = typeof formattedLog === 'string' ? formattedLog : String(formattedLog);
+    let logMsg = typeof formattedLog === 'string' ? formattedLog : String(formattedLog);
+
+    // Strip matter.js's own formatting to avoid double-logging
+    // Pattern: "YYYY-MM-DD HH:mm:ss.SSS LEVEL  Facility  Message"
+    // Also handle ANSI color codes
+    const matterFormatRegex = /^\u001b\[\d+m?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+\u001b\[\d+;?\d*m?(\w+)\s+\u001b\[\d+;?\d*m?(.*)$/;
+    const plainFormatRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+(\w+)\s+(.*)$/;
+    
+    let match = logMsg.match(matterFormatRegex) || logMsg.match(plainFormatRegex);
+    if (match) {
+      // Extract just the message part, strip ANSI codes
+      logMsg = match[2] || match[1];
+      logMsg = logMsg.replace(/\u001b\[\d+;?\d*m/g, '');
+    }
 
     switch (level) {
       case MatterLevel.FATAL:
