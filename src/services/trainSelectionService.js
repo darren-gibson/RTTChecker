@@ -7,7 +7,7 @@
 
 import { loggers } from '../utils/logger.js';
 import { config } from '../config.js';
-import { hhmmToMins, normalizeDepartureMinutes, isWithinTimeWindow } from '../utils/timeUtils.js';
+import { hhmmToMins, adjustForDayRollover, isWithinTimeWindow } from '../utils/timeUtils.js';
 
 const log = loggers.bridge;
 
@@ -120,7 +120,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
     const depStr = loc.gbttBookedDeparture || loc.realtimeDeparture;
     let depMins = hhmmToMins(depStr);
     if (Number.isNaN(depMins)) return null;
-    depMins = normalizeDepartureMinutes(depMins, nowMinutes);
+    depMins = adjustForDayRollover(depMins, nowMinutes);
     if (!isWithinTimeWindow(depMins, earliest, latest)) return null;
     const destEntry = findDestinationEntry(loc, destTiploc);
     if (!destEntry) {

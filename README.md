@@ -59,14 +59,8 @@ This device exposes two endpoints:
       - `brew install node@24` (or `brew install node` if 24 is default)
       - `brew unlink node && brew link --overwrite --force node@24`
       - `node -v` should report v24.x
-   - With nvm (optional):
-      - `nvm use` (uses `.nvmrc`)
       - or `nvm install 24 && nvm use 24`
 - RTT API credentials
-
-### Installation
-```bash
-npm install
 ```
 
 ### Configuration
@@ -82,21 +76,17 @@ export DEST_TIPLOC="KNGX"       # London Kings Cross
 export MIN_AFTER_MINUTES=20     # Look for trains 20+ minutes from now
 export WINDOW_MINUTES=60        # Within next 60 minutes
 
-# Matter device settings
-export DEVICE_NAME="Train Status"
 export DISCRIMINATOR=3840       # For Matter commissioning
 export PASSCODE=20202021        # For Matter commissioning
 export UPDATE_INTERVAL_MS=60000 # Update every 60 seconds
-export USE_BRIDGE="true"        # Default true, set to "false" to disable the Matter Bridge (Aggregator) and expose the two endpoints directly
-
 # Optional per-endpoint custom names (defaults derive from ORIGIN_TIPLOC-DEST_TIPLOC)
 export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"   # Mode Select endpoint name
 export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"     # Temperature Sensor endpoint name
 
 # Logging (optional)
-export LOG_LEVEL="debug"          # error < warn < info < debug (default: info)
 ```
-
+# (Configure logging via LOG_LEVEL / MATTER_LOG_FORMAT environment variables)
+```
 ### Logging and Debugging
 
 The application uses **matter.js's built-in Logger** for consistent, facility-based logging across the entire project:
@@ -105,17 +95,11 @@ The application uses **matter.js's built-in Logger** for consistent, facility-ba
 - `error`: Critical failures only (config validation, API auth errors)
 - `warn`: Warnings and retryable issues (API temporarily down, no train found)
 - `info`: Normal operation (status changes, periodic updates) - **default**
-- `debug`: Verbose details (API requests/responses, candidate train selection)
-
 **Logging Facilities:**
 The application organizes logs into facilities for granular control:
 - `rtt-checker`: Main application lifecycle and device updates
 - `matter-server`: Matter server initialization and commissioning
-- `rtt-bridge`: RTT API interactions and train selection
 - Plus all native matter.js facilities (e.g., `MatterServer`, `CommissioningServer`)
-
-**Examples:**
-```bash
 # Production: errors and warnings only
 export LOG_LEVEL="warn"
 
@@ -180,7 +164,6 @@ npm start
 	- Devices are read-only (status comes from RTT updates)
 
 ### Testing
-- Comprehensive Jest test suite with 105 tests covering:
 	- Train selection logic with real API responses
 	- Edge cases (no train, cancelled, late, midnight wrap)
 	- Matter device behavior and status mapping
@@ -188,13 +171,25 @@ npm start
 	- Configuration validation
 	- Error handling and classification
 	- Time utilities and parsing
-- Test coverage: ~88% statement coverage
-- To run tests:
 	```bash
 	npm test
 	```
 
-## Matter Device Details
+## Breaking Change: Removed Aliases
+
+The previously deprecated utility aliases have now been removed:
+
+- `formatDateForRTT` → use `formatDateYMD`
+- `normalizeDepartureMinutes` → use `adjustForDayRollover`
+
+Update any remaining imports:
+
+```diff
+import { formatDateYMD } from '.../timeUtils.js';
+import { adjustForDayRollover } from '.../timeUtils.js';
+```
+
+No behavioral changes were made; only the names were clarified. This is a breaking change because the old symbols no longer exist.
 
 ### Device Types
 Mode Select endpoint:

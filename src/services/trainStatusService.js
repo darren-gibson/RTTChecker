@@ -6,7 +6,7 @@
 import { TrainStatus } from "../constants.js";
 import { rttSearch } from "../api/rttApiClient.js";
 import { calculateOnTimeStatus } from "../domain/trainStatus.js";
-import { formatDateForRTT } from "../utils/timeUtils.js";
+import { formatDateYMD } from "../utils/timeUtils.js";
 
 import { pickNextService } from "./trainSelectionService.js";
 
@@ -34,7 +34,7 @@ export async function getTrainStatus({
 }) {
   // Default to current time if not provided
   const currentTime = now || new Date();
-  const dateStr = formatDateForRTT(currentTime);
+  const dateStr = formatDateYMD(currentTime);
 
   const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
   const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });

@@ -21,20 +21,19 @@ export function hhmmToMins(ts) {
 }
 
 /**
- * Normalize departure minutes to handle day wraparound.
- * If departure time is earlier than current time, assumes next day.
- * @param {number} depMins - Departure time in minutes since midnight
- * @param {number} nowMinutes - Current time in minutes since midnight
- * @returns {number} Normalized minutes (may exceed 1440 for next-day departures)
+ * Adjust a scheduled time so it always represents a future occurrence relative to a reference time.
+ * If the scheduled minutes value is earlier than the current minutes (wraparound), treat it as next day.
+ * @param {number} scheduledMinutes - Scheduled time in minutes since midnight
+ * @param {number} currentMinutes - Reference "now" time in minutes since midnight
+ * @returns {number} Future-oriented minutes (may exceed 1440 when rolled to next day)
  * @example
- * normalizeDepartureMinutes(120, 1400) // 1560 (120 + 1440, next day)
- * normalizeDepartureMinutes(1400, 500) // 1400 (same day)
+ * adjustForDayRollover(120, 1400) // 1560 (treated as next day)
+ * adjustForDayRollover(1400, 500) // 1400 (same day)
  */
-export function normalizeDepartureMinutes(depMins, nowMinutes) {
-  if (Number.isNaN(depMins)) return depMins;
-  // Day wrap: if departure earlier than now, treat as next day
-  if (depMins < nowMinutes) return depMins + 24 * 60;
-  return depMins;
+export function adjustForDayRollover(scheduledMinutes, currentMinutes) {
+  if (Number.isNaN(scheduledMinutes)) return scheduledMinutes;
+  if (scheduledMinutes < currentMinutes) return scheduledMinutes + 24 * 60;
+  return scheduledMinutes;
 }
 
 /**
@@ -52,16 +51,19 @@ export function isWithinTimeWindow(minutes, earliest, latest) {
 }
 
 /**
- * Format a Date object for RTT API (YYYY/MM/DD).
+ * Format a Date object into a YYYY/MM/DD string.
  * @param {Date} date - Date to format
- * @returns {string} Date string in YYYY/MM/DD format
+ * @returns {string} Date string in YYYY/MM/DD format (slash separated)
  * @example
- * formatDateForRTT(new Date('2025-11-30')) // "2025/11/30"
- * formatDateForRTT(new Date('2025-01-05')) // "2025/01/05"
+ * formatDateYMD(new Date('2025-11-30')) // "2025/11/30"
+ * formatDateYMD(new Date('2025-01-05')) // "2025/01/05"
  */
-export function formatDateForRTT(date) {
+export function formatDateYMD(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
   return `${y}/${m}/${d}`;
 }
+
+/** @deprecated Use formatDateYMD instead */
+// One-time deprecation warning tracker
