@@ -36,32 +36,51 @@ describe('pickNextService', () => {
   });
 
   test('selects next fastest train at least 20 minutes from now and within next hour', () => {
-    // Now is 09:00 UTC = 10:00 BST
-    const now = new Date('2025-10-17T09:00:00Z');
+    // Use current date/time to avoid timezone issues
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMin = now.getMinutes();
 
-    // create services: one departing at 09:25 (25 mins from 10:00 BST = outside window)
-    // another departing at 09:30 (30 mins, but also outside the 1h window from 10:00 BST)
-    // another departing at 10:50 (50 mins from 10:00 BST, within window)
+    // Create train times relative to current time
+    // Train 1: 5 mins from now (too early - outside minAfter window)
+    // Train 2: 25 mins from now (within window, earliest)
+    // Train 3: 70 mins from now (outside window - too late)
+    const train1Time = currentHour * 60 + currentMin + 5;
+    const train2Time = currentHour * 60 + currentMin + 25;
+    const train3Time = currentHour * 60 + currentMin + 70;
+
+    const formatTime = (mins) => {
+      const h = Math.floor(mins / 60) % 24;
+      const m = mins % 60;
+      return String(h).padStart(2, '0') + String(m).padStart(2, '0');
+    };
+
     const services2 = [
       {
         locationDetail: {
-          gbttBookedDeparture: '0925',
-          origin: [{ workingTime: '090000' }],
-          destination: [{ crs: 'KGX', tiploc: 'KNGX', workingTime: '112000' }],
+          gbttBookedDeparture: formatTime(train1Time),
+          origin: [{ workingTime: formatTime(train1Time) + '00' }],
+          destination: [
+            { crs: 'KGX', tiploc: 'KNGX', workingTime: formatTime(train1Time + 60) + '00' },
+          ],
         },
       },
       {
         locationDetail: {
-          gbttBookedDeparture: '0930',
-          origin: [{ workingTime: '091500' }],
-          destination: [{ crs: 'KGX', tiploc: 'KNGX', workingTime: '101500' }],
+          gbttBookedDeparture: formatTime(train2Time),
+          origin: [{ workingTime: formatTime(train2Time) + '00' }],
+          destination: [
+            { crs: 'KGX', tiploc: 'KNGX', workingTime: formatTime(train2Time + 50) + '00' },
+          ],
         },
       },
       {
         locationDetail: {
-          gbttBookedDeparture: '1050',
-          origin: [{ workingTime: '103000' }],
-          destination: [{ crs: 'KGX', tiploc: 'KNGX', workingTime: '113000' }],
+          gbttBookedDeparture: formatTime(train3Time),
+          origin: [{ workingTime: formatTime(train3Time) + '00' }],
+          destination: [
+            { crs: 'KGX', tiploc: 'KNGX', workingTime: formatTime(train3Time + 40) + '00' },
+          ],
         },
       },
     ];
@@ -72,6 +91,6 @@ describe('pickNextService', () => {
       now,
     });
     expect(chosen).toBeDefined();
-    expect(chosen.locationDetail.gbttBookedDeparture).toBe('1050');
+    expect(chosen.locationDetail.gbttBookedDeparture).toBe(formatTime(train2Time));
   });
 });
