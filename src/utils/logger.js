@@ -9,7 +9,7 @@ import { Logger as MatterLogger, Level as MatterLevel } from '@project-chip/matt
 const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const isTest = process.env.NODE_ENV === 'test';
-const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execArgv.join(' '));
+// const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execArgv.join(' '));
 const logFormat = (process.env.LOG_FORMAT || process.env.MATTER_LOG_FORMAT || 'auto').toLowerCase();
 
 // Determine pretty stream usage: prefer programmatic pretty in dev or LOG_FORMAT=plain
@@ -31,7 +31,7 @@ if (isTest) {
     const timeStr = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}-${String(ts.getDate()).padStart(2, '0')} ${String(ts.getHours()).padStart(2, '0')}:${String(ts.getMinutes()).padStart(2, '0')}:${String(ts.getSeconds()).padStart(2, '0')}.${String(ts.getMilliseconds()).padStart(3, '0')}`;
     return `${timeStr} ${lvl} ${facility} ${msg}`;
   };
-  
+
   const prettyStream = pinoPretty({
     colorize: isDevelopment,
     sync: true,
@@ -116,9 +116,10 @@ if (originalConsoleLogger) {
     // Strip matter.js's own formatting to avoid double-logging
     // Pattern: "YYYY-MM-DD HH:mm:ss.SSS LEVEL  Facility  Message"
     // Also handle ANSI color codes
-    const matterFormatRegex = /^\u001b\[\d+m?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+\u001b\[\d+;?\d*m?(\w+)\s+\u001b\[\d+;?\d*m?(.*)$/;
+    const matterFormatRegex =
+      /^\u001b\[\d+m?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+\u001b\[\d+;?\d*m?(\w+)\s+\u001b\[\d+;?\d*m?(.*)$/;
     const plainFormatRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+(\w+)\s+(.*)$/;
-    
+
     let match = logMsg.match(matterFormatRegex) || logMsg.match(plainFormatRegex);
     if (match) {
       // Extract just the message part, strip ANSI codes
