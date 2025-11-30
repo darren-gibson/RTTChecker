@@ -57,7 +57,7 @@ describe('Logger enforcement logic', () => {
     Logger.defaultLogLevel = originalLevel;
   });
 
-  test('Logger.get creates facility loggers', () => {
+  test('Logger.get creates facility loggers (Matter.js compatibility)', () => {
     const testFacility = 'test-facility-' + Date.now();
     const testLogger = Logger.get(testFacility);
 
@@ -67,30 +67,20 @@ describe('Logger enforcement logic', () => {
     expect(typeof testLogger.info).toBe('function');
     expect(typeof testLogger.debug).toBe('function');
 
-    // Verify it's in the logLevels registry
-    expect(Logger.logLevels[testFacility]).toBeDefined();
-
-    // Clean up
-    delete Logger.logLevels[testFacility];
+    // Note: With Pino-based logging, Logger.logLevels is a compatibility shim
+    // The actual logging configuration is managed by Pino
   });
 
-  test('Logger.get respects minimum log level for new facilities', () => {
-    const testFacility = 'test-min-level-' + Date.now();
+  test('exported loggers use Pino and support facility-based logging', () => {
+    // Verify exported loggers are Pino instances with child context
+    expect(loggers.rtt).toBeDefined();
+    expect(loggers.matter).toBeDefined();
+    expect(loggers.bridge).toBeDefined();
 
-    // Create a new facility
-    const testLogger = Logger.get(testFacility);
-    expect(testLogger).toBeDefined();
-
-    // Verify it was created with a defined level
-    const facilityLevel = Logger.logLevels[testFacility];
-    expect(facilityLevel).toBeDefined();
-    expect(typeof facilityLevel).toBe('number');
-
-    // Should be at least INFO level (1) in test environment
-    expect(facilityLevel).toBeGreaterThanOrEqual(Level.INFO);
-
-    // Clean up
-    delete Logger.logLevels[testFacility];
+    // Verify each has logging methods
+    expect(typeof loggers.rtt.info).toBe('function');
+    expect(typeof loggers.matter.info).toBe('function');
+    expect(typeof loggers.bridge.info).toBe('function');
   });
 
   test('exported log object has all methods', () => {
@@ -132,13 +122,15 @@ describe('Logger enforcement logic', () => {
   test('log methods work with multiple arguments', () => {
     const spy = jest.spyOn(loggers.rtt, 'error');
     log.error('Error:', { code: 500 }, 'details');
-    expect(spy).toHaveBeenCalledWith('Error:', { code: 500 }, 'details');
+    // Pino format: (obj, msg) where obj contains args
+    expect(spy).toHaveBeenCalledWith({ args: [{ code: 500 }, 'details'] }, 'Error:');
     spy.mockRestore();
   });
 
   test('loggers bridge facility exists and works', () => {
     const spy = jest.spyOn(loggers.bridge, 'warn');
     loggers.bridge.warn('bridge warning');
+    // Direct Pino logger call
     expect(spy).toHaveBeenCalledWith('bridge warning');
     spy.mockRestore();
   });
@@ -146,6 +138,7 @@ describe('Logger enforcement logic', () => {
   test('loggers matter facility exists and works', () => {
     const spy = jest.spyOn(loggers.matter, 'debug');
     loggers.matter.debug('matter debug');
+    // Direct Pino logger call
     expect(spy).toHaveBeenCalledWith('matter debug');
     spy.mockRestore();
   });

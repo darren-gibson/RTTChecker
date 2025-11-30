@@ -41,9 +41,9 @@ describe('Runtime log level behavior (child process)', () => {
   test('LOG_LEVEL=info suppresses all DEBUG logs', async () => {
     const { stdout, stderr } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'info' });
     const out = `${stdout}${stderr}`;
-    // Should contain INFO lines but no DEBUG lines at all
-    expect(out).toMatch(/INFO\s+rtt-checker/);
-    expect(out).not.toMatch(/\bDEBUG\b/);
+    // Should contain INFO lines but no DEBUG lines at all (Pino format or matter.js format)
+    expect(out).toMatch(/INFO|"level":30/);
+    expect(out).not.toMatch(/DEBUG|"level":20/);
     // The explicit verification debug message must be absent
     expect(out).not.toContain('Debug verification');
   });
@@ -51,8 +51,8 @@ describe('Runtime log level behavior (child process)', () => {
   test('LOG_LEVEL=debug includes DEBUG logs', async () => {
     const { stdout, stderr } = await runWithEnv({ ...baseEnv, LOG_LEVEL: 'debug' });
     const out = `${stdout}${stderr}`;
-    // Expect presence of debug lines from facilities and the verification message
-    expect(out).toMatch(/\bDEBUG\b/);
+    // Expect presence of debug lines from facilities and the verification message (Pino or matter.js format)
+    expect(out).toMatch(/DEBUG|"level":20/);
     expect(out).toContain('Debug verification');
   });
 });

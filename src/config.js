@@ -112,7 +112,7 @@ const envSchema = z.object({
   DELAY_DEVICE_NAME: z.string().max(64).optional(),
 
   // Optional logging configuration
-  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional(),
+  LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent']).optional(),
   MATTER_LOG_FORMAT: z.enum(['ansi', 'plain', 'html']).optional(),
   EXIT_AFTER_MS: z.coerce.number().int().min(0).optional(),
 });

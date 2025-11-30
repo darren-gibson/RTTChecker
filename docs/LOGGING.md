@@ -1,21 +1,35 @@
 # Logging
 
-Uses matter.js built-in Logger (no extra deps) for unified application + protocol logs.
+Uses **Pino** as the primary logging framework with automatic bridging to matter.js Logger for unified application + protocol logs.
+
+## Architecture
+
+- **Primary Logger**: [Pino](https://github.com/pinojs/pino) - Fast, low-overhead JSON logger
+- **Matter.js Integration**: Automatic bridging routes matter.js logs through Pino
+- **Pretty Printing**: Development mode uses `pino-pretty` for human-readable output
+- **Production**: Structured JSON logs for log aggregation systems
 
 ## Levels
 
-Set via `LOG_LEVEL` (`error`, `warn`, `info`, `debug`). Global value acts as minimum floor; lower per‑facility levels are clamped.
+Set via `LOG_LEVEL` environment variable. Supports: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `silent`.
 
 ```bash
+export LOG_LEVEL="trace"  # Most verbose (includes debug)
 export LOG_LEVEL="debug"  # Verbose output
-export LOG_LEVEL="info"   # Default
-export LOG_LEVEL="warn"   # Production
-export LOG_LEVEL="error"  # Minimal output
+export LOG_LEVEL="info"   # Default - normal operation
+export LOG_LEVEL="warn"   # Production - warnings and errors only
+export LOG_LEVEL="error"  # Minimal - errors only
+export LOG_LEVEL="fatal"  # Critical errors only
+export LOG_LEVEL="silent" # Disable all logging
 ```
 
 ## Facilities
 
-Primary: `rtt-checker`, `matter-server`, `rtt-bridge`. Native protocol facilities (e.g. `MatterServer`, `CommissioningServer`, `MdnsScanner`) appear automatically.
+Application loggers use child contexts for easy filtering:
+
+- `rtt-checker`: Main application logger
+- `matter-server`: Matter.js protocol logs (bridged from matter.js)
+- `rtt-bridge`: RTT API integration logs
 
 ## Usage Examples
 
@@ -26,7 +40,7 @@ import { log, loggers } from './utils/logger.js';
 
 // Use default logger (rtt-checker facility)
 log.info('Application started');
-log.debug('Debug details');
+log.debug('Debug details', { user: 'admin' });
 log.error('Error occurred');
 
 // Use facility-specific loggers
@@ -34,25 +48,23 @@ loggers.bridge.debug('Searching RTT API...');
 loggers.matter.info('Matter server started');
 ```
 
-### Per‑Facility Control
+### Dynamic Level Changes
 
 ```javascript
-import { Logger, Level } from '@project-chip/matter.js/log';
+import { setLogLevel } from './utils/logger.js';
 
-// Set level for specific facility
-Logger.logLevels = {
-  'rtt-bridge': Level.DEBUG, // Verbose RTT API logs
-  'matter-server': Level.INFO, // Normal Matter logs
-  MdnsScanner: Level.WARN, // Quiet mDNS scanner
-};
+// Change level at runtime
+setLogLevel('debug'); // Enable verbose logging
+setLogLevel('warn'); // Reduce noise
+```
 
-// Enable colored output
-Logger.format = 'ansi';
+### Matter.js Integration
 
-// Use custom formatter
-Logger.logFormatter = (now, level, facility, prefix, values) => {
-  return `[${facility}] ${values.join(' ')}`;
-};
+The logger automatically bridges matter.js logs to Pino:
+
+```javascript
+// matter.js logs are automatically routed through Pino
+// No additional configuration needed
 ```
 
 ### Env Vars
