@@ -5,8 +5,10 @@
 
 import { TrainStatus } from "../constants.js";
 import { rttSearch } from "../api/rttApiClient.js";
-import { pickNextService } from "./trainSelectionService.js";
 import { calculateOnTimeStatus } from "../domain/trainStatus.js";
+import { formatDateForRTT } from "../utils/timeUtils.js";
+
+import { pickNextService } from "./trainSelectionService.js";
 
 /**
  * Core business logic for getting train status from RTT API.
@@ -32,12 +34,7 @@ export async function getTrainStatus({
 }) {
   // Default to current time if not provided
   const currentTime = now || new Date();
-  
-  // Extract date from the current time
-  const y = currentTime.getFullYear();
-  const m = String(currentTime.getMonth() + 1).padStart(2, '0');
-  const d = String(currentTime.getDate()).padStart(2, '0');
-  const dateStr = `${y}/${m}/${d}`;
+  const dateStr = formatDateForRTT(currentTime);
 
   const data = await rttSearch(originTiploc, destTiploc, dateStr, { fetchImpl });
   const svc = pickNextService(data?.services || [], destTiploc, { minAfterMinutes, windowMinutes, now: currentTime });

@@ -1,7 +1,7 @@
 import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
 import { TrainStatus, MatterDevice } from '../../../../src/constants.js';
 import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
-import { RTTApiError } from '../../../../src/errors.js';
+import { RTTApiError } from '../../../../src/api/errors.js';
 
 jest.mock('../../../../src/services/trainStatusService.js');
 

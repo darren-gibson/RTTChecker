@@ -10,7 +10,9 @@ import { TrainStatus, MatterDevice as MatterConstants } from "../constants.js";
 import { config } from "../config.js";
 import { getTrainStatus } from "../services/trainStatusService.js";
 import { loggers } from "../utils/logger.js";
-import { RTTApiError, NoTrainFoundError, RTTCheckerError } from "../errors.js";
+import { RTTCheckerError } from "../errors.js";
+import { RTTApiError } from "../api/errors.js";
+import { NoTrainFoundError } from "../domain/errors.js";
 
 const log = loggers.rtt;
 

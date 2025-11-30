@@ -50,3 +50,18 @@ export function normalizeDepartureMinutes(depMins, nowMinutes) {
 export function isWithinTimeWindow(minutes, earliest, latest) {
   return minutes >= earliest && minutes <= latest;
 }
+
+/**
+ * Format a Date object for RTT API (YYYY/MM/DD).
+ * @param {Date} date - Date to format
+ * @returns {string} Date string in YYYY/MM/DD format
+ * @example
+ * formatDateForRTT(new Date('2025-11-30')) // "2025/11/30"
+ * formatDateForRTT(new Date('2025-01-05')) // "2025/01/05"
+ */
+export function formatDateForRTT(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}/${m}/${d}`;
+}

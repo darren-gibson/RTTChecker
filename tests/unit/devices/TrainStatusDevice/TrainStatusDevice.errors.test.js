@@ -1,7 +1,7 @@
 import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
-import { TrainStatus } from '../../../../src/constants.js';
 import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
-import { RTTApiError, NoTrainFoundError, RTTCheckerError } from '../../../../src/errors.js';
+import { RTTApiError } from '../../../../src/api/errors.js';
+import { NoTrainFoundError } from '../../../../src/domain/errors.js';
 import * as logger from '../../../../src/utils/logger.js';
 
 jest.mock('../../../../src/services/trainStatusService.js');
@@ -18,7 +18,9 @@ describe('TrainStatusDevice - errors', () => {
         fatal: () => {},
       });
       if (logger.setLogLevel) logger.setLogLevel('error');
-    } catch (_) {}
+    } catch (_) {
+      // Ignore logger mock errors
+    }
   });
 
   afterEach(() => {

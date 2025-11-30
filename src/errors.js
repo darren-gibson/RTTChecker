@@ -40,64 +40,13 @@ export class RTTCheckerError extends Error {
  * Error thrown when RTT API request fails.
  * Includes HTTP status code and response details.
  */
-export class RTTApiError extends RTTCheckerError {
-  constructor(message, options = {}) {
-    super(message, options);
-    this.statusCode = options.statusCode;
-    this.responseBody = options.responseBody;
-    this.endpoint = options.endpoint;
-  }
-
-  /**
-   * Check if error is due to authentication failure.
-   * @returns {boolean} True if 401/403 status code
-   */
-  isAuthError() {
-    return this.statusCode === 401 || this.statusCode === 403;
-  }
-
-  /**
-   * Check if error is retryable (5xx, network issues).
-   * @returns {boolean} True if error might succeed on retry
-   */
-  isRetryable() {
-    return this.statusCode >= 500 || !this.statusCode; // No status = network error
-  }
-
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      statusCode: this.statusCode,
-      endpoint: this.endpoint,
-      isAuthError: this.isAuthError(),
-      isRetryable: this.isRetryable()
-    };
-  }
-}
+// Moved to src/api/errors.js
 
 /**
  * Error thrown when no suitable train service is found.
  * Indicates search criteria were too restrictive or no trains available.
  */
-export class NoTrainFoundError extends RTTCheckerError {
-  constructor(message, options = {}) {
-    super(message, options);
-    this.originTiploc = options.originTiploc;
-    this.destTiploc = options.destTiploc;
-    this.searchWindow = options.searchWindow;
-    this.candidateCount = options.candidateCount || 0;
-  }
-
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      originTiploc: this.originTiploc,
-      destTiploc: this.destTiploc,
-      searchWindow: this.searchWindow,
-      candidateCount: this.candidateCount
-    };
-  }
-}
+// Moved to src/domain/errors.js
 
 /**
  * Error thrown when configuration is invalid or missing.
@@ -123,18 +72,4 @@ export class ConfigurationError extends RTTCheckerError {
  * Error thrown when train data is malformed or missing expected fields.
  * Indicates RTT API response doesn't match expected schema.
  */
-export class InvalidTrainDataError extends RTTCheckerError {
-  constructor(message, options = {}) {
-    super(message, options);
-    this.serviceId = options.serviceId;
-    this.missingField = options.missingField;
-  }
-
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      serviceId: this.serviceId,
-      missingField: this.missingField
-    };
-  }
-}
+// Moved to src/domain/errors.js

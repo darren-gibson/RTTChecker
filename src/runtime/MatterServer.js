@@ -39,19 +39,19 @@ function createEndpoints() {
     
     try {
       aggregator.addBridgedDevice(modeDevice, {
-  vendorName: config.matter.vendorName,
-  vendorId: MatterConstants.VendorId,
+        vendorName: config.matter.vendorName,
+        vendorId: MatterConstants.VendorId,
         productId: MatterConstants.ProductId,
-  productName: config.matter.statusDeviceName,
-  productLabel: config.matter.statusDeviceName,
-  nodeLabel: config.matter.statusDeviceName,
-  hardwareVersion: 1,
-  hardwareVersionString: '1.0',
-  softwareVersion: 1,
-  softwareVersionString: '1.0',
-  serialNumber: `${config.matter.serialNumber}-MODE`,
-  reachable: true,
-  uniqueId: `${config.matter.serialNumber}-MODE`,
+        productName: config.matter.statusDeviceName,
+        productLabel: config.matter.statusDeviceName,
+        nodeLabel: config.matter.statusDeviceName,
+        hardwareVersion: 1,
+        hardwareVersionString: '1.0',
+        softwareVersion: 1,
+        softwareVersionString: '1.0',
+        serialNumber: `${config.matter.serialNumber}-MODE`,
+        reachable: true,
+        uniqueId: `${config.matter.serialNumber}-MODE`,
       });
       log.info('   ✓ Bridged: Mode Select');
       const biMode = modeDevice.getClusterServer(BridgedDeviceBasicInformationCluster);
@@ -73,19 +73,19 @@ function createEndpoints() {
     
     try {
       aggregator.addBridgedDevice(tempSensor, {
-  vendorName: config.matter.vendorName,
-  vendorId: MatterConstants.VendorId,
+        vendorName: config.matter.vendorName,
+        vendorId: MatterConstants.VendorId,
         productId: MatterConstants.ProductId,
-  productName: config.matter.delayDeviceName,
-  productLabel: config.matter.delayDeviceName,
-  nodeLabel: config.matter.delayDeviceName,
-  hardwareVersion: 1,
-  hardwareVersionString: '1.0',
-  softwareVersion: 1,
-  softwareVersionString: '1.0',
-  serialNumber: `${config.matter.serialNumber}-TEMP`,
-  reachable: true,
-  uniqueId: `${config.matter.serialNumber}-TEMP`,
+        productName: config.matter.delayDeviceName,
+        productLabel: config.matter.delayDeviceName,
+        nodeLabel: config.matter.delayDeviceName,
+        hardwareVersion: 1,
+        hardwareVersionString: '1.0',
+        softwareVersion: 1,
+        softwareVersionString: '1.0',
+        serialNumber: `${config.matter.serialNumber}-TEMP`,
+        reachable: true,
+        uniqueId: `${config.matter.serialNumber}-TEMP`,
       });
       log.info('   ✓ Bridged: Temperature Sensor');
       const biTemp = tempSensor.getClusterServer(BridgedDeviceBasicInformationCluster);
@@ -141,7 +141,7 @@ export async function startMatterServer(trainDevice) {
   await storageManager.initialize();
   
   // Check if device is already commissioned
-  const _contexts = storageManager.createContext('0');
+  storageManager.createContext('0');
   try {
     // Check if FabricManager storage exists
     const fabricManagerContext = storageManager.createContext('FabricManager');

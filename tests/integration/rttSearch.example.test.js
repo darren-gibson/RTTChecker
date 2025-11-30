@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { rttSearch, b64 } from '../../src/api/rttApiClient.js';
+import { rttSearch, encodeBasicAuth } from '../../src/api/rttApiClient.js';
 
 describe('rttSearch with example response', () => {
   test('returns parsed JSON from example search.json and calls fetch with proper headers', async () => {
@@ -22,7 +22,7 @@ describe('rttSearch with example response', () => {
     expect(fakeFetch).toHaveBeenCalledTimes(1);
     expect(fakeFetch).toHaveBeenCalledWith(
   `https://api.rtt.io/api/v1/json/search/${crs}/to/KNGX/${date}`,
-      expect.objectContaining({ headers: { Authorization: `Basic ${b64(user, pass)}` } })
+      expect.objectContaining({ headers: { Authorization: `Basic ${encodeBasicAuth(user, pass)}` } })
     );
   });
 });
