@@ -9,41 +9,36 @@ const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
 const isDevelopment = process.env.NODE_ENV !== 'production';
 const isTest = process.env.NODE_ENV === 'test';
 const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execArgv.join(' '));
+const logFormat = (process.env.LOG_FORMAT || process.env.MATTER_LOG_FORMAT || 'auto').toLowerCase();
 
-// Configure Pino logger with pretty printing in development
-// Use sync pretty print when debugging (VS Code) to avoid worker thread issues
-const pinoConfig = {
-  level: isTest ? 'silent' : envLevel,
-  ...(isDevelopment && !isTest
-    ? isDebugger
-      ? {
-          // Synchronous pretty printing for debuggers (VS Code, etc.)
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'yyyy-mm-dd HH:MM:ss.l',
-              ignore: 'pid,hostname',
-              sync: true, // Critical: prevents worker thread issues in debuggers
-            },
-          },
-        }
-      : {
-          // Async pretty printing for normal terminal use
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'yyyy-mm-dd HH:MM:ss.l',
-              ignore: 'pid,hostname',
-            },
-          },
-        }
-    : {}),
-};
-
-// Create base logger
-const baseLogger = pino(pinoConfig);
+// Determine pretty stream usage: prefer programmatic pretty in dev or LOG_FORMAT=plain
+let baseLogger;
+if ((isDevelopment && !isTest) || logFormat === 'plain') {
+  const pad = (s, n) => String(s).padEnd(n, ' ');
+  const lvlMap = { 10: 'TRACE', 20: 'DEBUG', 30: 'INFO', 40: 'WARN', 50: 'ERROR', 60: 'FATAL' };
+  const messageFormat = (log, messageKey) => {
+    const ts = log.time ? new Date(log.time) : new Date();
+    const lvl = pad(lvlMap[log.level] || 'INFO', 5);
+    const facility = pad(log.facility || 'app', 20);
+    const msg = log[messageKey] ?? '';
+    const timeStr = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}-${String(ts.getDate()).padStart(2, '0')} ${String(ts.getHours()).padStart(2, '0')}:${String(ts.getMinutes()).padStart(2, '0')}:${String(ts.getSeconds()).padStart(2, '0')}.${String(ts.getMilliseconds()).padStart(3, '0')}`;
+    return `${timeStr} ${lvl} ${facility} ${msg}`;
+  };
+  const createPrettyStream = async () => {
+    const pinoPretty = (await import('pino-pretty')).default;
+    return pinoPretty({
+      colorize: isDevelopment,
+      sync: true,
+      ignore: 'pid,hostname,facility',
+      messageFormat,
+    });
+  };
+  // Top-level await to create pretty stream synchronously
+  const prettyStream = await createPrettyStream();
+  baseLogger = pino({ level: isTest ? 'silent' : envLevel }, prettyStream);
+} else {
+  baseLogger = pino({ level: isTest ? 'silent' : envLevel });
+}
 
 // Create child loggers for different facilities
 const rttLogger = baseLogger.child({ facility: 'rtt-checker' });
