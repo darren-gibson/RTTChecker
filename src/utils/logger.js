@@ -111,21 +111,7 @@ const originalConsoleLogger = MatterLogger.log;
 if (originalConsoleLogger) {
   // Intercept matter.js log output and route through Pino
   MatterLogger.log = function (level, formattedLog) {
-    let logMsg = typeof formattedLog === 'string' ? formattedLog : String(formattedLog);
-
-    // Strip matter.js's own formatting to avoid double-logging
-    // Pattern: "YYYY-MM-DD HH:mm:ss.SSS LEVEL  Facility  Message"
-    // Also handle ANSI color codes
-    const matterFormatRegex =
-      /^\u001b\[\d+m?\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+\u001b\[\d+;?\d*m?(\w+)\s+\u001b\[\d+;?\d*m?(.*)$/;
-    const plainFormatRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w+\s+(\w+)\s+(.*)$/;
-
-    let match = logMsg.match(matterFormatRegex) || logMsg.match(plainFormatRegex);
-    if (match) {
-      // Extract just the message part, strip ANSI codes
-      logMsg = match[2] || match[1];
-      logMsg = logMsg.replace(/\u001b\[\d+;?\d*m/g, '');
-    }
+    const logMsg = typeof formattedLog === 'string' ? formattedLog : String(formattedLog);
 
     switch (level) {
       case MatterLevel.FATAL:
