@@ -4,8 +4,8 @@ This project depends on open-source packages. Their licenses are reproduced or r
 
 | Package                      | Version (range) | License (indicative) | Source                                            |
 | ---------------------------- | --------------- | -------------------- | ------------------------------------------------- |
-| @project-chip/matter.js      | ^0.12.6         | Apache-2.0           | https://github.com/project-chip/matter.js         |
-| @project-chip/matter-node.js | ^0.12.6         | Apache-2.0           | https://github.com/project-chip/matter.js         |
+| @matter/main                 | ^0.15.x         | Apache-2.0           | https://github.com/project-chip/matter.js         |
+| @matter/nodejs               | ^0.15.x         | Apache-2.0           | https://github.com/project-chip/matter.js         |
 | qrcode-terminal              | ^0.12.0         | MIT                  | https://github.com/gtanner/qrcode-terminal        |
 | zod                          | ^4.1.13         | MIT                  | https://github.com/colinhacks/zod                 |
 | jest                         | ^30.2.0         | MIT                  | https://github.com/jestjs/jest                    |
@@ -49,4 +49,4 @@ License information above is indicative and should be validated against the actu
 
 ---
 
-Generated on: 2025-11-30
+Generated on: 2025-12-06

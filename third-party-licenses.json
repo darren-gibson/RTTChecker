@@ -1,0 +1,300 @@
+{
+  "@matter/general@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/general",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/general/LICENSE"
+  },
+  "@matter/main@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/LICENSE"
+  },
+  "@matter/model@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/model",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/model/LICENSE"
+  },
+  "@matter/node@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/node",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/node/LICENSE"
+  },
+  "@matter/nodejs@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/nodejs",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/nodejs/LICENSE"
+  },
+  "@matter/protocol@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/protocol",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/protocol/LICENSE"
+  },
+  "@matter/types@0.15.6": {
+    "licenses": "Apache-2.0",
+    "repository": "https://github.com/matter-js/matter",
+    "publisher": "matter.js authors",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/types",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@matter/main/node_modules/@matter/types/LICENSE"
+  },
+  "@noble/curves@1.9.7": {
+    "licenses": "MIT",
+    "repository": "https://github.com/paulmillr/noble-curves",
+    "publisher": "Paul Miller",
+    "url": "https://paulmillr.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@noble/curves",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@noble/curves/LICENSE"
+  },
+  "@noble/hashes@1.8.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/paulmillr/noble-hashes",
+    "publisher": "Paul Miller",
+    "url": "https://paulmillr.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@noble/hashes",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@noble/hashes/LICENSE"
+  },
+  "@pinojs/redact@0.4.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/redact",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@pinojs/redact",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/@pinojs/redact/LICENSE"
+  },
+  "atomic-sleep@1.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/davidmarkclements/atomic-sleep",
+    "publisher": "David Mark Clements",
+    "url": "@davidmarkclem",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/atomic-sleep",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/atomic-sleep/LICENSE"
+  },
+  "colorette@2.0.20": {
+    "licenses": "MIT",
+    "repository": "https://github.com/jorgebucaran/colorette",
+    "publisher": "Jorge Bucaran",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/colorette",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/colorette/LICENSE.md"
+  },
+  "dateformat@4.6.3": {
+    "licenses": "MIT",
+    "repository": "https://github.com/felixge/node-dateformat",
+    "publisher": "Steven Levithan",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/dateformat",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/dateformat/LICENSE"
+  },
+  "end-of-stream@1.4.5": {
+    "licenses": "MIT",
+    "repository": "https://github.com/mafintosh/end-of-stream",
+    "publisher": "Mathias Buus",
+    "email": "mathiasbuus@gmail.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/end-of-stream",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/end-of-stream/LICENSE"
+  },
+  "fast-copy@3.0.2": {
+    "licenses": "MIT",
+    "repository": "https://github.com/planttheidea/fast-copy",
+    "publisher": "tony_quetano@planttheidea.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/fast-copy",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/fast-copy/LICENSE"
+  },
+  "fast-safe-stringify@2.1.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/davidmarkclements/fast-safe-stringify",
+    "publisher": "David Mark Clements",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/fast-safe-stringify",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/fast-safe-stringify/LICENSE"
+  },
+  "help-me@5.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/mcollina/help-me",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/help-me",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/help-me/LICENSE"
+  },
+  "joycon@3.1.1": {
+    "licenses": "MIT",
+    "repository": "https://github.com/egoist/joycon",
+    "publisher": "egoist",
+    "email": "0x142857@gmail.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/joycon",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/joycon/LICENSE"
+  },
+  "minimist@1.2.8": {
+    "licenses": "MIT",
+    "repository": "https://github.com/minimistjs/minimist",
+    "publisher": "James Halliday",
+    "email": "mail@substack.net",
+    "url": "http://substack.net",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/minimist",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/minimist/LICENSE"
+  },
+  "on-exit-leak-free@2.1.2": {
+    "licenses": "MIT",
+    "repository": "https://github.com/mcollina/on-exit-or-gc",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/on-exit-leak-free",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/on-exit-leak-free/LICENSE"
+  },
+  "once@1.4.0": {
+    "licenses": "ISC",
+    "repository": "https://github.com/isaacs/once",
+    "publisher": "Isaac Z. Schlueter",
+    "email": "i@izs.me",
+    "url": "http://blog.izs.me/",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/once",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/once/LICENSE"
+  },
+  "pino-abstract-transport@2.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/pino-abstract-transport",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-abstract-transport",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-abstract-transport/LICENSE"
+  },
+  "pino-pretty@13.1.2": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/pino-pretty",
+    "publisher": "James Sumners",
+    "email": "james.sumners@gmail.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-pretty",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-pretty/LICENSE"
+  },
+  "pino-std-serializers@7.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/pino-std-serializers",
+    "publisher": "James Sumners",
+    "email": "james.sumners@gmail.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-std-serializers",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-std-serializers/LICENSE"
+  },
+  "pino@10.1.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/pino",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino/LICENSE"
+  },
+  "process-warning@5.0.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/fastify/process-warning",
+    "publisher": "Tomas Della Vedova",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/process-warning",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/process-warning/LICENSE"
+  },
+  "pump@3.0.3": {
+    "licenses": "MIT",
+    "repository": "https://github.com/mafintosh/pump",
+    "publisher": "Mathias Buus Madsen",
+    "email": "mathiasbuus@gmail.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pump",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pump/LICENSE"
+  },
+  "qrcode-terminal@0.12.0": {
+    "licenses": "Apache 2.0",
+    "repository": "https://github.com/gtanner/qrcode-terminal",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/qrcode-terminal",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/qrcode-terminal/LICENSE"
+  },
+  "quick-format-unescaped@4.0.4": {
+    "licenses": "MIT",
+    "repository": "https://github.com/davidmarkclements/quick-format",
+    "publisher": "David Mark Clements",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/quick-format-unescaped",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/quick-format-unescaped/LICENSE"
+  },
+  "real-require@0.2.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/real-require",
+    "publisher": "Paolo Insogna",
+    "email": "shogun@cowtech.it",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/real-require",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/real-require/LICENSE.md"
+  },
+  "rtt-checker@0.2.0": {
+    "licenses": "MIT",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/LICENSE"
+  },
+  "safe-stable-stringify@2.5.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/BridgeAR/safe-stable-stringify",
+    "publisher": "Ruben Bridgewater",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/safe-stable-stringify",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/safe-stable-stringify/LICENSE"
+  },
+  "secure-json-parse@4.1.0": {
+    "licenses": "BSD-3-Clause",
+    "repository": "https://github.com/fastify/secure-json-parse",
+    "publisher": "Eran Hammer",
+    "email": "eran@sideway.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/secure-json-parse",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/secure-json-parse/LICENSE"
+  },
+  "sonic-boom@4.2.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/pinojs/sonic-boom",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/sonic-boom",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/sonic-boom/LICENSE"
+  },
+  "split2@4.2.0": {
+    "licenses": "ISC",
+    "repository": "https://github.com/mcollina/split2",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/split2",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/split2/LICENSE"
+  },
+  "strip-json-comments@5.0.3": {
+    "licenses": "MIT",
+    "repository": "https://github.com/sindresorhus/strip-json-comments",
+    "publisher": "Sindre Sorhus",
+    "email": "sindresorhus@gmail.com",
+    "url": "https://sindresorhus.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-pretty/node_modules/strip-json-comments",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/pino-pretty/node_modules/strip-json-comments/license"
+  },
+  "thread-stream@3.1.0": {
+    "licenses": "MIT",
+    "repository": "https://github.com/mcollina/thread-stream",
+    "publisher": "Matteo Collina",
+    "email": "hello@matteocollina.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/thread-stream",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/thread-stream/LICENSE"
+  },
+  "wrappy@1.0.2": {
+    "licenses": "ISC",
+    "repository": "https://github.com/npm/wrappy",
+    "publisher": "Isaac Z. Schlueter",
+    "email": "i@izs.me",
+    "url": "http://blog.izs.me/",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/wrappy",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/wrappy/LICENSE"
+  },
+  "zod@4.1.13": {
+    "licenses": "MIT",
+    "repository": "https://github.com/colinhacks/zod",
+    "publisher": "Colin McDonnell",
+    "email": "zod@colinhacks.com",
+    "path": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/zod",
+    "licenseFile": "/Users/darren.gibson/Projects/js/RTTChecker/node_modules/zod/LICENSE"
+  }
+}
+
