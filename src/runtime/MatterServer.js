@@ -1,7 +1,7 @@
-import { StorageBackendDisk, StorageManager } from '@project-chip/matter-node.js/storage';
-import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
-import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cluster';
-import { Aggregator } from '@project-chip/matter.js/device';
+import { StorageBackendDisk, StorageManager } from '@matter/nodejs';
+import { MatterServer, CommissioningServer } from '@matter/main';
+import { BridgedDeviceBasicInformationCluster } from '@matter/main/clusters/bridged-device-basic-information';
+import { AggregatorEndpoint } from '@matter/main/endpoints/aggregator';
 import qr from 'qrcode-terminal';
 
 import { TrainStatusModeDevice } from '../devices/TrainStatusModeDevice.js';

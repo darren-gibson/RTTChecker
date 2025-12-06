@@ -3,7 +3,7 @@
 
 import pino from 'pino';
 import pinoPretty from 'pino-pretty';
-import { Logger as MatterLogger, Level as MatterLevel } from '@project-chip/matter.js/log';
+import { Logger as MatterLogger, LogLevel as MatterLevel } from '@matter/general';
 
 // Determine log level from environment
 const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();

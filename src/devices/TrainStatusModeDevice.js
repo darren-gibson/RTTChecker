@@ -1,6 +1,7 @@
-import { Device, DeviceTypes } from '@project-chip/matter.js/device';
-import { ClusterServer } from '@project-chip/matter.js/cluster';
-import { ModeSelectCluster, BasicInformationCluster } from '@project-chip/matter.js/cluster';
+import { Device, DeviceTypes } from '@matter/main';
+import { ClusterServer } from '@matter/main';
+import { ModeSelectCluster } from '@matter/main/clusters/mode-select';
+import { BasicInformationCluster } from '@matter/main/clusters/basic-information';
 
 import { MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';

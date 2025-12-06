@@ -1,10 +1,8 @@
-import { Device, DeviceTypes } from '@project-chip/matter.js/device';
-import { ClusterServer } from '@project-chip/matter.js/cluster';
-import {
-  TemperatureMeasurementCluster,
-  IdentifyCluster,
-  BasicInformationCluster,
-} from '@project-chip/matter.js/cluster';
+import { Device, DeviceTypes } from '@matter/main';
+import { ClusterServer } from '@matter/main';
+import { TemperatureMeasurementCluster } from '@matter/main/clusters/temperature-measurement';
+import { IdentifyCluster } from '@matter/main/clusters/identify';
+import { BasicInformationCluster } from '@matter/main/clusters/basic-information';
 
 import { MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';
