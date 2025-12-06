@@ -43,12 +43,12 @@ class TrainStatusAirQualityServer extends AirQualityServer {
 
   async setTrainStatus(statusCode) {
     const STATUS_TO_AIR_QUALITY = {
-      on_time: 1,      // Good - Green
-      minor_delay: 2,  // Fair - Yellow
-      delayed: 3,      // Moderate - Orange
-      major_delay: 4,  // Poor - Red
-      unknown: 5,      // VeryPoor - Dark Red
-      critical: 5,     // VeryPoor - Dark Red
+      on_time: 1, // Good - Green
+      minor_delay: 2, // Fair - Yellow
+      delayed: 3, // Moderate - Orange
+      major_delay: 4, // Poor - Red
+      unknown: 5, // VeryPoor - Dark Red
+      critical: 5, // VeryPoor - Dark Red
     };
 
     const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0;
@@ -59,13 +59,13 @@ class TrainStatusAirQualityServer extends AirQualityServer {
 
 ### Status Mapping
 
-| Train Status | Delay Range | Air Quality Level | Color in Google Home |
-|--------------|-------------|-------------------|---------------------|
-| On Time | 0-2 minutes | Good (1) | Green |
-| Minor Delay | 3-5 minutes | Fair (2) | Yellow |
-| Delayed | 6-10 minutes | Moderate (3) | Orange |
-| Major Delay | 11+ minutes | Poor (4) | Red |
-| Unknown/Critical | N/A | VeryPoor (5) | Dark Red |
+| Train Status     | Delay Range  | Air Quality Level | Color in Google Home |
+| ---------------- | ------------ | ----------------- | -------------------- |
+| On Time          | 0-2 minutes  | Good (1)          | Green                |
+| Minor Delay      | 3-5 minutes  | Fair (2)          | Yellow               |
+| Delayed          | 6-10 minutes | Moderate (3)      | Orange               |
+| Major Delay      | 11+ minutes  | Poor (4)          | Red                  |
+| Unknown/Critical | N/A          | VeryPoor (5)      | Dark Red             |
 
 ### Device Type
 
@@ -80,8 +80,8 @@ The air quality sensor is added as endpoint #3:
 
 ```javascript
 const airQualityDevice = await addEndpoint(
-  node, 
-  AirQualitySensorDevice, 
+  node,
+  AirQualitySensorDevice,
   [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer],
   { id: 'airquality', number: 3 }
 );
@@ -94,7 +94,7 @@ The air quality sensor updates automatically when train status changes:
 ```javascript
 trainDevice.on('statusChange', async (status) => {
   const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
-  
+
   await airQualityDevice.act(async (agent) => {
     await agent.airQuality.setTrainStatus(statusCode);
   });
@@ -108,17 +108,17 @@ When commissioned in Google Home, the air quality sensor appears as:
 - **Device Name**: "Train Air Quality"
 - **Device Type**: Air Quality Sensor
 - **Display**: Color-coded status badge
-- **Voice Commands**: 
+- **Voice Commands**:
   - "What's the air quality of Train Air Quality?"
   - "Is Train Air Quality good or bad?"
 
 ## Comparison with Other Approaches
 
-| Device Type | Pros | Cons |
-|-------------|------|------|
-| **Temperature Sensor** | Simple numeric value | No visual differentiation |
-| **Mode Select** | Text labels | Google Home shows as dropdown menu |
-| **Fan Control** | Speed presets | Confusing metaphor for train status |
+| Device Type            | Pros                                                                       | Cons                                                   |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------ |
+| **Temperature Sensor** | Simple numeric value                                                       | No visual differentiation                              |
+| **Mode Select**        | Text labels                                                                | Google Home shows as dropdown menu                     |
+| **Fan Control**        | Speed presets                                                              | Confusing metaphor for train status                    |
 | **Air Quality Sensor** | ✓ Color-coded visualization<br>✓ Intuitive metaphor<br>✓ Rich enum support | Requires re-commissioning if replacing existing device |
 
 ## Testing
@@ -126,6 +126,7 @@ When commissioned in Google Home, the air quality sensor appears as:
 To test the air quality sensor:
 
 1. **Start the server**:
+
    ```bash
    npm start
    ```

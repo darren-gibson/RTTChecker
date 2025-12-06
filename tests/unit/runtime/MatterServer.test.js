@@ -368,4 +368,107 @@ describe('MatterServer Custom Behaviors', () => {
       expect(statusCode).toBe('unknown');
     });
   });
+
+  describe('TrainStatusAirQualityServer', () => {
+    let mockBehavior;
+
+    beforeEach(() => {
+      mockBehavior = {
+        state: {
+          airQuality: 0, // Unknown
+        },
+        async setTrainStatus(statusCode) {
+          const STATUS_TO_AIR_QUALITY = {
+            on_time: 1, // Good
+            minor_delay: 2, // Fair
+            delayed: 3, // Moderate
+            major_delay: 4, // Poor
+            unknown: 5, // VeryPoor
+            critical: 5, // VeryPoor
+          };
+
+          const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0;
+          await this.setAirQuality(airQualityValue);
+        },
+        async setAirQuality(value) {
+          this.state.airQuality = value;
+        },
+      };
+    });
+
+    describe('initialization', () => {
+      it('should initialize with Unknown air quality (0)', () => {
+        expect(mockBehavior.state.airQuality).toBe(0);
+      });
+    });
+
+    describe('setTrainStatus() mapping', () => {
+      it('should map on_time to Good (1)', async () => {
+        await mockBehavior.setTrainStatus('on_time');
+        expect(mockBehavior.state.airQuality).toBe(1);
+      });
+
+      it('should map minor_delay to Fair (2)', async () => {
+        await mockBehavior.setTrainStatus('minor_delay');
+        expect(mockBehavior.state.airQuality).toBe(2);
+      });
+
+      it('should map delayed to Moderate (3)', async () => {
+        await mockBehavior.setTrainStatus('delayed');
+        expect(mockBehavior.state.airQuality).toBe(3);
+      });
+
+      it('should map major_delay to Poor (4)', async () => {
+        await mockBehavior.setTrainStatus('major_delay');
+        expect(mockBehavior.state.airQuality).toBe(4);
+      });
+
+      it('should map unknown to VeryPoor (5)', async () => {
+        await mockBehavior.setTrainStatus('unknown');
+        expect(mockBehavior.state.airQuality).toBe(5);
+      });
+
+      it('should map critical to VeryPoor (5)', async () => {
+        await mockBehavior.setTrainStatus('critical');
+        expect(mockBehavior.state.airQuality).toBe(5);
+      });
+
+      it('should default to Unknown (0) for invalid status', async () => {
+        await mockBehavior.setTrainStatus('invalid');
+        expect(mockBehavior.state.airQuality).toBe(0);
+      });
+    });
+
+    describe('status transitions', () => {
+      it('should handle improvement from Poor to Good', async () => {
+        await mockBehavior.setTrainStatus('major_delay');
+        expect(mockBehavior.state.airQuality).toBe(4);
+
+        await mockBehavior.setTrainStatus('on_time');
+        expect(mockBehavior.state.airQuality).toBe(1);
+      });
+
+      it('should handle degradation from Good to Poor', async () => {
+        await mockBehavior.setTrainStatus('on_time');
+        expect(mockBehavior.state.airQuality).toBe(1);
+
+        await mockBehavior.setTrainStatus('major_delay');
+        expect(mockBehavior.state.airQuality).toBe(4);
+      });
+
+      it('should handle gradual degradation', async () => {
+        await mockBehavior.setTrainStatus('on_time');
+        expect(mockBehavior.state.airQuality).toBe(1);
+
+        await mockBehavior.setTrainStatus('minor_delay');
+        expect(mockBehavior.state.airQuality).toBe(2);
+
+        await mockBehavior.setTrainStatus('delayed');
+        expect(mockBehavior.state.airQuality).toBe(3);
+
+        await mockBehavior.setTrainStatus('major_delay');
+        expect(mockBehavior.state.airQuality).toBe(4);
+      });
+    });
+  });
 });

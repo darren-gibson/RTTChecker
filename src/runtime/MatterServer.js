@@ -100,7 +100,7 @@ class TrainStatusModeServer extends ModeSelectServer {
 /**
  * Custom Air Quality Behavior
  * Maps train punctuality to air quality levels for color-coded status visualization
- * 
+ *
  * Status Mapping:
  * - On Time (0-2 mins)     → Good (1) - Green
  * - Minor Delay (3-5 mins) → Fair (2) - Yellow
@@ -120,12 +120,12 @@ class TrainStatusAirQualityServer extends AirQualityServer {
   async setTrainStatus(statusCode) {
     // Map train status codes to AirQualityEnum values
     const STATUS_TO_AIR_QUALITY = {
-      on_time: 1,      // Good - Green
-      minor_delay: 2,  // Fair - Yellow
-      delayed: 3,      // Moderate - Orange
-      major_delay: 4,  // Poor - Red
-      unknown: 5,      // VeryPoor - Dark Red
-      critical: 5,     // VeryPoor - Dark Red
+      on_time: 1, // Good - Green
+      minor_delay: 2, // Fair - Yellow
+      delayed: 3, // Moderate - Orange
+      major_delay: 4, // Poor - Red
+      unknown: 5, // VeryPoor - Dark Red
+      critical: 5, // VeryPoor - Dark Red
     };
 
     const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0; // Default to Unknown
@@ -192,7 +192,11 @@ export async function startMatterServer(trainDevice) {
   }
   let tempSensor, modeDevice, airQualityDevice;
   try {
-    const endpoints = await createEndpoints(node, { tempBehaviors, modeBehaviors, airQualityBehaviors });
+    const endpoints = await createEndpoints(node, {
+      tempBehaviors,
+      modeBehaviors,
+      airQualityBehaviors,
+    });
     tempSensor = endpoints.tempSensor;
     modeDevice = endpoints.modeDevice;
     airQualityDevice = endpoints.airQualityDevice;
