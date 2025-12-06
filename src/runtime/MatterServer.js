@@ -2,6 +2,7 @@ import { createHash } from 'crypto';
 
 import { TemperatureMeasurementServer } from '@matter/main/behaviors/temperature-measurement';
 import { ModeSelectServer } from '@matter/main/behaviors/mode-select';
+import { AirQualityServer } from '@matter/main/behaviors/air-quality';
 import { UserLabelServer } from '@matter/main/behaviors/user-label';
 import { FixedLabelServer } from '@matter/main/behaviors/fixed-label';
 
@@ -96,6 +97,47 @@ class TrainStatusModeServer extends ModeSelectServer {
   }
 }
 
+/**
+ * Custom Air Quality Behavior
+ * Maps train punctuality to air quality levels for color-coded status visualization
+ * 
+ * Status Mapping:
+ * - On Time (0-2 mins)     → Good (1) - Green
+ * - Minor Delay (3-5 mins) → Fair (2) - Yellow
+ * - Delayed (6-10 mins)    → Moderate (3) - Orange
+ * - Major Delay (11+ mins) → Poor (4) - Red
+ * - Unknown/Critical       → VeryPoor (5) - Dark Red
+ */
+class TrainStatusAirQualityServer extends AirQualityServer {
+  async initialize() {
+    log.debug('Initializing TrainStatusAirQualityServer...');
+    // Start with Unknown (0) until first status update
+    this.state.airQuality = 0; // AirQualityEnum.Unknown
+    await super.initialize?.();
+    log.debug('Initialized TrainStatusAirQualityServer');
+  }
+
+  async setTrainStatus(statusCode) {
+    // Map train status codes to AirQualityEnum values
+    const STATUS_TO_AIR_QUALITY = {
+      on_time: 1,      // Good - Green
+      minor_delay: 2,  // Fair - Yellow
+      delayed: 3,      // Moderate - Orange
+      major_delay: 4,  // Poor - Red
+      unknown: 5,      // VeryPoor - Dark Red
+      critical: 5,     // VeryPoor - Dark Red
+    };
+
+    const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0; // Default to Unknown
+    await this.setAirQuality(airQualityValue);
+  }
+
+  async setAirQuality(value) {
+    log.debug(`Setting air quality to: ${value}`);
+    this.state.airQuality = value;
+  }
+}
+
 // Use helper to generate BD-BI behaviors
 
 const BridgedInfoTemp = makeBridgedInfoBehavior({
@@ -108,6 +150,12 @@ const BridgedInfoMode = makeBridgedInfoBehavior({
   productName: config.matter.statusDeviceName,
   nodeLabel: config.matter.statusDeviceName,
   uniqueIdFactory: () => makeUniqueId('MODE'),
+});
+
+const BridgedInfoAirQuality = makeBridgedInfoBehavior({
+  productName: 'Train Air Quality',
+  nodeLabel: 'Train Air Quality',
+  uniqueIdFactory: () => makeUniqueId('AIR'),
 });
 
 /**
@@ -132,19 +180,22 @@ export async function startMatterServer(trainDevice) {
 
   // Add endpoints via factory
   log.info(
-    `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}"`
+    `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}", air quality "Train Air Quality"`
   );
   const tempBehaviors = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
   const modeBehaviors = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
+  const airQualityBehaviors = [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer];
   if (config.matter.useBridge) {
     tempBehaviors.push(BridgedInfoTemp);
     modeBehaviors.push(BridgedInfoMode);
+    airQualityBehaviors.push(BridgedInfoAirQuality);
   }
-  let tempSensor, modeDevice;
+  let tempSensor, modeDevice, airQualityDevice;
   try {
-    const endpoints = await createEndpoints(node, { tempBehaviors, modeBehaviors });
+    const endpoints = await createEndpoints(node, { tempBehaviors, modeBehaviors, airQualityBehaviors });
     tempSensor = endpoints.tempSensor;
     modeDevice = endpoints.modeDevice;
+    airQualityDevice = endpoints.airQualityDevice;
     log.info('   ✓ Endpoints added');
   } catch (e) {
     log.error('   ❌ Failed adding endpoints');
@@ -163,6 +214,7 @@ export async function startMatterServer(trainDevice) {
     try {
       await setEndpointName(tempSensor, config.matter.delayDeviceName);
       await setEndpointName(modeDevice, config.matter.statusDeviceName);
+      await setEndpointName(airQualityDevice, 'Train Air Quality');
       log.info('   ✓ Endpoint labels set');
     } catch (e) {
       log.warn('   ⚠️ Could not set endpoint labels via UserLabel:', e);
@@ -178,8 +230,10 @@ export async function startMatterServer(trainDevice) {
           computedMode = status.currentMode;
         }
 
+        const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
+
+        // Update mode device
         await modeDevice.act(async (agent) => {
-          const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
           await agent.modeSelect.setTrainStatus(statusCode);
         });
 
@@ -188,8 +242,10 @@ export async function startMatterServer(trainDevice) {
           await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
         });
 
-        // Calculate delay from the current mode
-        // For now, we'll just update based on available data
+        // Update air quality device with color-coded status
+        await airQualityDevice.act(async (agent) => {
+          await agent.airQuality.setTrainStatus(statusCode);
+        });
       } catch (error) {
         log.error('Error updating Matter endpoints:', error);
       }
@@ -210,6 +266,7 @@ export async function startMatterServer(trainDevice) {
     node,
     tempSensor,
     modeDevice,
+    airQualityDevice,
     close: async () => {
       log.info('🛑 Shutting down Matter server...');
       await node.close();
