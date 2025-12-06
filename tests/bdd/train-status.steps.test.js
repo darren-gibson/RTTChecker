@@ -87,6 +87,177 @@ defineFeature(feature, (test) => {
     });
   });
 
+  test('On time when delayMinutes is exactly 0', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('a train is scheduled to depart at 12:22', () => {
+      trainData = { scheduled: '1222' };
+    });
+    given('the realtime departure is also 12:22', () => {
+      trainData.realtime = '1222';
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "ON_TIME"', () => {
+      expect(result.status).toBe(TrainStatus.ON_TIME);
+    });
+  });
+
+  test('Assume on time when realtime is missing', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('the realtime data is missing', () => {
+      trainData = { scheduled: '1222', realtime: null };
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "ON_TIME"', () => {
+      expect(result.status).toBe(TrainStatus.ON_TIME);
+    });
+  });
+
+  test('Early departure within on-time threshold (2 minutes)', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('a train is scheduled to depart at 12:22', () => {
+      trainData = { scheduled: '1222' };
+    });
+    given('the realtime departure is 12:20', () => {
+      trainData.realtime = '1220';
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "ON_TIME"', () => {
+      expect(result.status).toBe(TrainStatus.ON_TIME);
+    });
+  });
+
+  test('Exactly at on-time boundary (2 minutes late)', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('a train is scheduled to depart at 12:22', () => {
+      trainData = { scheduled: '1222' };
+    });
+    given('the realtime departure is 12:24', () => {
+      trainData.realtime = '1224';
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "ON_TIME"', () => {
+      expect(result.status).toBe(TrainStatus.ON_TIME);
+    });
+  });
+
+  test('Exactly minor delay boundary (5 minutes late)', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('a train is scheduled to depart at 12:22', () => {
+      trainData = { scheduled: '1222' };
+    });
+    given('the realtime departure is 12:27', () => {
+      trainData.realtime = '1227';
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "MINOR_DELAY"', () => {
+      expect(result.status).toBe(TrainStatus.MINOR_DELAY);
+    });
+  });
+
+  test('Exactly delayed boundary (10 minutes late)', ({ given, when, then }) => {
+    given('I am checking train status from Cambridge to Kings Cross', () => {});
+    given('the current time is 12:00 UK local time', () => {
+      currentTime = new Date(2025, 10, 30, 12, 0, 0);
+    });
+    given('a train is scheduled to depart at 12:22', () => {
+      trainData = { scheduled: '1222' };
+    });
+    given('the realtime departure is 12:32', () => {
+      trainData.realtime = '1232';
+    });
+    when('I check the train status', async () => {
+      const train = createMockTrain(trainData.scheduled, trainData.realtime);
+      const mockFetch = createMockFetch([train]);
+
+      result = await getTrainStatus({
+        originTiploc: 'CAMBDGE',
+        destTiploc: 'KNGX',
+        minAfterMinutes: 20,
+        windowMinutes: 60,
+        now: currentTime,
+        fetchImpl: mockFetch,
+      });
+    });
+    then('the status should be "DELAYED"', () => {
+      expect(result.status).toBe(TrainStatus.DELAYED);
+    });
+  });
+
   test('Train with minor delay (1-5 minutes)', ({ given, when, then, and }) => {
     given('I am checking train status from Cambridge to Kings Cross', () => {
       // Context setup
