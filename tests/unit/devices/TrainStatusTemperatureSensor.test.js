@@ -2,9 +2,10 @@ import { describe, it, expect, beforeEach } from '@jest/globals';
 import { TemperatureMeasurementCluster } from '@matter/main/clusters/temperature-measurement';
 import { IdentifyCluster } from '@matter/main/clusters/identify';
 
-import { TrainStatusTemperatureSensor } from '../../../src/devices/TrainStatusTemperatureSensor.js';
-
-describe('TrainStatusTemperatureSensor', () => {
+// NOTE: TrainStatusTemperatureSensor (Device-based) is archived in .archive/v0.12/
+// The new v0.15 implementation uses custom behaviors in MatterServerV15.js
+// This test suite is skipped as it tests the old implementation
+describe.skip('TrainStatusTemperatureSensor (v0.12 - archived)', () => {
   let sensor;
 
   beforeEach(() => {

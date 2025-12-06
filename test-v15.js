@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { startMatterServer } from './src/runtime/MatterServerV15.js';
+import { startMatterServer } from './src/runtime/MatterServer.js';
 import { config } from './src/config.js';
 
 console.log('Testing MatterServerV15 implementation...');
@@ -12,7 +12,7 @@ console.log('Config:', {
 try {
   const server = await startMatterServer(null);
   console.log('✅ Server started successfully!');
-  
+
   // Shutdown after 2 seconds for testing
   setTimeout(async () => {
     console.log('Shutting down test server...');
