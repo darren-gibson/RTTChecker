@@ -1,11 +1,15 @@
+/* eslint-disable no-undef */
+// ARCHIVED: This is the v0.12 implementation using Device/Aggregator API
+// See src/runtime/MatterServer.js for v0.15 implementation using ServerNode/Behavior API
+
 import { StorageBackendDisk, StorageManager } from '@matter/nodejs';
 import { MatterServer, CommissioningServer } from '@matter/main';
 import { BridgedDeviceBasicInformationCluster } from '@matter/main/clusters/bridged-device-basic-information';
-import { AggregatorEndpoint } from '@matter/main/endpoints/aggregator';
+// import { AggregatorEndpoint } from '@matter/main/endpoints/aggregator';
 import qr from 'qrcode-terminal';
 
-import { TrainStatusModeDevice } from '../devices/TrainStatusModeDevice.js';
-import { TrainStatusTemperatureSensor } from '../devices/TrainStatusTemperatureSensor.js';
+// import { TrainStatusModeDevice } from '../devices/TrainStatusModeDevice.js';
+// import { TrainStatusTemperatureSensor } from '../devices/TrainStatusTemperatureSensor.js';
 import { MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
@@ -32,10 +36,10 @@ function createEndpoints() {
   log.info(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
   log.info(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
 
-  let aggregator = null;
+  const aggregator = null;
   if (config.matter.useBridge) {
     log.info('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
-    aggregator = new Aggregator();
+    // aggregator = new Aggregator();
 
     try {
       aggregator.addBridgedDevice(modeDevice, {
