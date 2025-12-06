@@ -45,12 +45,13 @@ class TrainTemperatureServer extends TemperatureMeasurementServer {
  */
 class TrainStatusModeServer extends ModeSelectServer {
   async setTrainStatus(statusCode) {
-    // Map status codes to modes
+    // Map status codes to modes (from constants.js)
     const modeMap = {
       on_time: 0,
-      delayed: 1,
-      cancelled: 2,
-      unknown: 3,
+      minor_delay: 1,
+      delayed: 2,
+      major_delay: 3,
+      unknown: 4,
     };
 
     const modeValue = modeMap[statusCode] ?? modeMap.unknown;
@@ -64,11 +65,12 @@ class TrainStatusModeServer extends ModeSelectServer {
     this.state.standardNamespace = null; // No standard namespace for custom modes
     this.state.supportedModes = [
       { label: 'On Time', mode: 0, semanticTags: [] },
-      { label: 'Delayed', mode: 1, semanticTags: [] },
-      { label: 'Cancelled', mode: 2, semanticTags: [] },
-      { label: 'Unknown', mode: 3, semanticTags: [] },
+      { label: 'Minor Delay', mode: 1, semanticTags: [] },
+      { label: 'Delayed', mode: 2, semanticTags: [] },
+      { label: 'Major Delay', mode: 3, semanticTags: [] },
+      { label: 'Unknown', mode: 4, semanticTags: [] },
     ];
-    this.state.currentMode = 3; // Start as unknown
+    this.state.currentMode = 4; // Start as unknown
 
     await super.initialize?.();
   }
@@ -144,18 +146,25 @@ export async function startMatterServer(trainDevice) {
   if (trainDevice) {
     log.info('🔗 Connecting train device to Matter endpoints...');
 
-    trainDevice.on('statusChanged', async (status) => {
+    trainDevice.on('statusChange', async (status) => {
       log.debug('Train status changed:', status);
       try {
+        // Map currentMode back to statusCode string for the behavior
+        const modeToStatus = {
+          0: 'on_time',
+          1: 'minor_delay',
+          2: 'delayed',
+          3: 'major_delay',
+          4: 'unknown',
+        };
+
         await modeDevice.act(async (agent) => {
-          await agent.modeSelect.setTrainStatus(status.statusCode);
+          const statusCode = modeToStatus[status.currentMode] || 'unknown';
+          await agent.modeSelect.setTrainStatus(statusCode);
         });
 
-        if (status.delayMinutes !== undefined) {
-          await tempSensor.act(async (agent) => {
-            await agent.temperatureMeasurement.setDelayMinutes(status.delayMinutes);
-          });
-        }
+        // Calculate delay from the current mode
+        // For now, we'll just update based on available data
       } catch (error) {
         log.error('Error updating Matter endpoints:', error);
       }
