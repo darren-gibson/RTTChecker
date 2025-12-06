@@ -1,131 +1,168 @@
-import { StorageBackendDisk, StorageManager } from '@project-chip/matter-node.js/storage';
-import { MatterServer, CommissioningServer } from '@project-chip/matter.js';
-import { BridgedDeviceBasicInformationCluster } from '@project-chip/matter.js/cluster';
-import { Aggregator } from '@project-chip/matter.js/device';
+import { createHash } from 'crypto';
+
+import { Environment } from '@matter/main';
+import { StorageBackendDisk } from '@matter/nodejs';
+import { ServerNode } from '@matter/main';
+import { TemperatureSensorDevice } from '@matter/main/devices/temperature-sensor';
+import { ModeSelectDevice } from '@matter/main/devices/mode-select';
+import { TemperatureMeasurementServer } from '@matter/main/behaviors/temperature-measurement';
+import { ModeSelectServer } from '@matter/main/behaviors/mode-select';
+import { UserLabelServer } from '@matter/main/behaviors/user-label';
+import { FixedLabelServer } from '@matter/main/behaviors/fixed-label';
+import { BridgedDeviceBasicInformationServer } from '@matter/main/behaviors/bridged-device-basic-information';
+import { DescriptorServer } from '@matter/main/behaviors/descriptor';
 import qr from 'qrcode-terminal';
 
-import { TrainStatusModeDevice } from '../devices/TrainStatusModeDevice.js';
-import { TrainStatusTemperatureSensor } from '../devices/TrainStatusTemperatureSensor.js';
-import { MatterDevice as MatterConstants } from '../constants.js';
+import { MatterDevice as MatterConstants, Timing } from '../constants.js';
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
 
 /**
- * Matter Server Implementation
+ * Matter Server Implementation (v0.15 API)
  * Creates a discoverable Matter device that Google Home can commission
  */
 
 const log = loggers.matter;
 
-/**
- * Create Matter endpoint devices (Mode Select and Temperature Sensor)
- * Optionally wraps them in a Bridge (Aggregator) if useBridge is true
- */
-function createEndpoints() {
-  log.info('📝 Creating Matter endpoints:');
-  log.info(`   Mode Select Device: "${config.matter.statusDeviceName}"`);
-  log.info(`   Temperature Sensor: "${config.matter.delayDeviceName}"`);
-
-  const modeDevice = new TrainStatusModeDevice(config.matter.statusDeviceName);
-  const tempSensor = new TrainStatusTemperatureSensor(config.matter.delayDeviceName);
-
-  log.info(`   ✓ Mode Select created with name: "${modeDevice.name}"`);
-  log.info(`   ✓ Temperature Sensor created with name: "${tempSensor.name}"`);
-
-  let aggregator = null;
-  if (config.matter.useBridge) {
-    log.info('🧩 Configuring bridge (Aggregator) for per-endpoint names...');
-    aggregator = new Aggregator();
-
-    try {
-      aggregator.addBridgedDevice(modeDevice, {
-        vendorName: config.matter.vendorName,
-        vendorId: MatterConstants.VendorId,
-        productId: MatterConstants.ProductId,
-        productName: config.matter.statusDeviceName,
-        productLabel: config.matter.statusDeviceName,
-        nodeLabel: config.matter.statusDeviceName,
-        hardwareVersion: 1,
-        hardwareVersionString: '1.0',
-        softwareVersion: 1,
-        softwareVersionString: '1.0',
-        serialNumber: `${config.matter.serialNumber}-MODE`,
-        reachable: true,
-        uniqueId: `${config.matter.serialNumber}-MODE`,
-      });
-      log.info('   ✓ Bridged: Mode Select');
-      const biMode = modeDevice.getClusterServer(BridgedDeviceBasicInformationCluster);
-      if (biMode) {
-        log.debug('      Bridged Mode Select attributes:', {
-          nodeLabel: biMode.getNodeLabelAttribute(),
-          productName: biMode.getProductNameAttribute(),
-          productLabel: biMode.getProductLabelAttribute(),
-          serialNumber: biMode.getSerialNumberAttribute(),
-          uniqueId: biMode.getUniqueIdAttribute?.(),
-        });
-      } else {
-        log.debug('      Bridged Mode Select BasicInformation cluster not found');
-      }
-    } catch (e) {
-      log.warn('   ⚠️  Could not add bridged info for Mode Select:', e?.message || e);
-      aggregator.addBridgedDevice(modeDevice);
-    }
-
-    try {
-      aggregator.addBridgedDevice(tempSensor, {
-        vendorName: config.matter.vendorName,
-        vendorId: MatterConstants.VendorId,
-        productId: MatterConstants.ProductId,
-        productName: config.matter.delayDeviceName,
-        productLabel: config.matter.delayDeviceName,
-        nodeLabel: config.matter.delayDeviceName,
-        hardwareVersion: 1,
-        hardwareVersionString: '1.0',
-        softwareVersion: 1,
-        softwareVersionString: '1.0',
-        serialNumber: `${config.matter.serialNumber}-TEMP`,
-        reachable: true,
-        uniqueId: `${config.matter.serialNumber}-TEMP`,
-      });
-      log.info('   ✓ Bridged: Temperature Sensor');
-      const biTemp = tempSensor.getClusterServer(BridgedDeviceBasicInformationCluster);
-      if (biTemp) {
-        log.debug('      Bridged Temperature Sensor attributes:', {
-          nodeLabel: biTemp.getNodeLabelAttribute(),
-          productName: biTemp.getProductNameAttribute(),
-          productLabel: biTemp.getProductLabelAttribute(),
-          serialNumber: biTemp.getSerialNumberAttribute(),
-          uniqueId: biTemp.getUniqueIdAttribute?.(),
-        });
-      } else {
-        log.debug('      Bridged Temperature Sensor BasicInformation cluster not found');
-      }
-    } catch (e) {
-      log.warn('   ⚠️  Could not add bridged info for Temperature Sensor:', e?.message || e);
-      aggregator.addBridgedDevice(tempSensor);
-    }
-  } else {
-    log.info('🔗 Bridge disabled (USE_BRIDGE=false). Exposing endpoints directly.');
-  }
-
-  return { modeDevice, tempSensor, aggregator };
+function makeUniqueId(suffix) {
+  const base = `${config.matter.serialNumber}-${suffix}`;
+  const hash = createHash('sha256').update(base).digest('hex');
+  // UniqueId must be 32 chars; take first 32 hex chars
+  return hash.slice(0, 32);
 }
 
 /**
- * Register devices with commissioning server
- * Handles both bridge mode (single aggregator) and direct mode (two devices)
+ * Custom Temperature Measurement Behavior
+ * Allows updating temperature from external source (train delay)
  */
-function registerDevices(commissioningServer, { modeDevice, tempSensor, aggregator }) {
-  log.info('🔌 Registering endpoints with commissioning server...');
+class TrainTemperatureServer extends TemperatureMeasurementServer {
+  async initialize() {
+    log.debug('Initializing TrainTemperatureServer...');
+    this.state.minMeasuredValue = -1000; // -10.00°C
+    this.state.maxMeasuredValue = 5000; // 50.00°C
+    this.state.measuredValue = null; // unknown until first update
+    await super.initialize?.();
+    log.debug('Initialized TrainTemperatureServer');
+  }
+  async setDelayMinutes(delayMinutes) {
+    if (delayMinutes == null) {
+      // Unknown delay → expose unknown temperature by setting measuredValue to null
+      await this.setMeasuredValue(null);
+      return;
+    }
+    const tempCelsius = Math.min(Math.max(delayMinutes, -10), 50);
+    const tempValue = Math.round(tempCelsius * 100);
+    await this.setMeasuredValue(tempValue);
+  }
 
-  if (config.matter.useBridge && aggregator) {
-    commissioningServer.addDevice(aggregator);
-    log.info('   ✓ Added Aggregator (Bridge) endpoint with Mode Select and Temperature Sensor');
-  } else {
-    commissioningServer.addDevice(modeDevice);
-    log.info(`   ✓ Added Mode Select endpoint: "${config.matter.statusDeviceName}"`);
-    commissioningServer.addDevice(tempSensor);
-    log.info(`   ✓ Added Temperature Sensor endpoint: "${config.matter.delayDeviceName}"`);
+  async setTemperature(tempCelsius) {
+    const tempValue = Math.round(tempCelsius * 100);
+    await this.setMeasuredValue(tempValue);
+  }
+
+  async setMeasuredValue(value) {
+    this.state.measuredValue = value;
+  }
+}
+
+/**
+ * Custom Mode Select Behavior
+ * Represents train status as mode selection
+ */
+class TrainStatusModeServer extends ModeSelectServer {
+  async setTrainStatus(statusCode) {
+    // Map status codes to modes (from constants.js)
+    const modeMap = {
+      on_time: 0,
+      minor_delay: 1,
+      delayed: 2,
+      major_delay: 3,
+      unknown: 4,
+    };
+
+    const modeValue = modeMap[statusCode] ?? modeMap.unknown;
+    await this.changeToMode({ newMode: modeValue });
+  }
+
+  async initialize() {
+    // Define available modes and required attributes BEFORE calling super.initialize()
+    // This ensures supportedModes is set when currentMode is validated
+    this.state.description = 'Train punctuality status';
+    this.state.standardNamespace = null; // No standard namespace for custom modes
+    this.state.supportedModes = [
+      { label: 'On Time', mode: 0, semanticTags: [] },
+      { label: 'Minor Delay', mode: 1, semanticTags: [] },
+      { label: 'Delayed', mode: 2, semanticTags: [] },
+      { label: 'Major Delay', mode: 3, semanticTags: [] },
+      { label: 'Unknown', mode: 4, semanticTags: [] },
+    ];
+    this.state.currentMode = 4; // Start as unknown
+
+    try {
+      await super.initialize?.();
+    } catch (err) {
+      log.error('BridgedInfoMode super.initialize failed:', err?.stack || err);
+      throw err;
+    }
+  }
+}
+
+/**
+ * Bridged Device Basic Information per-endpoint defaults
+ */
+class BridgedInfoTemp extends BridgedDeviceBasicInformationServer {
+  async initialize() {
+    log.debug('Initializing BridgedInfoTemp...');
+    this.state.vendorName = config.matter.vendorName;
+    this.state.vendorId = MatterConstants.VendorId;
+    this.state.productName = config.matter.delayDeviceName;
+    this.state.productId = MatterConstants.ProductId;
+    this.state.productLabel = config.matter.delayDeviceName;
+    this.state.nodeLabel = config.matter.delayDeviceName;
+    this.state.reachable = true;
+    this.state.serialNumber = config.matter.serialNumber;
+    this.state.manufacturingDate = '2024-01-01';
+    this.state.productAppearance = { finish: 0, primaryColor: 0 };
+    this.state.uniqueId = makeUniqueId('TEMP');
+    this.state.hardwareVersion = 1;
+    this.state.hardwareVersionString = '1.0';
+    this.state.softwareVersion = 1;
+    this.state.softwareVersionString = '1.0';
+    try {
+      log.debug('BridgedInfoTemp state:', JSON.stringify(this.state));
+    } catch (e) {
+      // ignore JSON stringify errors
+    }
+    await super.initialize?.();
+    log.debug('Initialized BridgedInfoTemp');
+  }
+}
+
+class BridgedInfoMode extends BridgedDeviceBasicInformationServer {
+  async initialize() {
+    log.debug('Initializing BridgedInfoMode...');
+    this.state.vendorName = config.matter.vendorName;
+    this.state.vendorId = MatterConstants.VendorId;
+    this.state.productName = config.matter.statusDeviceName;
+    this.state.productId = MatterConstants.ProductId;
+    this.state.productLabel = config.matter.statusDeviceName;
+    this.state.nodeLabel = config.matter.statusDeviceName;
+    this.state.reachable = true;
+    this.state.serialNumber = config.matter.serialNumber;
+    this.state.manufacturingDate = '2024-01-01';
+    this.state.productAppearance = { finish: 0, primaryColor: 0 };
+    this.state.uniqueId = makeUniqueId('MODE');
+    this.state.hardwareVersion = 1;
+    this.state.hardwareVersionString = '1.0';
+    this.state.softwareVersion = 1;
+    this.state.softwareVersionString = '1.0';
+    try {
+      log.debug('BridgedInfoMode state:', JSON.stringify(this.state));
+    } catch (e) {
+      // ignore JSON stringify errors
+    }
+    await super.initialize?.();
+    log.debug('Initialized BridgedInfoMode');
   }
 }
 
@@ -133,152 +170,211 @@ function registerDevices(commissioningServer, { modeDevice, tempSensor, aggregat
  * Initialize and start the Matter server with train status device
  */
 export async function startMatterServer(trainDevice) {
-  log.info('🔧 Initializing Matter server...');
+  log.info('🔧 Initializing Matter server (v0.15 API)...');
   log.info('   Storage directory: .matter-storage/');
+  log.info(`   Bridge mode: ${config.matter.useBridge ? 'enabled' : 'disabled'}`);
 
-  // Storage for commissioning data
-  const storageManager = new StorageManager(new StorageBackendDisk('.matter-storage'));
-  await storageManager.initialize();
+  // Configure environment with storage backend
+  const environment = Environment.default;
+  environment.vars.set('storage.path', '.matter-storage');
+  environment.set(StorageBackendDisk, new StorageBackendDisk('.matter-storage'));
 
-  // Check if device is already commissioned
-  storageManager.createContext('0');
-  try {
-    // Check if FabricManager storage exists
-    const fabricManagerContext = storageManager.createContext('FabricManager');
-    const fabrics = fabricManagerContext.get('fabrics');
-
-    if (fabrics && Array.isArray(fabrics) && fabrics.length > 0) {
-      log.warn('WARNING: Device is already commissioned!');
-      log.warn(`   Found ${fabrics.length} existing fabric(s)`);
-      log.warn('   To re-commission, delete .matter-storage/ directory first:');
-      log.warn('   rm -rf .matter-storage/');
-      log.warn('   Then restart the server.\n');
-    } else {
-      log.info('   ✓ No existing fabrics - ready for commissioning\n');
-    }
-  } catch (_error) {
-    // Storage key doesn't exist yet - device not commissioned
-    log.info('   ✓ No existing fabrics - ready for commissioning\n');
-  }
-
-  // Create Matter server
-  const matterServer = new MatterServer(storageManager);
-
-  // Create commissioning server with pairing info
-  const commissioningServer = new CommissioningServer({
-    port: 5540,
-    deviceName: config.matter.deviceName,
-    deviceType: MatterConstants.DeviceType,
+  // Create Matter server node
+  const node = await ServerNode.create({
+    id: 'rtt-checker',
+    network: {
+      port: config.matter.port,
+    },
+    commissioning: {
+      passcode: config.matter.passcode,
+      discriminator: config.matter.discriminator,
+    },
+    productDescription: {
+      name: config.matter.useBridge ? config.matter.productName : config.matter.statusDeviceName,
+      deviceType: config.matter.useBridge ? 0x000e /* Aggregator */ : ModeSelectDevice.deviceType,
+    },
     basicInformation: {
       vendorName: config.matter.vendorName,
       vendorId: MatterConstants.VendorId,
-      nodeLabel: config.matter.productName,
+      nodeLabel: config.matter.statusDeviceName,
       productName: config.matter.productName,
       productLabel: config.matter.productName,
       productId: MatterConstants.ProductId,
       serialNumber: config.matter.serialNumber,
-      uniqueId: config.matter.serialNumber,
+      hardwareVersion: 1,
+      hardwareVersionString: '1.0',
+      softwareVersion: 1,
+      softwareVersionString: '1.0',
     },
-    passcode: config.matter.passcode,
-    discriminator: config.matter.discriminator,
   });
 
-  log.info('📡 Matter server created');
-  // Mask discriminator and passcode at non-debug levels to avoid leaking full credentials.
-  const maskValue = (val, visible = 3) => {
-    const s = String(val);
-    if (log.debug) {
-      // still log full when DEBUG level active
-      return s;
-    }
-    if (s.length <= visible) return '*'.repeat(s.length);
-    return '*'.repeat(Math.max(0, s.length - visible)) + s.slice(-visible);
-  };
-  log.info(`   Discriminator: ${maskValue(config.matter.discriminator)}`);
-  log.info(`   Passcode: ${maskValue(config.matter.passcode)}`);
+  log.info('✅ Matter server node created');
 
-  // Generate QR code for commissioning
-  const { qrPairingCode, manualPairingCode } = commissioningServer.getPairingCode();
-
-  log.info('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  log.info('📱 COMMISSION THIS DEVICE WITH GOOGLE HOME');
-  log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  log.info('\n1️⃣  Open Google Home app on your phone');
-  log.info('2️⃣  Tap + → Add device → New device');
-  log.info('3️⃣  Select your home');
-  log.info('4️⃣  Scan this QR code or enter manual code:\n');
-  try {
-    qr.generate(qrPairingCode, { small: true });
-  } catch (_e) {
-    log.info(`QR: ${qrPairingCode}`);
-  }
-  const pairingMasked = maskValue(manualPairingCode, 4);
-  log.info(`\n   Manual pairing code: ${pairingMasked} (masked)\n`);
-  log.info('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-  // Create endpoints (with optional bridge)
-  const { modeDevice, tempSensor, aggregator } = createEndpoints();
-
-  // Update devices when train status changes
-  // Event payload: { timestamp, previousMode, currentMode, modeChanged, trainStatus, selectedService, raw, error }
-  trainDevice.on('statusChange', (change) => {
-    // Update Mode Select device (always reflect current status, even if error/unknown)
-    modeDevice.setCurrentMode(change.currentMode);
-
-    // Update temperature sensor with delay minutes (1:1 mapping: delay = temperature)
-    // Extract delay from trainStatus if available, otherwise use mode-based estimate
-    let delayMinutes = 0;
-
-    if (change.trainStatus) {
-      // Try to get actual delay from train status
-      const service = change.selectedService;
-      if (service?.rtd || service?.etd) {
-        // Calculate delay from real-time vs expected times
-        // This is a simplified estimate; real logic would parse time strings
-        delayMinutes = 0; // Placeholder for actual delay calculation
+  // Ensure the root endpoint is marked as an Aggregator for bridged devices
+  if (config.matter.useBridge) {
+    await node.act(async (agent) => {
+      const descriptor = await agent.load(DescriptorServer);
+      if (!descriptor.hasDeviceType(0x000e)) {
+        descriptor.addDeviceTypes('Aggregator');
+        log.info('   ✓ Root marked as Aggregator device type');
       }
+    });
+  }
+
+  // Add temperature sensor endpoint
+  log.info(`📝 Adding temperature sensor: "${config.matter.delayDeviceName}"`);
+  const tempBehaviors = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
+  if (config.matter.useBridge) tempBehaviors.push(BridgedInfoTemp);
+  let tempSensor;
+  try {
+    // Assign explicit endpoint identity to avoid generic part names
+    tempSensor = await node.add(TemperatureSensorDevice.with(...tempBehaviors), {
+      id: 'temperature',
+      number: 1,
+    });
+    log.info(`   ✓ Temperature sensor added`);
+  } catch (e) {
+    log.error('   ❌ Failed adding temperature sensor endpoint');
+    log.error(e?.stack || e);
+    throw e;
+  }
+
+  // Add mode select device endpoint
+  log.info(`📝 Adding mode select device: "${config.matter.statusDeviceName}"`);
+  const modeBehaviors = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
+  if (config.matter.useBridge) modeBehaviors.push(BridgedInfoMode);
+  let modeDevice;
+  try {
+    // Assign explicit endpoint identity to avoid generic part names
+    modeDevice = await node.add(ModeSelectDevice.with(...modeBehaviors), {
+      id: 'mode',
+      number: 2,
+    });
+    log.info(`   ✓ Mode select device added`);
+  } catch (e) {
+    log.error('   ❌ Failed adding mode select endpoint');
+    log.error(e?.stack || e);
+    throw e;
+  }
+
+  // Display commissioning QR code
+  const { qrPairingCode, manualPairingCode } = node.state.commissioning.pairingCodes;
+
+  log.info('📱 Commissioning information:');
+  log.info(`   Discriminator: ${config.matter.discriminator}`);
+  log.info(`   Passcode: ${config.matter.passcode}`);
+  log.info(`   Manual pairing code: ${manualPairingCode}`);
+  log.info('');
+  log.info('🔳 Scan QR code with Google Home app:');
+  qr.generate(qrPairingCode, { small: true }, (qrCode) => {
+    log.info('\n' + qrCode);
+  });
+
+  // Connect the train device to update endpoints
+  if (trainDevice) {
+    log.info('🔗 Connecting train device to Matter endpoints...');
+
+    // Set friendly labels; BD-BI already initialized with names when bridged
+    try {
+      await tempSensor.act(async (agent) => {
+        if (agent.userLabel?.setLabelList) {
+          await agent.userLabel.setLabelList([
+            { label: 'Name', value: config.matter.delayDeviceName },
+          ]);
+        }
+        if (agent.fixedLabel?.setLabelList) {
+          await agent.fixedLabel.setLabelList([
+            { label: 'Name', value: config.matter.delayDeviceName },
+          ]);
+        }
+      });
+      await modeDevice.act(async (agent) => {
+        if (agent.userLabel?.setLabelList) {
+          await agent.userLabel.setLabelList([
+            { label: 'Name', value: config.matter.statusDeviceName },
+          ]);
+        }
+        if (agent.fixedLabel?.setLabelList) {
+          await agent.fixedLabel.setLabelList([
+            { label: 'Name', value: config.matter.statusDeviceName },
+          ]);
+        }
+      });
+      log.info('   ✓ Endpoint labels set');
+    } catch (e) {
+      log.warn('   ⚠️ Could not set endpoint labels via UserLabel:', e);
     }
 
-    // Fallback to mode-based delay estimates if no real delay data
-    if (delayMinutes === 0) {
-      const modeToDelay = {
-        0: 0, // ON_TIME: 0 min = 0°C
-        1: 3, // MINOR_DELAY: ~3 min = ~3°C
-        2: 10, // DELAYED: ~10 min = ~10°C
-        3: 20, // MAJOR_DELAY: ~20 min = ~20°C
-        4: 99, // UNKNOWN: 99 min = 99°C (very high to signal problem)
-      };
-      delayMinutes = modeToDelay[change.currentMode] ?? 99;
-    }
+    trainDevice.on('statusChange', async (status) => {
+      log.debug('Train status changed:', status);
+      try {
+        // Map currentMode back to statusCode string for the behavior
+        const modeToStatus = {
+          0: 'on_time',
+          1: 'minor_delay',
+          2: 'delayed',
+          3: 'major_delay',
+          4: 'unknown',
+        };
 
-    // Update temperature sensor (direct 1:1 mapping)
-    tempSensor.setDelayMinutes(delayMinutes);
-  }); // Initial state: Start with UNKNOWN until first real update
-  modeDevice.setCurrentMode(MatterConstants.Modes.UNKNOWN.mode);
-  tempSensor.setDelayMinutes(99); // 99°C = unknown/error state
+        // Derive mode from delay when available; otherwise use currentMode or unknown
+        let computedMode = 4;
+        if (status?.delayMinutes == null) {
+          computedMode = 4;
+        } else {
+          const delay = Number(status.delayMinutes);
+          const abs = Math.abs(delay);
+          if (abs <= Timing.LATE_THRESHOLDS.ON_TIME) {
+            computedMode = 0; // on time (includes small early/late within threshold)
+          } else if (abs <= Timing.LATE_THRESHOLDS.MINOR) {
+            computedMode = 1; // minor delay
+          } else if (abs <= Timing.LATE_THRESHOLDS.DELAYED) {
+            computedMode = 2; // delayed
+          } else {
+            computedMode = 3; // major delay
+          }
+        }
+        // Fallback to provided currentMode if derivation failed (e.g., non-numeric)
+        if (Number.isNaN(Number(status?.delayMinutes)) && typeof status?.currentMode === 'number') {
+          computedMode = status.currentMode;
+        }
 
-  // Register endpoints with commissioning server
-  registerDevices(commissioningServer, { modeDevice, tempSensor, aggregator });
+        await modeDevice.act(async (agent) => {
+          const statusCode = modeToStatus[computedMode] || 'unknown';
+          await agent.modeSelect.setTrainStatus(statusCode);
+        });
 
-  await matterServer.addCommissioningServer(commissioningServer);
-  log.info('   ✓ Commissioning server registered with Matter server');
+        // Update temperature sensor from delay minutes (nullable supported)
+        await tempSensor.act(async (agent) => {
+          await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+        });
+
+        // Calculate delay from the current mode
+        // For now, we'll just update based on available data
+      } catch (error) {
+        log.error('Error updating Matter endpoints:', error);
+      }
+    });
+
+    log.info('   ✓ Train device event listeners attached');
+  }
 
   // Start the server
-  await matterServer.start();
+  log.info('🚀 Starting Matter server...');
+  await node.run();
 
-  log.info('✅ Matter server started and ready for commissioning');
-  log.info('   mDNS broadcast on port 5353 (UDP)');
-  log.info('   Matter server on port 5540 (UDP)');
-  log.info('   Waiting for Google Home to connect...\n');
+  log.info('✅ Matter server running and discoverable');
+  log.info(`   Listening on port: ${config.matter.port}`);
+  log.info('   Ready for commissioning with Google Home');
 
-  log.info('🔍 Troubleshooting Tips:');
-  log.info('   • Ensure phone and device are on the SAME WiFi network');
-  log.info('   • Check firewall allows UDP ports 5353 and 5540');
-  log.info('   • If stuck, delete .matter-storage/ and restart');
-  log.info('   • Try disabling VPN on your phone');
-  log.info('');
-
-  // Note: matter.js does not emit a generic 'commissioned' event here; pairing will complete in the controller UI.
-
-  return { matterServer, commissioningServer };
+  return {
+    node,
+    tempSensor,
+    modeDevice,
+    close: async () => {
+      log.info('🛑 Shutting down Matter server...');
+      await node.close();
+      log.info('✅ Matter server shut down');
+    },
+  };
 }

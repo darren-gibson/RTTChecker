@@ -2,6 +2,8 @@
 
 Real-time UK train punctuality exposed as a Matter device (Mode Select + Temperature Sensor) using the Real-Time Trains (RTT) API.
 
+**Built with:** Node.js 23, matter.js v0.15.6, Pino logging
+
 ## 1. Overview
 
 This service picks the next best train for a configured origin → destination journey and surfaces two values:
@@ -200,20 +202,18 @@ Use the mode state in Matter automations:
 
 ### Matter Device Implementation
 
-- `src/runtime/MatterServer.js`: Matter commissioning server setup and endpoint creation
+- `src/runtime/MatterServer.js`: Matter server (v0.15) with ServerNode API, custom temperature and mode select behaviors
 - `src/devices/TrainStatusDevice.js`: TrainStatusDevice class with periodic updates and event emission
-- `src/devices/TrainStatusTemperatureSensor.js`: Temperature Sensor endpoint (1:1 delay→temp)
-- `src/devices/TrainStatusModeDevice.js`: Mode Select endpoint
 
 ### Infrastructure
 
-- `src/utils/logger.js`: matter.js Logger wrapper with facility-based logging (rtt-checker, matter-server, rtt-bridge)
+- `src/utils/logger.js`: Unified logging with Pino (facility-based organization: rtt-checker, matter-server, rtt-bridge)
 - `src/errors.js`: Custom error classes for structured error handling
 - `src/types.js`: JSDoc type definitions for IDE support
 
 ### Testing & Deployment
 
-- `tests/`: Comprehensive Jest test suite (105 tests)
+- `tests/`: Comprehensive Jest test suite (168 tests)
 - `docker/`: Container assets (Dockerfile, docker-compose, entrypoint)
 - `scripts/`: Build and utility scripts
 - `docs/`: Additional documentation and guides (includes `LOGGING.md`)

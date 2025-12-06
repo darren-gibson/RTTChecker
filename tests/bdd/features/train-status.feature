@@ -14,6 +14,41 @@ Feature: Train Status Assessment
     Then the status should be "ON_TIME"
     And the assessment should be "good"
 
+  Scenario: On time when delayMinutes is exactly 0
+    Given a train is scheduled to depart at 12:22
+    And the realtime departure is also 12:22
+    When I check the train status
+    Then the status should be "ON_TIME"
+
+  Scenario: Assume on time when realtime is missing
+    Given the realtime data is missing
+    When I check the train status
+    Then the status should be "ON_TIME"
+
+  Scenario: Early departure within on-time threshold (2 minutes)
+    Given a train is scheduled to depart at 12:22
+    And the realtime departure is 12:20
+    When I check the train status
+    Then the status should be "ON_TIME"
+
+  Scenario: Exactly at on-time boundary (2 minutes late)
+    Given a train is scheduled to depart at 12:22
+    And the realtime departure is 12:24
+    When I check the train status
+    Then the status should be "ON_TIME"
+
+  Scenario: Exactly minor delay boundary (5 minutes late)
+    Given a train is scheduled to depart at 12:22
+    And the realtime departure is 12:27
+    When I check the train status
+    Then the status should be "MINOR_DELAY"
+
+  Scenario: Exactly delayed boundary (10 minutes late)
+    Given a train is scheduled to depart at 12:22
+    And the realtime departure is 12:32
+    When I check the train status
+    Then the status should be "DELAYED"
+
   Scenario: Train with minor delay (1-5 minutes)
     Given a train is scheduled to depart at 12:22
     And the realtime departure is 12:26

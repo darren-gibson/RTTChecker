@@ -44,8 +44,8 @@ if (!isTestEnv()) {
   // Start Matter server for Google Home integration
   let matterServer;
   startMatterServer(device)
-    .then((servers) => {
-      matterServer = servers.matterServer;
+    .then((server) => {
+      matterServer = server;
       log.info('🎯 Device ready! Monitor train status updates below:\n');
     })
     .catch((error) => {
