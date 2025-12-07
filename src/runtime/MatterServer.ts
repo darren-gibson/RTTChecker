@@ -88,7 +88,11 @@ export async function startMatterServer(
   );
   const tempBehaviors: any[] = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
   const modeBehaviors: any[] = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
-  const airQualityBehaviors: any[] = [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer];
+  const airQualityBehaviors: any[] = [
+    TrainStatusAirQualityServer,
+    UserLabelServer,
+    FixedLabelServer,
+  ];
   if (config.matter.useBridge) {
     tempBehaviors.push(BridgedInfoTemp);
     modeBehaviors.push(BridgedInfoMode);
