@@ -19,6 +19,8 @@ export interface RTTService {
     gbttBookedDeparture?: string;
     realtimeArrival?: string;
     gbttBookedArrival?: string;
+    realtimeGbttDepartureLateness?: number | string;
+    realtimeWttDepartureLateness?: number | string;
     origin?: Array<{
       tiploc: string;
       description?: string;

@@ -144,14 +144,15 @@ export class TrainStatusDevice extends EventEmitter {
             `⚠️  RTT API temporarily unavailable (${error.statusCode}). Will retry on next update.`
           );
         } else {
-          log.error(`❌ RTT API error: ${error.message}`, { statusCode: error.statusCode });
+          log.error(`❌ RTT API error: ${error.message} (status: ${error.statusCode})`);
         }
       } else if (error instanceof NoTrainFoundError) {
         log.warn(`⚠️  No suitable train found: ${error.message}`);
       } else if (error instanceof RTTCheckerError) {
-        log.error(`❌ RTTChecker error: ${error.message}`, error.context);
+        log.error(`❌ RTTChecker error: ${error.message}`);
       } else {
-        log.error('❌ Failed to update train status:', error);
+        const err = error as Error;
+        log.error(`❌ Failed to update train status: ${err.message}`);
       }
 
       const previousMode = this.currentMode;
@@ -171,7 +172,7 @@ export class TrainStatusDevice extends EventEmitter {
           selectedService: null,
           delayMinutes: null,
           raw: null,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
 
@@ -182,13 +183,13 @@ export class TrainStatusDevice extends EventEmitter {
   startPeriodicUpdates(): void {
     log.debug('🔁 Triggering initial train status fetch...');
     this.updateTrainStatus().catch((err: Error) => {
-      log.error('Initial train status update failed:', err);
+      log.error(`Initial train status update failed: ${err.message}`);
     });
 
     this.updateInterval = setInterval(() => {
       log.debug('⏱️ Periodic train status fetch...');
       this.updateTrainStatus().catch((err: Error) => {
-        log.error('Periodic train status update failed:', err);
+        log.error(`Periodic train status update failed: ${err.message}`);
       });
     }, this.updateIntervalMs);
 
