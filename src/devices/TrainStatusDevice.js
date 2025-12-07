@@ -33,6 +33,8 @@ export class TrainStatusDevice extends EventEmitter {
   constructor() {
     super();
     this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
+    this.currentDelayMinutes = null;
+    this.isFirstUpdate = true;
     this.updateInterval = null;
     this.updateIntervalMs = Number(process.env.UPDATE_INTERVAL_MS || 60000); // Default 1 minute
   }
@@ -65,18 +67,36 @@ export class TrainStatusDevice extends EventEmitter {
       const newMode = STATUS_TO_MODE[result.status] ?? MatterConstants.Modes.UNKNOWN.mode;
       const modeChanged = newMode !== this.currentMode;
 
-      if (modeChanged) {
+      // Calculate delay minutes from selected service
+      let delayMinutes = null;
+      if (result.selected?.locationDetail) {
+        const lateness =
+          result.selected.locationDetail.realtimeGbttDepartureLateness ??
+          result.selected.locationDetail.realtimeWttDepartureLateness;
+        if (lateness != null && !isNaN(Number(lateness))) {
+          delayMinutes = Number(lateness);
+        }
+      }
+      const delayChanged = delayMinutes !== this.currentDelayMinutes;
+
+      // Emit statusChange if: mode changed, delay changed, or first update
+      if (modeChanged || delayChanged || this.isFirstUpdate) {
         const previousMode = this.currentMode;
-        log.info(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
+        if (modeChanged) {
+          log.info(`🔄 Train status changed: ${previousMode} -> ${newMode} (${result.status})`);
+        }
         this.currentMode = newMode;
+        this.currentDelayMinutes = delayMinutes;
+        this.isFirstUpdate = false;
 
         this.emit('statusChange', {
           timestamp,
           previousMode,
           currentMode: newMode,
-          modeChanged: true,
+          modeChanged,
           trainStatus: result.status,
           selectedService: result.selected || null,
+          delayMinutes,
           raw: result.raw || null,
           error: null,
         });
@@ -104,16 +124,20 @@ export class TrainStatusDevice extends EventEmitter {
 
       const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
+      this.currentDelayMinutes = null;
       const modeChanged = previousMode !== this.currentMode;
 
-      if (modeChanged) {
+      // Always emit on error if mode changed or first update
+      if (modeChanged || this.isFirstUpdate) {
+        this.isFirstUpdate = false;
         this.emit('statusChange', {
           timestamp,
           previousMode,
           currentMode: this.currentMode,
-          modeChanged: true,
+          modeChanged,
           trainStatus: TrainStatus.UNKNOWN,
           selectedService: null,
+          delayMinutes: null,
           raw: null,
           error: error.message,
         });

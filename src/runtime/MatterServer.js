@@ -152,9 +152,14 @@ export async function startMatterServer(trainDevice) {
         }
 
         // Update temperature sensor from delay minutes (nullable supported)
+        // Special case: if status is unknown and no train selected, use 999°C sentinel
         if (tempSensor) {
           await tempSensor.act(async (agent) => {
-            await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+            if (statusCode === 'unknown' && status?.selectedService === null) {
+              await agent.temperatureMeasurement.setNoServiceTemperature();
+            } else {
+              await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+            }
           });
         }
 

@@ -27,6 +27,15 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
   }
 
   /**
+   * Explicitly expose the "no service" sentinel temperature of 50°C.
+   * This bypasses delayMinutes mapping so controllers can distinguish
+   * between on-time (0°C) and no-service (50°C - max delay).
+   */
+  async setNoServiceTemperature() {
+    await this.setMeasuredValue(50 * 100);
+  }
+
+  /**
    * Update temperature based on train delay in minutes
    * @param {number|null} delayMinutes - Train delay in minutes, or null for unknown
    */
