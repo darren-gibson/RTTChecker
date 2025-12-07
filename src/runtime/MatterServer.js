@@ -1,15 +1,15 @@
 import { createHash } from 'crypto';
 
-import { TemperatureMeasurementServer } from '@matter/main/behaviors/temperature-measurement';
-import { ModeSelectServer } from '@matter/main/behaviors/mode-select';
-import { AirQualityServer } from '@matter/main/behaviors/air-quality';
 import { UserLabelServer } from '@matter/main/behaviors/user-label';
 import { FixedLabelServer } from '@matter/main/behaviors/fixed-label';
 
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
-import { STATUS_TO_MODE, MODE_TO_STATUS, deriveModeFromDelay } from '../domain/modeMapping.js';
+import { MODE_TO_STATUS, deriveModeFromDelay } from '../domain/modeMapping.js';
 
+import { TrainTemperatureServer } from './behaviors/TrainTemperatureServer.js';
+import { TrainStatusModeServer } from './behaviors/TrainStatusModeServer.js';
+import { TrainStatusAirQualityServer } from './behaviors/TrainStatusAirQualityServer.js';
 import { printCommissioningInfo } from './helpers/commissioningHelpers.js';
 import { ensureAggregatorRoot } from './helpers/bridgeSetup.js';
 import { createServerNode } from './helpers/serverNodeFactory.js';
@@ -30,114 +30,6 @@ function makeUniqueId(suffix) {
   return hash.slice(0, 32);
 }
 
-/**
- * Custom Temperature Measurement Behavior
- * Allows updating temperature from external source (train delay)
- */
-class TrainTemperatureServer extends TemperatureMeasurementServer {
-  async initialize() {
-    log.debug('Initializing TrainTemperatureServer...');
-    this.state.minMeasuredValue = -1000; // -10.00°C
-    this.state.maxMeasuredValue = 5000; // 50.00°C
-    this.state.measuredValue = null; // unknown until first update
-    await super.initialize?.();
-    log.debug('Initialized TrainTemperatureServer');
-  }
-  async setDelayMinutes(delayMinutes) {
-    if (delayMinutes == null) {
-      // Unknown delay → expose unknown temperature by setting measuredValue to null
-      await this.setMeasuredValue(null);
-      return;
-    }
-    const tempCelsius = Math.min(Math.max(delayMinutes, -10), 50);
-    const tempValue = Math.round(tempCelsius * 100);
-    await this.setMeasuredValue(tempValue);
-  }
-
-  async setTemperature(tempCelsius) {
-    const tempValue = Math.round(tempCelsius * 100);
-    await this.setMeasuredValue(tempValue);
-  }
-
-  async setMeasuredValue(value) {
-    this.state.measuredValue = value;
-  }
-}
-
-/**
- * Custom Mode Select Behavior
- * Represents train status as mode selection
- */
-class TrainStatusModeServer extends ModeSelectServer {
-  async setTrainStatus(statusCode) {
-    const modeValue = STATUS_TO_MODE[statusCode] ?? STATUS_TO_MODE.unknown;
-    await this.changeToMode({ newMode: modeValue });
-  }
-
-  async initialize() {
-    // Define available modes and required attributes BEFORE calling super.initialize()
-    // This ensures supportedModes is set when currentMode is validated
-    this.state.description = 'Train punctuality status';
-    this.state.standardNamespace = null; // No standard namespace for custom modes
-    this.state.supportedModes = [
-      { label: 'On Time', mode: 0, semanticTags: [] },
-      { label: 'Minor Delay', mode: 1, semanticTags: [] },
-      { label: 'Delayed', mode: 2, semanticTags: [] },
-      { label: 'Major Delay', mode: 3, semanticTags: [] },
-      { label: 'Unknown', mode: 4, semanticTags: [] },
-    ];
-    this.state.currentMode = 4; // Start as unknown
-
-    try {
-      await super.initialize?.();
-    } catch (err) {
-      log.error('BridgedInfoMode super.initialize failed:', err?.stack || err);
-      throw err;
-    }
-  }
-}
-
-/**
- * Custom Air Quality Behavior
- * Maps train punctuality to air quality levels for color-coded status visualization
- *
- * Status Mapping:
- * - On Time (0-2 mins)     → Good (1) - Green
- * - Minor Delay (3-5 mins) → Fair (2) - Yellow
- * - Delayed (6-10 mins)    → Moderate (3) - Orange
- * - Major Delay (11+ mins) → Poor (4) - Red
- * - Unknown/Critical       → VeryPoor (5) - Dark Red
- */
-class TrainStatusAirQualityServer extends AirQualityServer {
-  async initialize() {
-    log.debug('Initializing TrainStatusAirQualityServer...');
-    // Start with Unknown (0) until first status update
-    this.state.airQuality = 0; // AirQualityEnum.Unknown
-    await super.initialize?.();
-    log.debug('Initialized TrainStatusAirQualityServer');
-  }
-
-  async setTrainStatus(statusCode) {
-    // Map train status codes to AirQualityEnum values
-    const STATUS_TO_AIR_QUALITY = {
-      on_time: 1, // Good - Green
-      minor_delay: 2, // Fair - Yellow
-      delayed: 3, // Moderate - Orange
-      major_delay: 4, // Poor - Red
-      unknown: 5, // VeryPoor - Dark Red
-      critical: 5, // VeryPoor - Dark Red
-    };
-
-    const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0; // Default to Unknown
-    await this.setAirQuality(airQualityValue);
-  }
-
-  async setAirQuality(value) {
-    log.debug(`Setting air quality to: ${value}`);
-    this.state.airQuality = value;
-  }
-}
-
 // Use helper to generate BD-BI behaviors
 
 const BridgedInfoTemp = makeBridgedInfoBehavior({
@@ -153,8 +45,8 @@ const BridgedInfoMode = makeBridgedInfoBehavior({
 });
 
 const BridgedInfoAirQuality = makeBridgedInfoBehavior({
-  productName: 'Train Air Quality',
-  nodeLabel: 'Train Air Quality',
+  productName: config.matter.airQualityDeviceName,
+  nodeLabel: config.matter.airQualityDeviceName,
   uniqueIdFactory: () => makeUniqueId('AIR'),
 });
 
@@ -180,7 +72,7 @@ export async function startMatterServer(trainDevice) {
 
   // Add endpoints via factory
   log.info(
-    `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}", air quality "Train Air Quality"`
+    `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}", air quality "${config.matter.airQualityDeviceName}"`
   );
   const tempBehaviors = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
   const modeBehaviors = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
@@ -218,7 +110,7 @@ export async function startMatterServer(trainDevice) {
     try {
       await setEndpointName(tempSensor, config.matter.delayDeviceName);
       await setEndpointName(modeDevice, config.matter.statusDeviceName);
-      await setEndpointName(airQualityDevice, 'Train Air Quality');
+      await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName);
       log.info('   ✓ Endpoint labels set');
     } catch (e) {
       log.warn('   ⚠️ Could not set endpoint labels via UserLabel:', e);

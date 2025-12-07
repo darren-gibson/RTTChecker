@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
 
+import { STATUS_TO_AIR_QUALITY } from '../../../src/domain/airQualityMapping.js';
+
 /**
  * Unit tests for TrainStatusAirQualityServer behavior
  * Tests the mapping of train status to air quality enum values
@@ -15,15 +17,6 @@ describe('TrainStatusAirQualityServer', () => {
         airQuality: 0, // Unknown
       },
       async setTrainStatus(statusCode) {
-        const STATUS_TO_AIR_QUALITY = {
-          on_time: 1, // Good - Green
-          minor_delay: 2, // Fair - Yellow
-          delayed: 3, // Moderate - Orange
-          major_delay: 4, // Poor - Red
-          unknown: 5, // VeryPoor - Dark Red
-          critical: 5, // VeryPoor - Dark Red
-        };
-
         const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0;
         await this.setAirQuality(airQualityValue);
       },

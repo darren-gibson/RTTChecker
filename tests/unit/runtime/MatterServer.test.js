@@ -372,21 +372,13 @@ describe('MatterServer Custom Behaviors', () => {
   describe('TrainStatusAirQualityServer', () => {
     let mockBehavior;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      const { STATUS_TO_AIR_QUALITY } = await import('../../../src/domain/airQualityMapping.js');
       mockBehavior = {
         state: {
           airQuality: 0, // Unknown
         },
         async setTrainStatus(statusCode) {
-          const STATUS_TO_AIR_QUALITY = {
-            on_time: 1, // Good
-            minor_delay: 2, // Fair
-            delayed: 3, // Moderate
-            major_delay: 4, // Poor
-            unknown: 5, // VeryPoor
-            critical: 5, // VeryPoor
-          };
-
           const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0;
           await this.setAirQuality(airQualityValue);
         },
@@ -395,7 +387,6 @@ describe('MatterServer Custom Behaviors', () => {
         },
       };
     });
-
     describe('initialization', () => {
       it('should initialize with Unknown air quality (0)', () => {
         expect(mockBehavior.state.airQuality).toBe(0);

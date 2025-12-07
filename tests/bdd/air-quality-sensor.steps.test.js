@@ -1,32 +1,18 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
 
+import {
+  STATUS_TO_AIR_QUALITY,
+  AirQuality,
+  AIR_QUALITY_NAMES,
+  AIR_QUALITY_COLORS,
+} from '../../src/domain/airQualityMapping.js';
+
 const feature = loadFeature('./tests/bdd/features/air-quality-sensor.feature');
 
 defineFeature(feature, (test) => {
   let mockAirQualitySensor;
   let currentStatus;
   let statusHistory;
-  let changeEvents;
-
-  // Air quality enum values
-  const AirQuality = {
-    Unknown: 0,
-    Good: 1,
-    Fair: 2,
-    Moderate: 3,
-    Poor: 4,
-    VeryPoor: 5,
-  };
-
-  // Status to air quality mapping (matches implementation)
-  const STATUS_TO_AIR_QUALITY = {
-    on_time: 1, // Good
-    minor_delay: 2, // Fair
-    delayed: 3, // Moderate
-    major_delay: 4, // Poor
-    unknown: 5, // VeryPoor
-    critical: 5, // VeryPoor
-  };
 
   // Delay minutes to status mapping (matches modeMapping.js)
   const getStatusFromDelay = (delayMinutes) => {
@@ -55,19 +41,10 @@ defineFeature(feature, (test) => {
         this.state.airQuality = value;
       },
       getAirQualityName() {
-        const names = ['Unknown', 'Good', 'Fair', 'Moderate', 'Poor', 'VeryPoor'];
-        return names[this.state.airQuality] || 'Unknown';
+        return AIR_QUALITY_NAMES[this.state.airQuality] || 'Unknown';
       },
       getColorDisplay() {
-        const colors = {
-          0: 'gray',
-          1: 'green',
-          2: 'yellow',
-          3: 'orange',
-          4: 'red',
-          5: 'dark red',
-        };
-        return colors[this.state.airQuality] || 'gray';
+        return AIR_QUALITY_COLORS[this.state.airQuality] || 'gray';
       },
     };
   };
@@ -76,7 +53,6 @@ defineFeature(feature, (test) => {
     mockAirQualitySensor = createMockAirQualitySensor();
     currentStatus = null;
     statusHistory = [];
-    changeEvents = [];
   });
 
   test('On-time train shows Good air quality (Green)', ({ given, when, then, and }) => {

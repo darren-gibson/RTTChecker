@@ -58,12 +58,16 @@ function sanitizeDeviceName(name) {
 // Derive per-endpoint names (can be overridden by explicit env vars)
 const defaultStatusName = `${config.train.originTiploc}-${config.train.destTiploc} Train Status`;
 const defaultDelayName = `${config.train.originTiploc}-${config.train.destTiploc} Train Delay`;
+const defaultAirQualityName = `${config.train.originTiploc}-${config.train.destTiploc} Air Quality`;
 
 config.matter.statusDeviceName = sanitizeDeviceName(
   process.env.STATUS_DEVICE_NAME || defaultStatusName
 );
 config.matter.delayDeviceName = sanitizeDeviceName(
   process.env.DELAY_DEVICE_NAME || defaultDelayName
+);
+config.matter.airQualityDeviceName = sanitizeDeviceName(
+  process.env.AIR_QUALITY_DEVICE_NAME || defaultAirQualityName
 );
 
 /**
