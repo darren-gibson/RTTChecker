@@ -1,6 +1,10 @@
 import { EventEmitter } from 'events';
 
-import { TrainStatus, type TrainStatusType, MatterDevice as MatterConstants } from '../constants.js';
+import {
+  TrainStatus,
+  type TrainStatusType,
+  MatterDevice as MatterConstants,
+} from '../constants.js';
 import { config } from '../config.js';
 import { getTrainStatus } from '../services/trainStatusService.js';
 import { loggers } from '../utils/logger.js';
@@ -77,7 +81,11 @@ export class TrainStatusDevice extends EventEmitter {
     return this.currentMode;
   }
 
-  async updateTrainStatus(): Promise<{ status: TrainStatusType; selected: RTTService | null; raw: RTTSearchResponse | null }> {
+  async updateTrainStatus(): Promise<{
+    status: TrainStatusType;
+    selected: RTTService | null;
+    raw: RTTSearchResponse | null;
+  }> {
     const timestamp = new Date();
     try {
       const result = await getTrainStatus({

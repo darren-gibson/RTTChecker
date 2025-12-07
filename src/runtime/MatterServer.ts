@@ -2,9 +2,11 @@ import { createHash } from 'crypto';
 
 import { UserLabelServer } from '@matter/main/behaviors/user-label';
 import { FixedLabelServer } from '@matter/main/behaviors/fixed-label';
+import type { ServerNode, Endpoint } from '@matter/main';
 
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
+import type { TrainStatusDevice, StatusChangeEvent } from '../devices/TrainStatusDevice.js';
 import { MODE_TO_STATUS, deriveModeFromDelay } from '../domain/modeMapping.js';
 
 import { TrainTemperatureServer } from './behaviors/TrainTemperatureServer.js';
@@ -21,9 +23,17 @@ import { createEndpoints } from './helpers/endpointFactory.js';
  * Creates a discoverable Matter device that Google Home can commission
  */
 
+export interface MatterServerResult {
+  node: ServerNode;
+  tempSensor: Endpoint;
+  modeDevice?: Endpoint;
+  airQualityDevice?: Endpoint;
+  close: () => Promise<void>;
+}
+
 const log = loggers.matter;
 
-function makeUniqueId(suffix) {
+function makeUniqueId(suffix: string): string {
   const base = `${config.matter.serialNumber}-${suffix}`;
   const hash = createHash('sha256').update(base).digest('hex');
   // UniqueId must be 32 chars; take first 32 hex chars
@@ -33,27 +43,27 @@ function makeUniqueId(suffix) {
 // Use helper to generate BD-BI behaviors
 
 const BridgedInfoTemp = makeBridgedInfoBehavior({
-  productName: config.matter.delayDeviceName,
-  nodeLabel: config.matter.delayDeviceName,
+  productName: config.matter.delayDeviceName ?? 'Train Delay',
+  nodeLabel: config.matter.delayDeviceName ?? 'Train Delay',
   uniqueIdFactory: () => makeUniqueId('TEMP'),
 });
 
 const BridgedInfoMode = makeBridgedInfoBehavior({
-  productName: config.matter.statusDeviceName,
-  nodeLabel: config.matter.statusDeviceName,
+  productName: config.matter.statusDeviceName ?? 'Train Status',
+  nodeLabel: config.matter.statusDeviceName ?? 'Train Status',
   uniqueIdFactory: () => makeUniqueId('MODE'),
 });
 
 const BridgedInfoAirQuality = makeBridgedInfoBehavior({
-  productName: config.matter.airQualityDeviceName,
-  nodeLabel: config.matter.airQualityDeviceName,
+  productName: config.matter.airQualityDeviceName ?? 'Train Air Quality',
+  nodeLabel: config.matter.airQualityDeviceName ?? 'Train Air Quality',
   uniqueIdFactory: () => makeUniqueId('AIR'),
 });
 
 /**
  * Initialize and start the Matter server with train status device
  */
-export async function startMatterServer(trainDevice) {
+export async function startMatterServer(trainDevice: TrainStatusDevice): Promise<MatterServerResult> {
   log.info('🔧 Initializing Matter server (v0.15 API)...');
   log.info('   Storage directory: .matter-storage/');
   log.info(`   Bridge mode: ${config.matter.useBridge ? 'enabled' : 'disabled'}`);
@@ -88,8 +98,10 @@ export async function startMatterServer(trainDevice) {
   // is always created; choose between mode and air quality.
   const primaryEndpoint = config.matter.primaryEndpoint;
 
-  let tempSensor, modeDevice, airQualityDevice;
-  const endpointOptions = { tempBehaviors };
+  let tempSensor: Endpoint;
+  let modeDevice: Endpoint | undefined;
+  let airQualityDevice: Endpoint | undefined;
+  const endpointOptions: any = { tempBehaviors };
   if (config.matter.useBridge || primaryEndpoint === 'mode') {
     endpointOptions.modeBehaviors = modeBehaviors;
   }
@@ -104,9 +116,10 @@ export async function startMatterServer(trainDevice) {
     airQualityDevice = endpoints.airQualityDevice;
     log.info('   ✓ Endpoints added');
   } catch (e) {
+    const error = e as Error;
     log.error('   ❌ Failed adding endpoints');
-    log.error(e?.stack || e);
-    throw e;
+    log.error(error?.stack || error);
+    throw error;
   }
 
   // Display commissioning QR code
@@ -119,21 +132,22 @@ export async function startMatterServer(trainDevice) {
     // Set friendly labels; BD-BI already initialized with names when bridged
     try {
       if (tempSensor) {
-        await setEndpointName(tempSensor, config.matter.delayDeviceName);
+        await setEndpointName(tempSensor, config.matter.delayDeviceName ?? 'Train Delay');
       }
       if (modeDevice) {
-        await setEndpointName(modeDevice, config.matter.statusDeviceName);
+        await setEndpointName(modeDevice, config.matter.statusDeviceName ?? 'Train Status');
       }
       if (airQualityDevice) {
-        await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName);
+        await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName ?? 'Train Air Quality');
       }
       log.info('   ✓ Endpoint labels set');
     } catch (e) {
-      log.warn('   ⚠️ Could not set endpoint labels via UserLabel:', e);
+      const error = e as Error;
+      log.warn(`⚠️ Could not set endpoint labels: ${error.message}`);
     }
 
-    trainDevice.on('statusChange', async (status) => {
-      log.debug('Train status changed:', status);
+    trainDevice.on('statusChange', async (status: StatusChangeEvent) => {
+      log.debug(`Train status changed: ${JSON.stringify(status)}`);
       try {
         // Derive mode from delay when available; otherwise use currentMode or unknown
         let computedMode = deriveModeFromDelay(status?.delayMinutes);
@@ -146,7 +160,7 @@ export async function startMatterServer(trainDevice) {
 
         // Update mode device if present
         if (modeDevice) {
-          await modeDevice.act(async (agent) => {
+          await modeDevice.act(async (agent: any) => {
             await agent.modeSelect.setTrainStatus(statusCode);
           });
         }
@@ -154,7 +168,7 @@ export async function startMatterServer(trainDevice) {
         // Update temperature sensor from delay minutes (nullable supported)
         // Special case: if status is unknown and no train selected, use 999°C sentinel
         if (tempSensor) {
-          await tempSensor.act(async (agent) => {
+          await tempSensor.act(async (agent: any) => {
             if (statusCode === 'unknown' && status?.selectedService === null) {
               await agent.temperatureMeasurement.setNoServiceTemperature();
             } else {
@@ -165,12 +179,13 @@ export async function startMatterServer(trainDevice) {
 
         // Update air quality device with color-coded status if present
         if (airQualityDevice) {
-          await airQualityDevice.act(async (agent) => {
+          await airQualityDevice.act(async (agent: any) => {
             await agent.airQuality.setTrainStatus(statusCode);
           });
         }
       } catch (error) {
-        log.error('Error updating Matter endpoints:', error);
+        const err = error as Error;
+        log.error(`Error updating Matter endpoints: ${err.message}`);
       }
     });
 
@@ -182,7 +197,7 @@ export async function startMatterServer(trainDevice) {
   await node.run();
 
   log.info('✅ Matter server running and discoverable');
-  log.info(`   Listening on port: ${config.matter.port}`);
+  log.info(`   Listening on port: ${(config.matter as any).port ?? 5540}`);
   log.info('   Ready for commissioning with Google Home');
 
   return {
@@ -190,7 +205,7 @@ export async function startMatterServer(trainDevice) {
     tempSensor,
     modeDevice,
     airQualityDevice,
-    close: async () => {
+    close: async (): Promise<void> => {
       log.info('🛑 Shutting down Matter server...');
       await node.close();
       log.info('✅ Matter server shut down');

@@ -1,6 +1,5 @@
 import { BridgedDeviceBasicInformationServer } from '@matter/main/behaviors/bridged-device-basic-information';
 import type { ServerNode, Endpoint } from '@matter/main';
-import type { DeviceTypeDefinition } from '@matter/main/types';
 
 export interface BridgedInfoBehaviorConfig {
   productName: string;
@@ -9,24 +8,30 @@ export interface BridgedInfoBehaviorConfig {
 }
 
 // Factory to create a BD-BI behavior with configured names and IDs
-export function makeBridgedInfoBehavior({ productName, nodeLabel, uniqueIdFactory }: BridgedInfoBehaviorConfig): typeof BridgedDeviceBasicInformationServer {
+export function makeBridgedInfoBehavior({
+  productName,
+  nodeLabel,
+  uniqueIdFactory,
+}: BridgedInfoBehaviorConfig): typeof BridgedDeviceBasicInformationServer {
   return class BridgedInfoBehavior extends BridgedDeviceBasicInformationServer {
     async initialize() {
-      this.state.vendorName = this.env.vars.get('matter.vendorName') ?? 'RTT Checker';
-      this.state.vendorId = 0xfff1; // default vendor if not provided via env
-      this.state.productName = productName;
-      this.state.productId = 0x8001;
-      this.state.productLabel = productName;
-      this.state.nodeLabel = nodeLabel;
-      this.state.reachable = true;
-      this.state.serialNumber = this.env.vars.get('matter.serialNumber') ?? 'RTT-001';
-      this.state.manufacturingDate = '2024-01-01';
-      this.state.productAppearance = { finish: 0, primaryColor: 0 };
-      this.state.uniqueId = uniqueIdFactory();
-      this.state.hardwareVersion = 1;
-      this.state.hardwareVersionString = '1.0';
-      this.state.softwareVersion = 1;
-      this.state.softwareVersionString = '1.0';
+      const state = (this as any).state;
+      const env = (this as any).env;
+      state.vendorName = env.vars.get('matter.vendorName') ?? 'RTT Checker';
+      state.vendorId = 0xfff1; // default vendor if not provided via env
+      state.productName = productName;
+      state.productId = 0x8001;
+      state.productLabel = productName;
+      state.nodeLabel = nodeLabel;
+      state.reachable = true;
+      state.serialNumber = env.vars.get('matter.serialNumber') ?? 'RTT-001';
+      state.manufacturingDate = '2024-01-01';
+      state.productAppearance = { finish: 0, primaryColor: 0 };
+      state.uniqueId = uniqueIdFactory();
+      state.hardwareVersion = 1;
+      state.hardwareVersionString = '1.0';
+      state.softwareVersion = 1;
+      state.softwareVersionString = '1.0';
       await super.initialize?.();
     }
   };
@@ -35,7 +40,7 @@ export function makeBridgedInfoBehavior({ productName, nodeLabel, uniqueIdFactor
 // Helper for endpoint creation with explicit id/number
 export async function addEndpoint(
   node: ServerNode,
-  deviceDef: DeviceTypeDefinition,
+  deviceDef: any,
   behaviors: unknown[],
   { id, number }: { id: string; number: number }
 ): Promise<Endpoint> {
