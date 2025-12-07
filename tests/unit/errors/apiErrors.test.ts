@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RTTCheckerError } from '../../../src/errors.js';
 import { RTTApiError } from '../../../src/api/errors.js';
 
@@ -45,9 +44,9 @@ describe('RTTApiError', () => {
       endpoint: 'https://api.test.com',
     });
     const json = error.toJSON();
-    expect(json.statusCode).toBe(500);
-    expect(json.endpoint).toBe('https://api.test.com');
-    expect(json.isAuthError).toBe(false);
-    expect(json.isRetryable).toBe(true);
+    expect(json['statusCode']).toBe(500);
+    expect(json['endpoint']).toBe('https://api.test.com');
+    expect(json['isAuthError']).toBe(false);
+    expect(json['isRetryable']).toBe(true);
   });
 });

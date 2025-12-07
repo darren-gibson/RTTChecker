@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RTTCheckerError, ConfigurationError } from '../../../src/errors.js';
 
 describe('RTTCheckerError', () => {
@@ -14,11 +13,11 @@ describe('RTTCheckerError', () => {
   test('serializes to JSON', () => {
     const error = new RTTCheckerError('Test', { context: { x: 1 } });
     const json = error.toJSON();
-    expect(json.name).toBe('RTTCheckerError');
-    expect(json.message).toBe('Test');
-    expect(json.context).toEqual({ x: 1 });
-    expect(json.timestamp).toBeDefined();
-    expect(json.stack).toBeDefined();
+    expect(json['name']).toBe('RTTCheckerError');
+    expect(json['message']).toBe('Test');
+    expect(json['context']).toEqual({ x: 1 });
+    expect(json['timestamp']).toBeDefined();
+    expect(json['stack']).toBeDefined();
   });
 
   test('defaults to empty context', () => {
@@ -59,7 +58,7 @@ describe('ConfigurationError', () => {
       invalidFields: ['TIMEOUT'],
     });
     const json = error.toJSON();
-    expect(json.missingFields).toEqual(['API_KEY']);
-    expect(json.invalidFields).toEqual(['TIMEOUT']);
+    expect(json['missingFields']).toEqual(['API_KEY']);
+    expect(json['invalidFields']).toEqual(['TIMEOUT']);
   });
 });

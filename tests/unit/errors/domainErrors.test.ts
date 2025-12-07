@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { RTTCheckerError } from '../../../src/errors.js';
 import { NoTrainFoundError, InvalidTrainDataError } from '../../../src/domain/errors.js';
 
@@ -7,14 +6,14 @@ describe('NoTrainFoundError', () => {
     const error = new NoTrainFoundError('No trains available', {
       originTiploc: 'CAMBDGE',
       destTiploc: 'KNGX',
-      searchWindow: { start: 500, end: 560 },
+      searchWindow: '500-560',
       candidateCount: 3,
     });
     expect(error).toBeInstanceOf(RTTCheckerError);
     expect(error.name).toBe('NoTrainFoundError');
     expect(error.originTiploc).toBe('CAMBDGE');
     expect(error.destTiploc).toBe('KNGX');
-    expect(error.searchWindow).toEqual({ start: 500, end: 560 });
+    expect(error.searchWindow).toBe('500-560');
     expect(error.candidateCount).toBe(3);
   });
 
@@ -28,14 +27,14 @@ describe('NoTrainFoundError', () => {
 
   test('serializes with search details', () => {
     const error = new NoTrainFoundError('Not found', {
-      originTiploc: 'A',
-      destTiploc: 'B',
+      originTiploc: 'ABC',
+      destTiploc: 'XYZ',
       candidateCount: 5,
     });
     const json = error.toJSON();
-    expect(json.originTiploc).toBe('A');
-    expect(json.destTiploc).toBe('B');
-    expect(json.candidateCount).toBe(5);
+    expect(json['originTiploc']).toBe('ABC');
+    expect(json['destTiploc']).toBe('XYZ');
+    expect(json['candidateCount']).toBe(5);
   });
 });
 
@@ -57,7 +56,7 @@ describe('InvalidTrainDataError', () => {
       missingField: 'destination',
     });
     const json = error.toJSON();
-    expect(json.serviceId).toBe('ABC123');
-    expect(json.missingField).toBe('destination');
+    expect(json['serviceId']).toBe('ABC123');
+    expect(json['missingField']).toBe('destination');
   });
 });

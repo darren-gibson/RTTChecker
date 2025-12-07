@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   STATUS_TO_MODE,
   MODE_TO_STATUS,
@@ -7,7 +6,7 @@ import {
 
 describe('modeMapping domain logic', () => {
   test('STATUS_TO_MODE and MODE_TO_STATUS are consistent for known statuses', () => {
-    const statuses = ['on_time', 'minor_delay', 'delayed', 'major_delay', 'unknown'];
+    const statuses = ['on_time', 'minor_delay', 'delayed', 'major_delay', 'unknown'] as const;
     for (const status of statuses) {
       const mode = STATUS_TO_MODE[status];
       expect(mode).toBeGreaterThanOrEqual(0);

@@ -1,10 +1,9 @@
-// @ts-nocheck
 import { defineFeature, loadFeature } from 'jest-cucumber';
 
 const feature = loadFeature('./tests/bdd/features/matter-configuration.feature');
 
 defineFeature(feature, (test) => {
-  let config;
+  let config: { useBridge: boolean; primaryEndpoint: string };
 
   beforeEach(() => {
     // Model the relevant parts of config.matter in-memory
