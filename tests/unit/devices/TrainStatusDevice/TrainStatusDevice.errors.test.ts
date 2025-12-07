@@ -19,7 +19,7 @@ describe('TrainStatusDevice - errors', () => {
         fatal: () => {},
       });
       if (logger.setLogLevel) logger.setLogLevel('error');
-    } catch (_) {
+    } catch {
       // Ignore logger mock errors
     }
   });

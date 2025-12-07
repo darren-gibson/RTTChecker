@@ -1,5 +1,6 @@
 import { DescriptorServer } from '@matter/main/behaviors/descriptor';
 import type { ServerNode } from '@matter/main';
+
 import type { Logger } from '../../utils/retryableRequest.js';
 
 export async function ensureAggregatorRoot(node: ServerNode, log: Logger): Promise<void> {

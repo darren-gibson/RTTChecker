@@ -16,8 +16,16 @@ describe('config validation integration', () => {
   });
 
   afterEach(() => {
-    // Restore original environment
-    process.env = originalEnv;
+    // Restore original environment by clearing all keys and restoring originals
+    // Note: process.env = originalEnv doesn't work properly in Node.js
+    for (const key in process.env) {
+      if (!(key in originalEnv)) {
+        delete process.env[key];
+      }
+    }
+    for (const key in originalEnv) {
+      process.env[key] = originalEnv[key];
+    }
   });
 
   describe('TIPLOC validation with custom validators', () => {

@@ -1,5 +1,4 @@
 // @ts-nocheck
-import type { RTTService } from '../../../src/api/rttApiClient.js';
 import pickNextService from '../../../src/services/trainSelectionService.js';
 import { adjustForDayRollover } from '../../../src/utils/timeUtils.js';
 

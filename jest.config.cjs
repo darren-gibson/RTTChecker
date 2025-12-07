@@ -14,6 +14,9 @@ module.exports = {
           module: 'ES2022',
           moduleResolution: 'node',
         },
+        diagnostics: {
+          ignoreCodes: [4112], // Ignore "cannot have override modifier" error in jest
+        },
       },
     ],
     '^.+\\.js$': 'babel-jest',

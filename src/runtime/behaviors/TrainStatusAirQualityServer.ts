@@ -1,6 +1,6 @@
 import { AirQualityServer } from '@matter/main/behaviors/air-quality';
-import type { TrainStatusType } from '../../constants.js';
 
+import type { TrainStatusType } from '../../constants.js';
 import { STATUS_TO_AIR_QUALITY } from '../../domain/airQualityMapping.js';
 import { loggers } from '../../utils/logger.js';
 

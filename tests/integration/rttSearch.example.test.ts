@@ -10,7 +10,7 @@ describe('rttSearch with example response', () => {
     const raw = fs.readFileSync(file, 'utf8');
     const parsed = JSON.parse(raw);
 
-    const fakeFetch = jest.fn((url, opts) => Promise.resolve({ ok: true, json: () => parsed }));
+    const fakeFetch = jest.fn((_url, _opts) => Promise.resolve({ ok: true, json: () => parsed }));
 
     const user = 'testuser';
     const pass = 'testpass';

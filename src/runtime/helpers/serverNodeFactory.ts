@@ -1,8 +1,9 @@
 import { Environment, ServerNode } from '@matter/main';
-// @ts-ignore - Matter.js nodejs module lacks complete type definitions
+// @ts-ignore - jest/ts-jest has issues resolving @matter/nodejs package exports
 import { StorageBackendDisk } from '@matter/nodejs';
-// @ts-ignore - Matter.js device modules lack complete type definitions
+// @ts-ignore - jest/ts-jest has issues resolving @matter/main package exports
 import { ModeSelectDevice } from '@matter/main/devices/mode-select';
+
 import type { Config } from '../../config.js';
 
 export interface ServerNodeResult {

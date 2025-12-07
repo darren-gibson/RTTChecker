@@ -8,6 +8,6 @@ try {
   if (typeof realLogger.setLogLevel === 'function') {
     realLogger.setLogLevel('silent');
   }
-} catch (_) {
+} catch {
   // Ignore if logger configuration fails
 }

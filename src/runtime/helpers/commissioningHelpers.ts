@@ -1,6 +1,7 @@
 // @ts-ignore - qrcode-terminal doesn't have types
 import qr from 'qrcode-terminal';
 import type { ServerNode } from '@matter/main';
+
 import type { Logger } from '../../utils/retryableRequest.js';
 import type { Config } from '../../config.js';
 

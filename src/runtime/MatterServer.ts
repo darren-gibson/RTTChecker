@@ -86,9 +86,9 @@ export async function startMatterServer(
   log.info(
     `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}", air quality "${config.matter.airQualityDeviceName}"`
   );
-  const tempBehaviors: any[] = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
-  const modeBehaviors: any[] = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
-  const airQualityBehaviors: any[] = [
+  const tempBehaviors: unknown[] = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
+  const modeBehaviors: unknown[] = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
+  const airQualityBehaviors: unknown[] = [
     TrainStatusAirQualityServer,
     UserLabelServer,
     FixedLabelServer,
@@ -107,7 +107,11 @@ export async function startMatterServer(
   let tempSensor: Endpoint;
   let modeDevice: Endpoint | undefined;
   let airQualityDevice: Endpoint | undefined;
-  const endpointOptions: any = { tempBehaviors };
+  const endpointOptions: {
+    tempBehaviors: unknown[];
+    modeBehaviors?: unknown[];
+    airQualityBehaviors?: unknown[];
+  } = { tempBehaviors };
   if (config.matter.useBridge || primaryEndpoint === 'mode') {
     endpointOptions.modeBehaviors = modeBehaviors;
   }
@@ -169,27 +173,28 @@ export async function startMatterServer(
 
         // Update mode device if present
         if (modeDevice) {
-          await modeDevice.act(async (agent: any) => {
-            await agent.modeSelect.setTrainStatus(statusCode);
+          await modeDevice.act(async (agent) => {
+            await (agent as any).modeSelect.setTrainStatus(statusCode);
           });
         }
 
         // Update temperature sensor from delay minutes (nullable supported)
         // Special case: if status is unknown and no train selected, use 999°C sentinel
         if (tempSensor) {
-          await tempSensor.act(async (agent: any) => {
+          await tempSensor.act(async (agent) => {
+            const typedAgent = agent as any;
             if (statusCode === 'unknown' && status?.selectedService === null) {
-              await agent.temperatureMeasurement.setNoServiceTemperature();
+              await typedAgent.temperatureMeasurement.setNoServiceTemperature();
             } else {
-              await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+              await typedAgent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
             }
           });
         }
 
         // Update air quality device with color-coded status if present
         if (airQualityDevice) {
-          await airQualityDevice.act(async (agent: any) => {
-            await agent.airQuality.setTrainStatus(statusCode);
+          await airQualityDevice.act(async (agent) => {
+            await (agent as any).airQuality.setTrainStatus(statusCode);
           });
         }
       } catch (error) {

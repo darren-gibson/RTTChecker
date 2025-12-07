@@ -1,6 +1,7 @@
-// @ts-ignore - Matter.js behavior modules lack complete type definitions
+// @ts-ignore - jest/ts-jest has issues resolving @matter/main package exports
 import { BridgedDeviceBasicInformationServer } from '@matter/main/behaviors/bridged-device-basic-information';
 import type { ServerNode, Endpoint } from '@matter/main';
+import type { Environment } from '@matter/main';
 
 export interface BridgedInfoBehaviorConfig {
   productName: string;
@@ -15,10 +16,10 @@ export function makeBridgedInfoBehavior({
   uniqueIdFactory,
 }: BridgedInfoBehaviorConfig): typeof BridgedDeviceBasicInformationServer {
   return class BridgedInfoBehavior extends BridgedDeviceBasicInformationServer {
-    // @ts-ignore - TS wants override but ts-jest has issues with it in dynamic classes
-    async initialize() {
+    // Note: 'override' keyword required by tsc but jest/ts-jest doesn't see the parent class correctly
+    override async initialize() {
       const state = (this as any).state;
-      const env = (this as any).env;
+      const env = (this as any).env as Environment;
       state.vendorName = env.vars.get('matter.vendorName') ?? 'RTT Checker';
       state.vendorId = 0xfff1; // default vendor if not provided via env
       state.productName = productName;
@@ -40,9 +41,9 @@ export function makeBridgedInfoBehavior({
 }
 
 // Helper for endpoint creation with explicit id/number
-export async function addEndpoint(
+export async function addEndpoint<T extends { with: (...behaviors: any[]) => any }>(
   node: ServerNode,
-  deviceDef: any,
+  deviceDef: T,
   behaviors: unknown[],
   { id, number }: { id: string; number: number }
 ): Promise<Endpoint> {
@@ -51,12 +52,13 @@ export async function addEndpoint(
 
 // Helper to set both UserLabel and FixedLabel to a single Name value
 export async function setEndpointName(endpoint: Endpoint, name: string): Promise<void> {
-  await endpoint.act(async (agent: any) => {
-    if (agent.userLabel?.setLabelList) {
-      await agent.userLabel.setLabelList([{ label: 'Name', value: name }]);
+  await endpoint.act(async (agent) => {
+    const typedAgent = agent as any;
+    if (typedAgent.userLabel?.setLabelList) {
+      await typedAgent.userLabel.setLabelList([{ label: 'Name', value: name }]);
     }
-    if (agent.fixedLabel?.setLabelList) {
-      await agent.fixedLabel.setLabelList([{ label: 'Name', value: name }]);
+    if (typedAgent.fixedLabel?.setLabelList) {
+      await typedAgent.fixedLabel.setLabelList([{ label: 'Name', value: name }]);
     }
   });
 }

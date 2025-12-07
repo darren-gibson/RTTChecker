@@ -1,6 +1,6 @@
 import { ModeSelectServer } from '@matter/main/behaviors/mode-select';
-import type { TrainStatusType } from '../../constants.js';
 
+import type { TrainStatusType } from '../../constants.js';
 import { STATUS_TO_MODE } from '../../domain/modeMapping.js';
 import { loggers } from '../../utils/logger.js';
 
