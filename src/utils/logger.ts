@@ -5,28 +5,37 @@ import pino from 'pino';
 import pinoPretty from 'pino-pretty';
 import { Logger as MatterLogger, LogLevel as MatterLevel } from '@matter/general';
 
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'silent';
+
 // Determine log level from environment
-const envLevel = (process.env.LOG_LEVEL || 'info').toLowerCase();
-const isDevelopment = process.env.NODE_ENV !== 'production';
-const isTest = process.env.NODE_ENV === 'test';
-// const isDebugger = typeof v8debug === 'object' || /--inspect/.test(process.execArgv.join(' '));
-const logFormat = (process.env.LOG_FORMAT || process.env.MATTER_LOG_FORMAT || 'auto').toLowerCase();
+const env = process.env as Record<string, string | undefined>;
+const envLevel = (env['LOG_LEVEL'] || 'info').toLowerCase() as LogLevel;
+const isDevelopment = env['NODE_ENV'] !== 'production';
+const isTest = env['NODE_ENV'] === 'test';
+const logFormat = (env['LOG_FORMAT'] || env['MATTER_LOG_FORMAT'] || 'auto').toLowerCase();
 
 // Determine pretty stream usage: prefer programmatic pretty in dev or LOG_FORMAT=plain
 const usePretty = (isDevelopment && !isTest) || logFormat === 'plain';
-let baseLogger;
+let baseLogger: pino.Logger;
 
 if (isTest) {
   // Test mode: simple silent logger
   baseLogger = pino({ level: 'silent' });
 } else if (usePretty) {
   // Development/plain format mode: use pino-pretty with custom formatter
-  const pad = (s, n) => String(s).padEnd(n, ' ');
-  const lvlMap = { 10: 'TRACE', 20: 'DEBUG', 30: 'INFO', 40: 'WARN', 50: 'ERROR', 60: 'FATAL' };
-  const messageFormat = (log, messageKey) => {
-    const ts = log.time ? new Date(log.time) : new Date();
-    const lvl = pad(lvlMap[log.level] || 'INFO', 5);
-    const facility = pad(log.facility || 'app', 20);
+  const pad = (s: unknown, n: number): string => String(s).padEnd(n, ' ');
+  const lvlMap: Record<number, string> = {
+    10: 'TRACE',
+    20: 'DEBUG',
+    30: 'INFO',
+    40: 'WARN',
+    50: 'ERROR',
+    60: 'FATAL',
+  };
+  const messageFormat = (log: Record<string, unknown>, messageKey: string): string => {
+    const ts = log['time'] ? new Date(log['time'] as number) : new Date();
+    const lvl = pad(lvlMap[log['level'] as number] || 'INFO', 5);
+    const facility = pad(log['facility'] || 'app', 20);
     const msg = log[messageKey] ?? '';
     const timeStr = `${ts.getFullYear()}-${String(ts.getMonth() + 1).padStart(2, '0')}-${String(ts.getDate()).padStart(2, '0')} ${String(ts.getHours()).padStart(2, '0')}:${String(ts.getMinutes()).padStart(2, '0')}:${String(ts.getSeconds()).padStart(2, '0')}.${String(ts.getMilliseconds()).padStart(3, '0')}`;
     return `${timeStr} ${lvl} ${facility} ${msg}`;
@@ -54,28 +63,28 @@ const bridgeLogger = baseLogger.child({ facility: 'rtt-bridge' });
 // Export unified log interface
 // Maintain backward compatibility with matter.js style: log.info(msg, ...args)
 export const log = {
-  error: (msg, ...args) => {
+  error: (msg: string, ...args: unknown[]): void => {
     if (args.length === 0) {
       rttLogger.error(msg);
     } else {
       rttLogger.error({ args }, msg);
     }
   },
-  warn: (msg, ...args) => {
+  warn: (msg: string, ...args: unknown[]): void => {
     if (args.length === 0) {
       rttLogger.warn(msg);
     } else {
       rttLogger.warn({ args }, msg);
     }
   },
-  info: (msg, ...args) => {
+  info: (msg: string, ...args: unknown[]): void => {
     if (args.length === 0) {
       rttLogger.info(msg);
     } else {
       rttLogger.info({ args }, msg);
     }
   },
-  debug: (msg, ...args) => {
+  debug: (msg: string, ...args: unknown[]): void => {
     if (args.length === 0) {
       rttLogger.debug(msg);
     } else {
@@ -92,7 +101,7 @@ export const loggers = {
 };
 
 // Map Pino levels to Matter.js levels
-const pinoToMatterLevel = {
+const pinoToMatterLevel: Record<string, MatterLevel> = {
   trace: MatterLevel.DEBUG,
   debug: MatterLevel.DEBUG,
   info: MatterLevel.INFO,
@@ -104,13 +113,13 @@ const pinoToMatterLevel = {
 // Configure Matter.js logger to use our Pino-based system
 const matterLevel = pinoToMatterLevel[envLevel] ?? MatterLevel.INFO;
 MatterLogger.defaultLogLevel = matterLevel;
-MatterLogger.format = process.env.MATTER_LOG_FORMAT || 'ansi';
+MatterLogger.format = env['MATTER_LOG_FORMAT'] || 'ansi';
 
 // Bridge Matter.js logger output to Pino
 const originalConsoleLogger = MatterLogger.log;
-if (originalConsoleLogger) {
+if (typeof originalConsoleLogger === 'function') {
   // Intercept matter.js log output and route through Pino
-  MatterLogger.log = function (level, formattedLog) {
+  MatterLogger.log = function (level: MatterLevel, formattedLog: string): void {
     const logMsg = typeof formattedLog === 'string' ? formattedLog : String(formattedLog);
 
     switch (level) {
@@ -134,13 +143,13 @@ if (originalConsoleLogger) {
 }
 
 // Set log level dynamically
-export function setLogLevel(level) {
+export function setLogLevel(level: string): void {
   const normalizedLevel = level.toLowerCase();
 
   // Handle special case for 'silent' which stops all logging
   if (normalizedLevel === 'silent') {
     baseLogger.level = 'silent';
-    MatterLogger.defaultLogLevel = MatterLevel.FATAL + 1; // Above all levels
+    MatterLogger.defaultLogLevel = (MatterLevel.FATAL + 1) as MatterLevel; // Above all levels
   } else {
     // Validate level exists in Pino
     const validLevels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
@@ -155,7 +164,7 @@ export function setLogLevel(level) {
     }
   }
 
-  process.env.LOG_LEVEL = level;
+  env['LOG_LEVEL'] = level;
 }
 
 // Cleanup function for test environments (no-op now, kept for compatibility)

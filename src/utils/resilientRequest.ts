@@ -7,20 +7,30 @@
  */
 
 import { CircuitBreaker, CircuitState } from './circuitBreaker.js';
-import { withRetry, fetchJsonWithRetry, DEFAULT_RETRY_CONFIG } from './retryableRequest.js';
+import {
+  withRetry,
+  fetchJsonWithRetry,
+  DEFAULT_RETRY_CONFIG,
+  type RetryConfig,
+  type Logger,
+  type RetryOptions,
+  type FetchOptions,
+  type FetchRetryOptions,
+} from './retryableRequest.js';
 
-/**
- * @typedef {Object} ResilientConfig
- * @property {number} [failureThreshold=5] - Failures before opening circuit
- * @property {number} [successThreshold=2] - Successes to close circuit
- * @property {number} [timeout=60000] - Circuit open timeout in ms
- * @property {number} [maxRetries=3] - Max retry attempts per request
- * @property {number} [baseDelayMs=1000] - Base retry delay
- * @property {number} [maxDelayMs=10000] - Max retry delay
- * @property {Function} [logger] - Logger instance with debug/info/error methods
- * @property {Function} [onCircuitOpen] - Callback when circuit opens
- * @property {Function} [onCircuitClose] - Callback when circuit closes
- */
+export interface ResilientConfig {
+  failureThreshold?: number;
+  successThreshold?: number;
+  timeout?: number;
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  retryableStatusCodes?: number[];
+  nonRetryableStatusCodes?: number[];
+  logger?: Logger;
+  onCircuitOpen?: (breaker: CircuitBreaker) => void;
+  onCircuitClose?: (breaker: CircuitBreaker) => void;
+}
 
 /**
  * Resilient request handler with circuit breaker and retry logic
@@ -41,10 +51,11 @@ import { withRetry, fetchJsonWithRetry, DEFAULT_RETRY_CONFIG } from './retryable
  * const result = await resilient.fetchJson('https://api.example.com/data');
  */
 export class ResilientRequest {
-  /**
-   * @param {ResilientConfig} config - Configuration options
-   */
-  constructor(config = {}) {
+  private readonly logger?: Logger;
+  private readonly retryConfig: RetryConfig & { logger?: Logger };
+  private readonly circuitBreaker: CircuitBreaker;
+
+  constructor(config: ResilientConfig = {}) {
     this.logger = config.logger;
     this.retryConfig = {
       maxRetries: config.maxRetries ?? DEFAULT_RETRY_CONFIG.maxRetries,
@@ -85,13 +96,11 @@ export class ResilientRequest {
 
   /**
    * Execute an operation with circuit breaker and retry protection
-   * @template T
-   * @param {Function} operation - Async function to execute
-   * @param {Object} [options] - Override retry options for this call
-   * @returns {Promise<T>} Result of the operation
-   * @throws {Error} Circuit open error or final operation error
    */
-  async execute(operation, options = {}) {
+  async execute<T>(
+    operation: (attempt: number) => Promise<T>,
+    options: RetryOptions = {}
+  ): Promise<T> {
     // Circuit breaker wraps the retry logic
     return this.circuitBreaker.execute(async () => {
       const retryOptions = { ...this.retryConfig, ...options };
@@ -101,13 +110,12 @@ export class ResilientRequest {
 
   /**
    * Fetch JSON with full protection (circuit breaker + retry + parsing)
-   * @template T
-   * @param {string} url - URL to fetch
-   * @param {Object} [fetchOptions] - Fetch options (fetchImpl, init, headers)
-   * @param {Object} [retryOptions] - Override retry options
-   * @returns {Promise<T>} Parsed JSON response
    */
-  async fetchJson(url, fetchOptions = {}, retryOptions = {}) {
+  async fetchJson<T>(
+    url: string,
+    fetchOptions: FetchOptions = {},
+    retryOptions: FetchRetryOptions = {}
+  ): Promise<T> {
     return this.circuitBreaker.execute(async () => {
       const mergedOptions = { ...this.retryConfig, ...retryOptions };
       return fetchJsonWithRetry(url, fetchOptions, mergedOptions);
@@ -116,25 +124,22 @@ export class ResilientRequest {
 
   /**
    * Get circuit breaker statistics
-   * @returns {Object} Current circuit breaker stats
    */
-  getStats() {
+  getStats(): Record<string, unknown> {
     return this.circuitBreaker.getStats();
   }
 
   /**
    * Get current circuit state
-   * @returns {string} Current circuit state (CLOSED, OPEN, HALF_OPEN)
    */
-  getCircuitState() {
+  getCircuitState(): string {
     return this.circuitBreaker.getState();
   }
 
   /**
    * Check if circuit is open
-   * @returns {boolean} True if circuit is open
    */
-  isCircuitOpen() {
+  isCircuitOpen(): boolean {
     return this.circuitBreaker.isOpen();
   }
 
@@ -142,7 +147,7 @@ export class ResilientRequest {
    * Manually reset the circuit breaker
    * Useful for administrative control after fixing underlying issues
    */
-  resetCircuit() {
+  resetCircuit(): void {
     this.logger?.info?.('Manually resetting circuit breaker');
     this.circuitBreaker.reset();
   }
@@ -151,7 +156,7 @@ export class ResilientRequest {
    * Manually open the circuit breaker
    * Useful for maintenance mode or manual intervention
    */
-  openCircuit() {
+  openCircuit(): void {
     this.logger?.warn?.('Manually opening circuit breaker');
     this.circuitBreaker.open();
   }
@@ -160,10 +165,6 @@ export class ResilientRequest {
 /**
  * Create a singleton resilient request instance with shared circuit breaker
  * Useful for managing a single service's health across multiple call sites
- *
- * @param {string} serviceName - Unique name for this service
- * @param {ResilientConfig} config - Configuration options
- * @returns {ResilientRequest} Singleton instance
  *
  * @example
  * // In RTTBridge.js
@@ -177,18 +178,21 @@ export class ResilientRequest {
  * const search = await rttClient.fetchJson('https://api/search');
  * const service = await rttClient.fetchJson('https://api/service/123');
  */
-const instances = new Map();
+const instances = new Map<string, ResilientRequest>();
 
-export function createResilientClient(serviceName, config = {}) {
+export function createResilientClient(
+  serviceName: string,
+  config: ResilientConfig = {}
+): ResilientRequest {
   if (!instances.has(serviceName)) {
     instances.set(serviceName, new ResilientRequest(config));
   }
-  return instances.get(serviceName);
+  return instances.get(serviceName)!;
 }
 
 /**
  * Clear all singleton instances (useful for testing)
  */
-export function clearResilientClients() {
+export function clearResilientClients(): void {
   instances.clear();
 }

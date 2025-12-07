@@ -5,25 +5,42 @@
  * @see docs/VALIDATION_AND_RETRY.md for usage examples
  */
 
-/**
- * Circuit breaker states
- * @enum {string}
- */
 export const CircuitState = {
   CLOSED: 'CLOSED', // Normal operation
   OPEN: 'OPEN', // Failing - reject immediately
   HALF_OPEN: 'HALF_OPEN', // Testing recovery
-};
+} as const;
 
-/**
- * @typedef {Object} CircuitBreakerConfig
- * @property {number} failureThreshold - Number of failures before opening circuit
- * @property {number} successThreshold - Number of successes in half-open to close circuit
- * @property {number} timeout - Time in ms before attempting recovery (half-open)
- * @property {Function} [onStateChange] - Callback when circuit state changes
- * @property {Function} [onFailure] - Callback when operation fails
- * @property {Function} [onSuccess] - Callback when operation succeeds
- */
+export type CircuitStateType = (typeof CircuitState)[keyof typeof CircuitState];
+
+export interface StateChangeEvent {
+  from: CircuitStateType;
+  to: CircuitStateType;
+  breaker: CircuitBreaker;
+}
+
+export interface FailureEvent {
+  error: Error;
+  breaker: CircuitBreaker;
+}
+
+export interface SuccessEvent {
+  breaker: CircuitBreaker;
+}
+
+export interface CircuitBreakerConfig {
+  failureThreshold?: number;
+  successThreshold?: number;
+  timeout?: number;
+  onStateChange?: (event: StateChangeEvent) => void;
+  onFailure?: (event: FailureEvent) => void;
+  onSuccess?: (event: SuccessEvent) => void;
+}
+
+export interface CircuitBreakerError extends Error {
+  circuitBreakerOpen?: boolean;
+  nextAttemptTime?: number | null;
+}
 
 /**
  * Circuit Breaker for protecting against cascading failures
@@ -40,10 +57,20 @@ export const CircuitState = {
  * });
  */
 export class CircuitBreaker {
-  /**
-   * @param {CircuitBreakerConfig} config - Circuit breaker configuration
-   */
-  constructor(config = {}) {
+  readonly failureThreshold: number;
+  readonly successThreshold: number;
+  readonly timeout: number;
+  private readonly onStateChange?: (event: StateChangeEvent) => void;
+  private readonly onFailure?: (event: FailureEvent) => void;
+  private readonly onSuccess?: (event: SuccessEvent) => void;
+
+  private state: CircuitStateType;
+  private failureCount: number;
+  private successCount: number;
+  private nextAttemptTime: number | null;
+  private lastError: Error | null;
+
+  constructor(config: CircuitBreakerConfig = {}) {
     this.failureThreshold = config.failureThreshold || 5;
     this.successThreshold = config.successThreshold || 2;
     this.timeout = config.timeout || 60000; // 1 minute default
@@ -61,59 +88,50 @@ export class CircuitBreaker {
 
   /**
    * Get current circuit state
-   * @returns {string} Current circuit state
    */
-  getState() {
+  getState(): CircuitStateType {
     return this.state;
   }
 
   /**
    * Get failure count
-   * @returns {number} Current failure count
    */
-  getFailureCount() {
+  getFailureCount(): number {
     return this.failureCount;
   }
 
   /**
    * Get success count (relevant in half-open state)
-   * @returns {number} Current success count
    */
-  getSuccessCount() {
+  getSuccessCount(): number {
     return this.successCount;
   }
 
   /**
    * Get last error
-   * @returns {Error|null} Last error that occurred
    */
-  getLastError() {
+  getLastError(): Error | null {
     return this.lastError;
   }
 
   /**
    * Check if circuit is open
-   * @returns {boolean} True if circuit is open
    */
-  isOpen() {
+  isOpen(): boolean {
     return this.state === CircuitState.OPEN;
   }
 
   /**
    * Check if circuit should transition to half-open
-   * @private
-   * @returns {boolean} True if timeout has elapsed
    */
-  shouldAttemptReset() {
-    return this.nextAttemptTime && Date.now() >= this.nextAttemptTime;
+  private shouldAttemptReset(): boolean {
+    return this.nextAttemptTime !== null && Date.now() >= this.nextAttemptTime;
   }
 
   /**
    * Change circuit state
-   * @private
-   * @param {string} newState - New state to transition to
    */
-  changeState(newState) {
+  private changeState(newState: CircuitStateType): void {
     if (this.state !== newState) {
       const oldState = this.state;
       this.state = newState;
@@ -123,9 +141,8 @@ export class CircuitBreaker {
 
   /**
    * Handle successful operation
-   * @private
    */
-  onOperationSuccess() {
+  private onOperationSuccess(): void {
     this.failureCount = 0;
     this.lastError = null;
 
@@ -142,10 +159,8 @@ export class CircuitBreaker {
 
   /**
    * Handle failed operation
-   * @private
-   * @param {Error} error - Error that occurred
    */
-  onOperationFailure(error) {
+  private onOperationFailure(error: Error): void {
     this.failureCount++;
     this.lastError = error;
 
@@ -165,12 +180,8 @@ export class CircuitBreaker {
 
   /**
    * Execute an operation through the circuit breaker
-   * @template T
-   * @param {Function} operation - Async function to execute
-   * @returns {Promise<T>} Result of the operation
-   * @throws {Error} Circuit open error or operation error
    */
-  async execute(operation) {
+  async execute<T>(operation: () => Promise<T>): Promise<T> {
     // Check if we should attempt reset
     if (this.state === CircuitState.OPEN && this.shouldAttemptReset()) {
       this.changeState(CircuitState.HALF_OPEN);
@@ -179,8 +190,8 @@ export class CircuitBreaker {
 
     // Reject immediately if circuit is open
     if (this.state === CircuitState.OPEN) {
-      const error = new Error(
-        `Circuit breaker is OPEN. Last error: ${this.lastError?.message || 'Unknown'}. Next attempt at ${new Date(this.nextAttemptTime).toISOString()}`
+      const error: CircuitBreakerError = new Error(
+        `Circuit breaker is OPEN. Last error: ${this.lastError?.message || 'Unknown'}. Next attempt at ${new Date(this.nextAttemptTime ?? 0).toISOString()}`
       );
       error.circuitBreakerOpen = true;
       error.nextAttemptTime = this.nextAttemptTime;
@@ -193,7 +204,7 @@ export class CircuitBreaker {
       this.onOperationSuccess();
       return result;
     } catch (error) {
-      this.onOperationFailure(error);
+      this.onOperationFailure(error as Error);
       throw error;
     }
   }
@@ -202,7 +213,7 @@ export class CircuitBreaker {
    * Manually reset the circuit breaker
    * Useful for administrative control or testing
    */
-  reset() {
+  reset(): void {
     this.changeState(CircuitState.CLOSED);
     this.failureCount = 0;
     this.successCount = 0;
@@ -214,16 +225,15 @@ export class CircuitBreaker {
    * Manually open the circuit breaker
    * Useful for maintenance or manual intervention
    */
-  open() {
+  open(): void {
     this.changeState(CircuitState.OPEN);
     this.nextAttemptTime = Date.now() + this.timeout;
   }
 
   /**
    * Get circuit breaker statistics
-   * @returns {Object} Current statistics
    */
-  getStats() {
+  getStats(): Record<string, unknown> {
     return {
       state: this.state,
       failureCount: this.failureCount,
