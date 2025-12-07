@@ -1,12 +1,43 @@
-/**
- * @typedef {import('../types.js').RTTSearchResponse} RTTSearchResponse
- */
-
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
 import { createResilientClient } from '../utils/resilientRequest.js';
+import type { CircuitBreaker } from '../utils/circuitBreaker.js';
 
 import { RTTApiError } from './errors.js';
+
+// Type definitions for RTT API
+export interface RTTService {
+  serviceUid: string;
+  runDate: string;
+  trainIdentity: string;
+  serviceType: string;
+  origin?: { tiploc: string; description?: string };
+  destination?: { tiploc: string; description?: string };
+  locationDetail?: {
+    realtimeActivated?: boolean;
+    realtimeDeparture?: string;
+    gbttBookedDeparture?: string;
+    origin?: Array<{ tiploc: string; description?: string }>;
+    destination?: Array<{ tiploc: string; description?: string }>;
+    displayAs?: string;
+    platform?: string;
+    platformConfirmed?: boolean;
+    platformChanged?: boolean;
+  };
+}
+
+export interface RTTSearchResponse {
+  location?: { name: string; crs: string; tiploc: string };
+  filter?: { from: string; to: string };
+  services?: RTTService[];
+}
+
+export interface RTTSearchOptions {
+  user?: string;
+  pass?: string;
+  fetchImpl?: typeof fetch;
+  maxRetries?: number;
+}
 
 const log = loggers.bridge;
 
@@ -19,7 +50,7 @@ const rttClient = createResilientClient('RTT_API', {
   baseDelayMs: 1000, // Start with 1s delay
   maxDelayMs: 10000, // Cap at 10s delay
   logger: log,
-  onCircuitOpen: (breaker) => {
+  onCircuitOpen: (breaker: CircuitBreaker) => {
     log.error(
       `RTT API circuit opened after ${breaker.getFailureCount()} failures - service degraded`
     );
@@ -31,11 +62,12 @@ const rttClient = createResilientClient('RTT_API', {
 
 /**
  * Encode credentials for HTTP Basic Authentication.
- * @param {string} u - Username
- * @param {string} p - Password
- * @returns {string} Base64-encoded credentials
+ * @param u - Username
+ * @param p - Password
+ * @returns Base64-encoded credentials
  */
-export const encodeBasicAuth = (u, p) => Buffer.from(`${u}:${p}`).toString('base64');
+export const encodeBasicAuth = (u: string, p: string): string =>
+  Buffer.from(`${u}:${p}`).toString('base64');
 
 // Use withRetry's internal defaults; caller can override via maxRetries.
 
@@ -44,18 +76,20 @@ export const encodeBasicAuth = (u, p) => Buffer.from(`${u}:${p}`).toString('base
  * Implements exponential backoff for retryable errors (429, 5xx, network errors).
  * Fast fails on authentication/authorization errors (401, 403).
  *
- * @param {string} from - Origin TIPLOC code
- * @param {string} to - Destination TIPLOC code
- * @param {string} date - Date in YYYY/MM/DD format
- * @param {Object} [options] - Additional options
- * @param {string} [options.user] - RTT API username (defaults to config)
- * @param {string} [options.pass] - RTT API password (defaults to config)
- * @param {Function} [options.fetchImpl] - Custom fetch implementation for testing
- * @param {number} [options.maxRetries] - Override max retry attempts
- * @returns {Promise<RTTSearchResponse>} RTT API response with services array
- * @throws {RTTApiError} If from/to TIPLOCs are missing or API request fails after retries
+ * @param from - Origin TIPLOC code
+ * @param to - Destination TIPLOC code
+ * @param date - Date in YYYY/MM/DD format
+ * @param options - Additional options
+ * @returns RTT API response with services array
+ * @throws RTTApiError If from/to TIPLOCs are missing or API request fails after retries
  */
-export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetries } = {}) {
+export async function rttSearch(
+  from: string,
+  to: string,
+  date: string,
+  options: RTTSearchOptions = {}
+): Promise<RTTSearchResponse> {
+  const { user, pass, fetchImpl, maxRetries } = options;
   if (!from || !to) {
     throw new RTTApiError('rttSearch requires both from and to TIPLOC', {
       context: { from, to, date },
@@ -64,10 +98,17 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
 
   const RTT_USER = user || config.rtt.user;
   const RTT_PASS = pass || config.rtt.pass;
+  
+  if (!RTT_USER || !RTT_PASS) {
+    throw new RTTApiError('RTT API credentials not configured', {
+      context: { from, to, date },
+    });
+  }
+  
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
 
   try {
-    return await rttClient.fetchJson(
+    return (await rttClient.fetchJson(
       url,
       {
         fetchImpl: fetchImpl || fetch,
@@ -76,7 +117,7 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
       {
         // Allow per-request override of retry config
         ...(typeof maxRetries === 'number' ? { maxRetries } : {}),
-        buildError: (res, body, attempt) =>
+        buildError: (res: Response, body: unknown, attempt: number) =>
           new RTTApiError(`RTT API request failed: ${res.status} ${res.statusText}`, {
             statusCode: res.status,
             endpoint: url,
@@ -84,10 +125,10 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
             context: { from, to, date, attempt },
           }),
       }
-    );
+    )) as RTTSearchResponse;
   } catch (error) {
     // Handle circuit breaker open errors gracefully
-    if (error.circuitBreakerOpen) {
+    if (error && typeof error === 'object' && 'circuitBreakerOpen' in error) {
       throw new RTTApiError('RTT API temporarily unavailable (circuit breaker open)', {
         statusCode: 503,
         endpoint: url,
@@ -98,23 +139,33 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
     if (error instanceof RTTApiError) {
       throw error;
     }
-    throw new RTTApiError(`Network error calling RTT API: ${error.message}`, {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new RTTApiError(`Network error calling RTT API: ${errorMessage}`, {
       endpoint: url,
-      context: { from, to, date, originalError: error.message },
+      context: { from, to, date, originalError: errorMessage },
     });
   }
+}
+
+export interface RTTApiHealth {
+  state: string;
+  failureCount: number;
+  successCount: number;
+  lastFailureTime: Date | null;
+  lastSuccessTime: Date | null;
+  isHealthy: boolean;
 }
 
 /**
  * Get RTT API circuit breaker health statistics.
  * Useful for monitoring, health checks, and diagnostics.
  *
- * @returns {Object} Circuit breaker statistics including state, failure count, etc.
+ * @returns Circuit breaker statistics including state, failure count, etc.
  * @example
  * const health = getRTTApiHealth();
  * console.log(`RTT API Status: ${health.state}, Failures: ${health.failureCount}`);
  */
-export function getRTTApiHealth() {
+export function getRTTApiHealth(): RTTApiHealth {
   return {
     ...rttClient.getStats(),
     isHealthy: !rttClient.isCircuitOpen(),
@@ -129,7 +180,7 @@ export function getRTTApiHealth() {
  * // After fixing RTT API credentials or service issues
  * resetRTTApiCircuit();
  */
-export function resetRTTApiCircuit() {
+export function resetRTTApiCircuit(): void {
   log.info('Manually resetting RTT API circuit breaker');
   rttClient.resetCircuit();
 }
