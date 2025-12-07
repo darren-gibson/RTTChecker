@@ -4,12 +4,21 @@
  * @module errors
  */
 
+export interface ErrorOptions {
+  context?: Record<string, unknown>;
+  missingFields?: string[];
+  invalidFields?: string[];
+}
+
 /**
  * Base error class for all RTTChecker errors.
  * @extends Error
  */
 export class RTTCheckerError extends Error {
-  constructor(message, options = {}) {
+  public readonly timestamp: Date;
+  public readonly context: Record<string, unknown>;
+
+  constructor(message: string, options: ErrorOptions = {}) {
     super(message);
     this.name = this.constructor.name;
     this.timestamp = new Date();
@@ -23,9 +32,9 @@ export class RTTCheckerError extends Error {
 
   /**
    * Serialize error for logging or transmission.
-   * @returns {Object} Plain object representation of error
+   * @returns Plain object representation of error
    */
-  toJSON() {
+  toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       message: this.message,
@@ -53,13 +62,16 @@ export class RTTCheckerError extends Error {
  * Used during startup validation.
  */
 export class ConfigurationError extends RTTCheckerError {
-  constructor(message, options = {}) {
+  public readonly missingFields: string[];
+  public readonly invalidFields: string[];
+
+  constructor(message: string, options: ErrorOptions = {}) {
     super(message, options);
     this.missingFields = options.missingFields || [];
     this.invalidFields = options.invalidFields || [];
   }
 
-  toJSON() {
+  override toJSON(): Record<string, unknown> {
     return {
       ...super.toJSON(),
       missingFields: this.missingFields,

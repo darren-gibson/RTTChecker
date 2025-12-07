@@ -1,25 +1,36 @@
-import { RTTCheckerError } from '../errors.js';
+import { RTTCheckerError, ErrorOptions } from '../errors.js';
+
+export interface RTTApiErrorOptions extends ErrorOptions {
+  statusCode?: number;
+  responseBody?: unknown;
+  endpoint?: string;
+}
 
 /**
  * Error thrown when RTT API request fails.
  * Includes HTTP status code and response details.
  */
 export class RTTApiError extends RTTCheckerError {
-  constructor(message, options = {}) {
+  public readonly statusCode?: number;
+  public readonly responseBody?: unknown;
+  public readonly endpoint?: string;
+
+  constructor(message: string, options: RTTApiErrorOptions = {}) {
     super(message, options);
     this.statusCode = options.statusCode;
     this.responseBody = options.responseBody;
     this.endpoint = options.endpoint;
   }
 
-  isAuthError() {
+  isAuthError(): boolean {
     return this.statusCode === 401 || this.statusCode === 403;
   }
-  isRetryable() {
-    return this.statusCode >= 500 || !this.statusCode;
+  
+  isRetryable(): boolean {
+    return (this.statusCode !== undefined && this.statusCode >= 500) || !this.statusCode;
   }
 
-  toJSON() {
+  override toJSON(): Record<string, unknown> {
     return {
       ...super.toJSON(),
       statusCode: this.statusCode,
