@@ -2,18 +2,19 @@
   "name": "rtt-checker",
   "version": "0.2.0",
   "description": "A Matter smart home device that reports train status using RTT API data with Mode Select cluster.",
-  "main": "index.js",
+  "main": "index.ts",
   "type": "module",
   "scripts": {
     "start": "tsx index.ts",
+    "build": "tsc",
     "test": "jest --coverage",
     "test:bdd": "jest tests/bdd",
-    "lint": "eslint . --ext .js,.cjs,.mjs",
+    "lint": "eslint . --ext .js,.cjs,.mjs,.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "ci": "npm run lint && npm run format:check && npm test && npm audit --production",
-    "diagnose": "./diagnose.sh",
-    "reset": "./reset-commissioning.sh"
+    "diagnose": "./scripts/diagnose.sh",
+    "reset": "./scripts/reset-commissioning.sh"
   },
   "keywords": [
     "matter",

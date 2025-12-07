@@ -16,12 +16,22 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
 # Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies deterministically
+# Copy package files first for better layer caching
 COPY package*.json ./
-RUN npm ci --omit=dev
 
-# Copy source code
-COPY . .
+# Install all dependencies including devDependencies for build
+RUN npm ci
+
+# Copy TypeScript source and config files
+COPY tsconfig.json ./
+COPY index.ts ./
+COPY src/ ./src/
+
+# Compile TypeScript to JavaScript
+RUN npm run build
+
+# Remove devDependencies to reduce image size
+RUN npm prune --production
 
 # Set environment variable for production
 ENV NODE_ENV=production
@@ -47,4 +57,5 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Use entrypoint for any initialization
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["node", "index.js"]
+# Run the compiled JavaScript from dist/
+CMD ["node", "dist/index.js"]

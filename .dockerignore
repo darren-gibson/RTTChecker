@@ -27,7 +27,8 @@ jest.config.cjs
 .vscode/
 .idea/
 
-# Build artifacts
+# Build artifacts (pre-compiled, will build fresh in container)
 *.log
 npm-debug.log*
 train-status-*.tar.gz
+dist/
