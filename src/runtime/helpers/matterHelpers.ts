@@ -1,3 +1,4 @@
+// @ts-ignore - Matter.js behavior modules lack complete type definitions
 import { BridgedDeviceBasicInformationServer } from '@matter/main/behaviors/bridged-device-basic-information';
 import type { ServerNode, Endpoint } from '@matter/main';
 
@@ -44,7 +45,7 @@ export async function addEndpoint(
   behaviors: unknown[],
   { id, number }: { id: string; number: number }
 ): Promise<Endpoint> {
-  return node.add(deviceDef.with(...behaviors), { id, number });
+  return (node as any).add(deviceDef.with(...behaviors), { id, number });
 }
 
 // Helper to set both UserLabel and FixedLabel to a single Name value

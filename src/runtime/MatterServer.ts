@@ -63,7 +63,9 @@ const BridgedInfoAirQuality = makeBridgedInfoBehavior({
 /**
  * Initialize and start the Matter server with train status device
  */
-export async function startMatterServer(trainDevice: TrainStatusDevice): Promise<MatterServerResult> {
+export async function startMatterServer(
+  trainDevice: TrainStatusDevice
+): Promise<MatterServerResult> {
   log.info('🔧 Initializing Matter server (v0.15 API)...');
   log.info('   Storage directory: .matter-storage/');
   log.info(`   Bridge mode: ${config.matter.useBridge ? 'enabled' : 'disabled'}`);
@@ -138,7 +140,10 @@ export async function startMatterServer(trainDevice: TrainStatusDevice): Promise
         await setEndpointName(modeDevice, config.matter.statusDeviceName ?? 'Train Status');
       }
       if (airQualityDevice) {
-        await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName ?? 'Train Air Quality');
+        await setEndpointName(
+          airQualityDevice,
+          config.matter.airQualityDeviceName ?? 'Train Air Quality'
+        );
       }
       log.info('   ✓ Endpoint labels set');
     } catch (e) {

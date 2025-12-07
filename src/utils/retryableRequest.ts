@@ -168,7 +168,7 @@ export async function withRetry<T>(
     } catch (error) {
       // Check if we should retry this error
       const retryableError = error as RetryableError;
-      if (!shouldRetryFn(retryableError, attempt, config, logger)) {
+      if (!shouldRetryFn(retryableError, attempt, config, logger ?? null)) {
         throw error;
       }
 
@@ -191,7 +191,7 @@ export async function fetchJsonWithRetry<T>(
   const effectiveFetch = fetchImpl || fetch;
   const mergedInit = { ...init, headers: { ...(init.headers || {}), ...headers } };
 
-  return withRetry(async (attempt) => {
+  return withRetry<T>(async (attempt) => {
     logger?.debug?.(`GET ${url}${attempt > 0 ? ` (attempt ${attempt + 1})` : ''}`);
     try {
       const res = await effectiveFetch(url, mergedInit);
@@ -206,7 +206,7 @@ export async function fetchJsonWithRetry<T>(
             });
         throw error;
       }
-      return res.json();
+      return res.json() as Promise<T>;
     } catch (err) {
       const error = err as RetryableError;
       if (error.statusCode || error.responseBody || error.isNetworkError) {

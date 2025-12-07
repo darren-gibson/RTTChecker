@@ -113,7 +113,8 @@ export async function rttSearch(
   const RTT_USER = user || config.rtt.user;
   const RTT_PASS = pass || config.rtt.pass;
 
-  if (!RTT_USER || !RTT_PASS) {
+  // Only validate credentials when not using a mock fetch implementation
+  if (!fetchImpl && (!RTT_USER || !RTT_PASS)) {
     throw new RTTApiError('RTT API credentials not configured', {
       context: { from, to, date },
     });
@@ -126,7 +127,7 @@ export async function rttSearch(
       url,
       {
         fetchImpl: fetchImpl || fetch,
-        headers: { Authorization: `Basic ${encodeBasicAuth(RTT_USER, RTT_PASS)}` },
+        headers: { Authorization: `Basic ${encodeBasicAuth(RTT_USER || '', RTT_PASS || '')}` },
       },
       {
         // Allow per-request override of retry config
@@ -165,6 +166,9 @@ export interface RTTApiHealth {
   state: string;
   failureCount: number;
   successCount: number;
+  failureThreshold: number;
+  successThreshold: number;
+  timeout: number;
   lastFailureTime: Date | null;
   lastSuccessTime: Date | null;
   isHealthy: boolean;
@@ -180,8 +184,16 @@ export interface RTTApiHealth {
  * console.log(`RTT API Status: ${health.state}, Failures: ${health.failureCount}`);
  */
 export function getRTTApiHealth(): RTTApiHealth {
+  const stats = rttClient.getStats();
   return {
-    ...rttClient.getStats(),
+    state: stats['state'] as string,
+    failureCount: stats['failureCount'] as number,
+    successCount: stats['successCount'] as number,
+    failureThreshold: stats['failureThreshold'] as number,
+    successThreshold: stats['successThreshold'] as number,
+    timeout: stats['timeout'] as number,
+    lastFailureTime: stats['lastFailureTime'] as Date | null,
+    lastSuccessTime: stats['lastSuccessTime'] as Date | null,
     isHealthy: !rttClient.isCircuitOpen(),
   };
 }

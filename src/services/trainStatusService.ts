@@ -6,8 +6,8 @@ import { formatDateYMD } from '../utils/timeUtils.js';
 import { pickNextService } from './trainSelectionService.js';
 
 export interface TrainStatusOptions {
-  originTiploc: string;
-  destTiploc: string;
+  originTiploc: string | null;
+  destTiploc: string | null;
   minAfterMinutes?: number;
   windowMinutes?: number;
   now?: Date;
@@ -33,6 +33,11 @@ export async function getTrainStatus({
   now,
   fetchImpl,
 }: TrainStatusOptions): Promise<TrainStatusResult> {
+  // Check for null tiploc values
+  if (!originTiploc || !destTiploc) {
+    return { status: TrainStatus.UNKNOWN, selected: null, raw: null };
+  }
+
   // Default to current time if not provided
   const currentTime = now || new Date();
   const dateStr = formatDateYMD(currentTime);

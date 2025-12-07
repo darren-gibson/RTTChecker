@@ -1,5 +1,7 @@
 import { Environment, ServerNode } from '@matter/main';
+// @ts-ignore - Matter.js nodejs module lacks complete type definitions
 import { StorageBackendDisk } from '@matter/nodejs';
+// @ts-ignore - Matter.js device modules lack complete type definitions
 import { ModeSelectDevice } from '@matter/main/devices/mode-select';
 import type { Config } from '../../config.js';
 
@@ -13,27 +15,34 @@ export async function createServerNode(config: Config): Promise<ServerNodeResult
   environment.vars.set('storage.path', '.matter-storage');
   environment.set(StorageBackendDisk, new StorageBackendDisk('.matter-storage'));
 
+  // Type assertion for Matter configuration with optional properties
+  const matterConfig = config.matter as typeof config.matter & {
+    port?: number;
+    vendorId?: number;
+    productId?: number;
+  };
+
   const node = await ServerNode.create({
     id: 'rtt-checker',
     network: {
-      port: config.matter.port,
+      port: matterConfig.port ?? 5540,
     },
     commissioning: {
-      passcode: config.matter.passcode,
-      discriminator: config.matter.discriminator,
+      passcode: matterConfig.passcode,
+      discriminator: matterConfig.discriminator,
     },
     productDescription: {
-      name: config.matter.useBridge ? config.matter.productName : config.matter.statusDeviceName,
-      deviceType: config.matter.useBridge ? 0x000e /* Aggregator */ : ModeSelectDevice.deviceType,
+      name: matterConfig.useBridge ? matterConfig.productName : matterConfig.statusDeviceName,
+      deviceType: matterConfig.useBridge ? 0x000e /* Aggregator */ : ModeSelectDevice.deviceType,
     },
     basicInformation: {
-      vendorName: config.matter.vendorName,
-      vendorId: config.matter.vendorId ?? 0xfff1,
-      nodeLabel: config.matter.statusDeviceName,
-      productName: config.matter.productName,
-      productLabel: config.matter.productName,
-      productId: config.matter.productId ?? 0x8001,
-      serialNumber: config.matter.serialNumber,
+      vendorName: matterConfig.vendorName,
+      vendorId: matterConfig.vendorId ?? 0xfff1,
+      nodeLabel: matterConfig.statusDeviceName,
+      productName: matterConfig.productName,
+      productLabel: matterConfig.productName,
+      productId: matterConfig.productId ?? 0x8001,
+      serialNumber: matterConfig.serialNumber,
       hardwareVersion: 1,
       hardwareVersionString: '1.0',
       softwareVersion: 1,

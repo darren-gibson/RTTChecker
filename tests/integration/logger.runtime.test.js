@@ -8,7 +8,9 @@ function runWithEnv(env) {
   return new Promise((resolve, reject) => {
     const stdoutChunks = [];
     const stderrChunks = [];
-    const child = spawn(process.execPath, [path.resolve(__dirname, '../../index.js')], {
+    // Use tsx to execute TypeScript directly - it's faster and better with ESM
+    const tsxPath = path.resolve(__dirname, '../../node_modules/.bin/tsx');
+    const child = spawn(tsxPath, [path.resolve(__dirname, '../../index.ts')], {
       env: {
         ...process.env,
         ...env,
