@@ -1,39 +1,49 @@
-/**
- * @typedef {import('./types.js').RTTService} RTTService
- * @typedef {import('./types.js').RTTLocation} RTTLocation
- * @typedef {import('./types.js').TrainSelectionOptions} TrainSelectionOptions
- * @typedef {import('./types.js').TrainCandidate} TrainCandidate
- */
-
 import { loggers } from '../utils/logger.js';
 import { config } from '../config.js';
 import { hhmmToMins, adjustForDayRollover, isWithinTimeWindow } from '../utils/timeUtils.js';
+import type { RTTService } from '../api/rttApiClient.js';
+
+export interface TrainSelectionOptions {
+  minAfterMinutes?: number;
+  windowMinutes?: number;
+  now?: Date;
+}
+
+type RTTLocationDetail = NonNullable<RTTService['locationDetail']>;
+type RTTDestination = NonNullable<RTTLocationDetail['destination']>[number];
+
+export interface TrainCandidate {
+  service: RTTService;
+  depMins: number;
+  duration: number;
+  depStr: string | number | undefined;
+  destEntry: RTTDestination;
+  loc: RTTLocationDetail;
+}
 
 const log = loggers.bridge;
 
 /**
  * Find destination entry in location's destination array.
- * @private
- * @param {RTTLocation} loc - Location details with destinations
- * @param {string} destTiploc - Target destination TIPLOC
- * @returns {RTTLocation|undefined} Matching destination or undefined
  */
-function findDestinationEntry(loc, destTiploc) {
+function findDestinationEntry(
+  loc: RTTLocationDetail,
+  destTiploc: string
+): RTTDestination | undefined {
   const destList = Array.isArray(loc.destination) ? loc.destination : [];
   return destList.find((d) => d.tiploc === destTiploc);
 }
 
 /**
  * Build candidate object with computed journey details.
- * @private
- * @param {RTTService} service - Train service
- * @param {RTTLocation} destEntry - Destination location details
- * @param {RTTLocation} loc - Origin location details
- * @param {number} depMins - Departure minutes since midnight
- * @param {string} depStr - Departure time string (for logging)
- * @returns {TrainCandidate} Candidate with duration and timing details
  */
-function buildCandidate(service, destEntry, loc, depMins, depStr) {
+function buildCandidate(
+  service: RTTService,
+  destEntry: RTTDestination,
+  loc: RTTLocationDetail,
+  depMins: number,
+  depStr: string | number | undefined
+): TrainCandidate {
   // Compute journey duration (origin to destination)
   const originTime =
     loc.origin?.[0]?.workingTime || loc.origin?.[0]?.publicTime || loc.gbttBookedDeparture;
@@ -51,11 +61,8 @@ function buildCandidate(service, destEntry, loc, depMins, depStr) {
 
 /**
  * Rank candidates by arrival time (earliest first), then departure time.
- * @private
- * @param {TrainCandidate[]} candidates - Array of candidates to rank
- * @returns {TrainCandidate[]} Sorted candidates (modifies in place)
  */
-function rankCandidates(candidates) {
+function rankCandidates(candidates: TrainCandidate[]): TrainCandidate[] {
   // Sort by arrival time then departure time
   candidates.sort((a, b) => {
     const aArr = hhmmToMins(
@@ -82,11 +89,8 @@ function rankCandidates(candidates) {
 
 /**
  * Log candidate details at debug level.
- * @private
- * @param {TrainCandidate} candidate - Candidate to log
- * @param {boolean} [selected=false] - Whether this is the selected candidate
  */
-function logCandidate(candidate, selected = false) {
+function logCandidate(candidate: TrainCandidate, selected: boolean = false): void {
   try {
     const { depStr, destEntry, loc } = candidate;
     const destArrival =
@@ -116,11 +120,6 @@ function logCandidate(candidate, selected = false) {
  *
  * Ranks by earliest arrival time, then earliest departure.
  *
- * @param {RTTService[]} services - Array of train services from RTT API
- * @param {string} destTiploc - Destination TIPLOC code to match
- * @param {TrainSelectionOptions} [opts={}] - Selection options
- * @returns {RTTService|undefined} Selected service, or undefined if none found
- *
  * @example
  * const service = pickNextService(data.services, 'KNGX', {
  *   minAfterMinutes: 20,
@@ -128,7 +127,11 @@ function logCandidate(candidate, selected = false) {
  *   now: new Date()
  * });
  */
-export function pickNextService(services, destTiploc, opts = {}) {
+export function pickNextService(
+  services: RTTService[] | null | undefined,
+  destTiploc: string,
+  opts: TrainSelectionOptions = {}
+): RTTService | undefined {
   if (!Array.isArray(services)) return undefined;
 
   const minAfterMinutes = Number(opts.minAfterMinutes ?? 20);
@@ -148,7 +151,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
       if (!isWithinTimeWindow(depMins, earliest, latest)) return null;
       const destEntry = findDestinationEntry(loc, destTiploc);
       if (!destEntry) {
-        const id = s.serviceUid || s.trainIdentity || s.runningIdentity || 'unknown';
+        const id = s.serviceUid || s.trainIdentity || 'unknown';
         log.warn(`excluding service ${id}: no destination TIPLOC ${destTiploc}`);
         return null;
       }
@@ -156,7 +159,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
       logCandidate(cand, false);
       return cand;
     })
-    .filter(Boolean);
+    .filter((c): c is TrainCandidate => c !== null);
 
   if (candidates.length === 0) {
     log.info(
@@ -167,6 +170,7 @@ export function pickNextService(services, destTiploc, opts = {}) {
 
   const ranked = rankCandidates(candidates);
   const selected = ranked[0];
+  if (!selected) return undefined;
   logCandidate(selected, true);
   return selected.service;
 }

@@ -17,8 +17,20 @@ export interface RTTService {
     realtimeActivated?: boolean;
     realtimeDeparture?: string;
     gbttBookedDeparture?: string;
-    origin?: Array<{ tiploc: string; description?: string }>;
-    destination?: Array<{ tiploc: string; description?: string }>;
+    realtimeArrival?: string;
+    gbttBookedArrival?: string;
+    origin?: Array<{
+      tiploc: string;
+      description?: string;
+      workingTime?: string;
+      publicTime?: string;
+    }>;
+    destination?: Array<{
+      tiploc: string;
+      description?: string;
+      workingTime?: string;
+      publicTime?: string;
+    }>;
     displayAs?: string;
     platform?: string;
     platformConfirmed?: boolean;
