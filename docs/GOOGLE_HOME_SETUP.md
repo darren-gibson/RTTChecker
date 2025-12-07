@@ -27,8 +27,10 @@ export UPDATE_INTERVAL_MS=60000   # Update every 60 seconds
 # If unset, names will be automatically generated like:
 #   <ORIGIN>-<DEST> Train Status
 #   <ORIGIN>-<DEST> Train Delay
+#   <ORIGIN>-<DEST> Train Punctuality
 export STATUS_DEVICE_NAME="CAMBDGE-KNGX Train Status"
 export DELAY_DEVICE_NAME="CAMBDGE-KNGX Train Delay"
+export AIR_QUALITY_DEVICE_NAME="CAMBDGE-KNGX Train Punctuality"
 ```
 
 ## Essentials
@@ -42,12 +44,17 @@ export ORIGIN_TIPLOC=CAMBDGE
 export DEST_TIPLOC=KNGX
 ```
 
-Optional (override names / interval):
+Optional (override names / interval / endpoint type):
 
 ```bash
 export STATUS_DEVICE_NAME="Cambridge-London Status"
 export DELAY_DEVICE_NAME="Cambridge-London Delay"
 export UPDATE_INTERVAL_MS=60000
+export AIR_QUALITY_DEVICE_NAME="Cambridge-London Train Punctuality"
+
+# When not using a bridge, choose which primary endpoint to expose
+export USE_BRIDGE=false
+export PRIMARY_ENDPOINT=airQuality   # or "mode" (default)
 ```
 
 ```bash
@@ -119,9 +126,10 @@ You'll see updates like:
 
 **In Google Home App:**
 
-- You should see TWO endpoints/devices. Default names are derived from the route:
+- You should see at least the delay sensor and a status device. Default names are derived from the route:
   - `<ORIGIN>-<DEST> Train Delay` (or your `DELAY_DEVICE_NAME` override) – Temperature Sensor showing numeric delay
-- If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
+- If the Air Quality endpoint is enabled and/or you are using a bridge, you may also see an Air Quality Sensor device using the name from `AIR_QUALITY_DEVICE_NAME` or its default.
+- If you set `STATUS_DEVICE_NAME` / `DELAY_DEVICE_NAME` / `AIR_QUALITY_DEVICE_NAME`, those custom names appear instead of the derived defaults.
 
 ### Bridge mode and names
 

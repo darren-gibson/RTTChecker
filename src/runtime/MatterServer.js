@@ -82,13 +82,23 @@ export async function startMatterServer(trainDevice) {
     modeBehaviors.push(BridgedInfoMode);
     airQualityBehaviors.push(BridgedInfoAirQuality);
   }
+
+  // When not using a bridge, we only want one primary
+  // visualisation endpoint exposed to controllers. Temperature
+  // is always created; choose between mode and air quality.
+  const primaryEndpoint = config.matter.primaryEndpoint;
+
   let tempSensor, modeDevice, airQualityDevice;
+  const endpointOptions = { tempBehaviors };
+  if (config.matter.useBridge || primaryEndpoint === 'mode') {
+    endpointOptions.modeBehaviors = modeBehaviors;
+  }
+  if (config.matter.useBridge || primaryEndpoint === 'airQuality') {
+    endpointOptions.airQualityBehaviors = airQualityBehaviors;
+  }
+
   try {
-    const endpoints = await createEndpoints(node, {
-      tempBehaviors,
-      modeBehaviors,
-      airQualityBehaviors,
-    });
+    const endpoints = await createEndpoints(node, endpointOptions);
     tempSensor = endpoints.tempSensor;
     modeDevice = endpoints.modeDevice;
     airQualityDevice = endpoints.airQualityDevice;
@@ -108,9 +118,15 @@ export async function startMatterServer(trainDevice) {
 
     // Set friendly labels; BD-BI already initialized with names when bridged
     try {
-      await setEndpointName(tempSensor, config.matter.delayDeviceName);
-      await setEndpointName(modeDevice, config.matter.statusDeviceName);
-      await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName);
+      if (tempSensor) {
+        await setEndpointName(tempSensor, config.matter.delayDeviceName);
+      }
+      if (modeDevice) {
+        await setEndpointName(modeDevice, config.matter.statusDeviceName);
+      }
+      if (airQualityDevice) {
+        await setEndpointName(airQualityDevice, config.matter.airQualityDeviceName);
+      }
       log.info('   ✓ Endpoint labels set');
     } catch (e) {
       log.warn('   ⚠️ Could not set endpoint labels via UserLabel:', e);
@@ -128,20 +144,26 @@ export async function startMatterServer(trainDevice) {
 
         const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
 
-        // Update mode device
-        await modeDevice.act(async (agent) => {
-          await agent.modeSelect.setTrainStatus(statusCode);
-        });
+        // Update mode device if present
+        if (modeDevice) {
+          await modeDevice.act(async (agent) => {
+            await agent.modeSelect.setTrainStatus(statusCode);
+          });
+        }
 
         // Update temperature sensor from delay minutes (nullable supported)
-        await tempSensor.act(async (agent) => {
-          await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
-        });
+        if (tempSensor) {
+          await tempSensor.act(async (agent) => {
+            await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+          });
+        }
 
-        // Update air quality device with color-coded status
-        await airQualityDevice.act(async (agent) => {
-          await agent.airQuality.setTrainStatus(statusCode);
-        });
+        // Update air quality device with color-coded status if present
+        if (airQualityDevice) {
+          await airQualityDevice.act(async (agent) => {
+            await agent.airQuality.setTrainStatus(statusCode);
+          });
+        }
       } catch (error) {
         log.error('Error updating Matter endpoints:', error);
       }

@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 import { config, isTestEnv, isProductionEnv } from '../src/config.js';
 
 describe('Configuration', () => {
@@ -60,6 +62,27 @@ describe('Configuration', () => {
     // Matter has 64 character limit on device names
     expect(config.matter.statusDeviceName.length).toBeLessThanOrEqual(64);
     expect(config.matter.delayDeviceName.length).toBeLessThanOrEqual(64);
+  });
+
+  test('primaryEndpoint defaults to mode when unset or invalid', () => {
+    // In test env without PRIMARY_ENDPOINT set, we should see 'mode'
+    expect(config.matter.primaryEndpoint).toBe('mode');
+  });
+
+  test('sanitizeDeviceName trims and strips non-ASCII characters', async () => {
+    const originalEnv = { ...process.env };
+    process.env.STATUS_DEVICE_NAME =
+      '⭐ CAMBDGE→KNGX Very Long Name That Should Be Trimmed At Some Point ⭐';
+
+    // Clear the module from cache and re-import to re-run initialization
+    jest.resetModules();
+    const { config: freshConfig } = await import('../src/config.js');
+
+    // Names should only contain printable ASCII characters
+    expect(freshConfig.matter.statusDeviceName).toMatch(/^[\x20-\x7E]+$/u);
+    expect(freshConfig.matter.statusDeviceName.length).toBeLessThanOrEqual(64);
+
+    process.env = originalEnv;
   });
 });
 

@@ -39,6 +39,10 @@ export const config = {
     // Use a Bridge (Aggregator) to group endpoints under a single device.
     // Set USE_BRIDGE=false to expose endpoints directly without a bridge in controllers like Google Home.
     useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false',
+    // Which visualisation endpoint to expose to controllers ("mode" or "airQuality").
+    // This only affects which endpoint is presented as the primary device when not using a bridge.
+    primaryEndpoint:
+      process.env.PRIMARY_ENDPOINT?.toLowerCase() === 'airquality' ? 'airQuality' : 'mode',
   },
 };
 
@@ -58,7 +62,7 @@ function sanitizeDeviceName(name) {
 // Derive per-endpoint names (can be overridden by explicit env vars)
 const defaultStatusName = `${config.train.originTiploc}-${config.train.destTiploc} Train Status`;
 const defaultDelayName = `${config.train.originTiploc}-${config.train.destTiploc} Train Delay`;
-const defaultAirQualityName = `${config.train.originTiploc}-${config.train.destTiploc} Air Quality`;
+const defaultAirQualityName = `${config.train.originTiploc}-${config.train.destTiploc} Train Punctuality`;
 
 config.matter.statusDeviceName = sanitizeDeviceName(
   process.env.STATUS_DEVICE_NAME || defaultStatusName
@@ -114,6 +118,8 @@ const envSchema = z.object({
   USE_BRIDGE: z.enum(['true', 'false']).optional(),
   STATUS_DEVICE_NAME: z.string().max(64).optional(),
   DELAY_DEVICE_NAME: z.string().max(64).optional(),
+  AIR_QUALITY_DEVICE_NAME: z.string().max(64).optional(),
+  PRIMARY_ENDPOINT: z.enum(['mode', 'airQuality']).optional(),
 
   // Optional logging configuration
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent']).optional(),

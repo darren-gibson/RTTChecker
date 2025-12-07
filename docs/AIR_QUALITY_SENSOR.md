@@ -32,30 +32,11 @@ The Air Quality Sensor offers several advantages:
 
 ## Implementation Details
 
-### Custom Behavior Class
+### Custom Behavior & Mapping
 
-```javascript
-class TrainStatusAirQualityServer extends AirQualityServer {
-  async initialize() {
-    this.state.airQuality = 0; // AirQualityEnum.Unknown
-    await super.initialize?.();
-  }
-
-  async setTrainStatus(statusCode) {
-    const STATUS_TO_AIR_QUALITY = {
-      on_time: 1, // Good - Green
-      minor_delay: 2, // Fair - Yellow
-      delayed: 3, // Moderate - Orange
-      major_delay: 4, // Poor - Red
-      unknown: 5, // VeryPoor - Dark Red
-      critical: 5, // VeryPoor - Dark Red
-    };
-
-    const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0;
-    await this.setAirQuality(airQualityValue);
-  }
-}
-```
+The Air Quality behavior is implemented as a custom server that maps
+train status codes to `AirQualityEnum` values using the shared
+`STATUS_TO_AIR_QUALITY` mapping in `src/domain/airQualityMapping.js`.
 
 ### Status Mapping
 
@@ -76,16 +57,9 @@ class TrainStatusAirQualityServer extends AirQualityServer {
 
 ### Endpoint Configuration
 
-The air quality sensor is added as endpoint #3:
-
-```javascript
-const airQualityDevice = await addEndpoint(
-  node,
-  AirQualitySensorDevice,
-  [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer],
-  { id: 'airquality', number: 3 }
-);
-```
+The air quality sensor is created alongside the existing temperature and
+mode endpoints by the Matter server runtime (`src/runtime/MatterServer.js`),
+using the shared behavior and mapping described above.
 
 ### Event Wiring
 
@@ -105,12 +79,28 @@ trainDevice.on('statusChange', async (status) => {
 
 When commissioned in Google Home, the air quality sensor appears as:
 
-- **Device Name**: "Train Air Quality"
+- **Device Name**: Derived from `AIR_QUALITY_DEVICE_NAME` or `ORIGIN_TIPLOC-DEST_TIPLOC Air Quality`
 - **Device Type**: Air Quality Sensor
 - **Display**: Color-coded status badge
 - **Voice Commands**:
   - "What's the air quality of Train Air Quality?"
   - "Is Train Air Quality good or bad?"
+
+When running **without** a bridge (`USE_BRIDGE=false`), you can choose whether
+the primary exposed device is the traditional Mode Select status device or
+this Air Quality Sensor by setting the `PRIMARY_ENDPOINT` environment variable:
+
+```bash
+# Expose Mode Select device (default)
+PRIMARY_ENDPOINT=mode
+
+# Expose Air Quality Sensor as the primary device
+PRIMARY_ENDPOINT=airQuality
+```
+
+When running **with** a bridge (`USE_BRIDGE=true`), both the Mode Select and
+Air Quality endpoints are created under a single bridged device, and the
+`PRIMARY_ENDPOINT` setting is ignored.
 
 ## Comparison with Other Approaches
 
@@ -134,12 +124,12 @@ To test the air quality sensor:
 2. **Commission to Google Home**:
    - Scan the QR code displayed in terminal
    - Follow Google Home app prompts
-   - Device appears as "Train Air Quality"
+   - Device appears as "<ORIGIN>-<DEST> Train Punctuality" by default (or your `AIR_QUALITY_DEVICE_NAME` override)
 
 3. **Verify status updates**:
    - Wait for periodic train status refresh (every 60 seconds)
    - Or trigger manual status change by modifying train service
-   - Check Google Home app for color changes
+   - Check Google Home app for color changes on the Train Punctuality device
 
 4. **Voice queries**:
    - "Hey Google, what's the air quality?"

@@ -6,10 +6,11 @@ Real-time UK train punctuality exposed as a Matter device (Mode Select + Tempera
 
 ## 1. Overview
 
-This service picks the next best train for a configured origin → destination journey and surfaces two values:
+This service picks the next best train for a configured origin  destination journey and surfaces:
 
 - Discrete status (Mode Select cluster) mapping five punctuality bands
 - Numeric delay in minutes (Temperature Measurement cluster; negative = early)
+- Optional color-coded status via an Air Quality Sensor endpoint (for richer Google Home visuals)
 
 ## 2. Core Features
 
@@ -46,19 +47,22 @@ Pair via QR code shown at startup (Google Home / Apple Home / etc.).
 
 ## 5. Configuration (Environment Variables)
 
-| Variable                 | Description                                        | Example                   |
-| ------------------------ | -------------------------------------------------- | ------------------------- | ---- | ----- | ---- |
-| RTT_USER / RTT_PASS      | RTT API credentials                                | demo / secret             |
-| ORIGIN_TIPLOC            | Origin TIPLOC (must be a calling point)            | CAMBDGE                   |
-| DEST_TIPLOC              | Destination TIPLOC                                 | KNGX                      |
-| MIN_AFTER_MINUTES        | Minimum minutes from now before considering trains | 20                        |
-| WINDOW_MINUTES           | Size of search window (minutes)                    | 60                        |
-| UPDATE_INTERVAL_MS       | Polling interval                                   | 60000                     |
-| STATUS_DEVICE_NAME       | Override Mode Select endpoint name                 | CAMBDGE-KNGX Train Status |
-| DELAY_DEVICE_NAME        | Override delay sensor name                         | CAMBDGE-KNGX Train Delay  |
-| LOG_LEVEL                | error                                              | warn                      | info | debug | info |
-| MATTER_LOG_FORMAT        | ansi                                               | plain                     | html | ansi  |
-| DISCRIMINATOR / PASSCODE | Matter commissioning values                        | 3840 / 20202021           |
+| Variable                 | Description                                                   | Example                   |
+| ------------------------ | ------------------------------------------------------------- | ------------------------- |
+| RTT_USER / RTT_PASS      | RTT API credentials                                           | demo / secret             |
+| ORIGIN_TIPLOC            | Origin TIPLOC (must be a calling point)                       | CAMBDGE                   |
+| DEST_TIPLOC              | Destination TIPLOC                                            | KNGX                      |
+| MIN_AFTER_MINUTES        | Minimum minutes from now before considering trains            | 20                        |
+| WINDOW_MINUTES           | Size of search window (minutes)                               | 60                        |
+| UPDATE_INTERVAL_MS       | Polling interval                                              | 60000                     |
+| USE_BRIDGE               | `true` = bridge device; `false` = expose endpoints directly   | true                      |
+| PRIMARY_ENDPOINT         | When not bridged, which device to expose: `mode`/`airQuality` | mode                      |
+| STATUS_DEVICE_NAME       | Override Mode Select endpoint name                            | CAMBDGE-KNGX Train Status |
+| DELAY_DEVICE_NAME        | Override delay sensor name                                    | CAMBDGE-KNGX Train Delay  |
+| AIR_QUALITY_DEVICE_NAME  | Override air quality endpoint name                            | CAMBDGE-KNGX Air Quality  |
+| LOG_LEVEL                | Global log level: error, warn, info, debug                    | info                      |
+| MATTER_LOG_FORMAT        | Log format for matter.js: ansi, plain, html                   | ansi                      |
+| DISCRIMINATOR / PASSCODE | Matter commissioning values                                   | 3840 / 20202021           |
 
 ## 6. Train Selection Logic
 
@@ -213,7 +217,7 @@ Use the mode state in Matter automations:
 
 ### Testing & Deployment
 
-- `tests/`: Comprehensive Jest test suite (168 tests)
+- `tests/`: Comprehensive Jest test suite
 - `docker/`: Container assets (Dockerfile, docker-compose, entrypoint)
 - `scripts/`: Build and utility scripts
 - `docs/`: Additional documentation and guides (includes `LOGGING.md`)

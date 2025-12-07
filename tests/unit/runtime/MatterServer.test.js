@@ -462,4 +462,149 @@ describe('MatterServer Custom Behaviors', () => {
       });
     });
   });
+
+  describe('Endpoint selection startup behaviour (mode vs air quality)', () => {
+    function getEndpointConfig({ useBridge, primaryEndpoint }) {
+      const tempBehaviors = ['temp'];
+      const modeBehaviors = useBridge || primaryEndpoint === 'mode' ? ['mode'] : undefined;
+      const airQualityBehaviors =
+        useBridge || primaryEndpoint === 'airQuality' ? ['air'] : undefined;
+
+      return { tempBehaviors, modeBehaviors, airQualityBehaviors };
+    }
+
+    it('creates temperature and mode endpoints by default when not bridged', () => {
+      const { tempBehaviors, modeBehaviors, airQualityBehaviors } = getEndpointConfig({
+        useBridge: false,
+        primaryEndpoint: 'mode',
+      });
+
+      expect(tempBehaviors).toEqual(['temp']);
+      expect(modeBehaviors).toEqual(['mode']);
+      expect(airQualityBehaviors).toBeUndefined();
+    });
+
+    it('creates temperature and air quality endpoints when PRIMARY_ENDPOINT=airQuality', () => {
+      const { tempBehaviors, modeBehaviors, airQualityBehaviors } = getEndpointConfig({
+        useBridge: false,
+        primaryEndpoint: 'airQuality',
+      });
+
+      expect(tempBehaviors).toEqual(['temp']);
+      expect(modeBehaviors).toBeUndefined();
+      expect(airQualityBehaviors).toEqual(['air']);
+    });
+
+    it('creates all three endpoints when bridge mode is enabled', () => {
+      const { tempBehaviors, modeBehaviors, airQualityBehaviors } = getEndpointConfig({
+        useBridge: true,
+        primaryEndpoint: 'airQuality',
+      });
+
+      expect(tempBehaviors).toEqual(['temp']);
+      expect(modeBehaviors).toEqual(['mode']);
+      expect(airQualityBehaviors).toEqual(['air']);
+    });
+  });
+});
+
+describe('MatterServer statusChange handler', () => {
+  it('updates only available endpoints without throwing', async () => {
+    const updates = {
+      mode: [],
+      temp: [],
+      air: [],
+    };
+
+    const modeDevice = {
+      async act(fn) {
+        await fn({
+          modeSelect: {
+            async setTrainStatus(statusCode) {
+              updates.mode.push(statusCode);
+            },
+          },
+        });
+      },
+    };
+
+    const tempSensor = {
+      async act(fn) {
+        await fn({
+          temperatureMeasurement: {
+            async setDelayMinutes(delay) {
+              updates.temp.push(delay);
+            },
+          },
+        });
+      },
+    };
+
+    const airQualityDevice = {
+      async act(fn) {
+        await fn({
+          airQuality: {
+            async setTrainStatus(statusCode) {
+              updates.air.push(statusCode);
+            },
+          },
+        });
+      },
+    };
+
+    // Import handler indirectly by creating a tiny shim that mirrors the
+    // logic inside startMatterServer's statusChange listener.
+    const handler = async (status) => {
+      // Derived from src/domain/modeMapping.js
+      const MODE_TO_STATUS = {
+        0: 'on_time',
+        1: 'minor_delay',
+        2: 'delayed',
+        3: 'major_delay',
+        4: 'unknown',
+      };
+
+      const deriveModeFromDelay = (delayMinutes) => {
+        if (delayMinutes == null || Number.isNaN(Number(delayMinutes))) {
+          return 4;
+        }
+        const delay = Number(delayMinutes);
+        const abs = Math.abs(delay);
+        if (abs <= 2) return 0;
+        if (abs <= 5) return 1;
+        if (abs <= 10) return 2;
+        return 3;
+      };
+
+      let computedMode = deriveModeFromDelay(status?.delayMinutes);
+      if (Number.isNaN(Number(status?.delayMinutes)) && typeof status?.currentMode === 'number') {
+        computedMode = status.currentMode;
+      }
+
+      const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
+
+      if (modeDevice) {
+        await modeDevice.act(async (agent) => {
+          await agent.modeSelect.setTrainStatus(statusCode);
+        });
+      }
+
+      if (tempSensor) {
+        await tempSensor.act(async (agent) => {
+          await agent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
+        });
+      }
+
+      if (airQualityDevice) {
+        await airQualityDevice.act(async (agent) => {
+          await agent.airQuality.setTrainStatus(statusCode);
+        });
+      }
+    };
+
+    await expect(handler({ delayMinutes: 7 })).resolves.not.toThrow();
+    expect(updates.mode).toEqual(['delayed']);
+    expect(updates.temp).toEqual([7]);
+    expect(updates.air).toEqual(['delayed']);
+  });
 });

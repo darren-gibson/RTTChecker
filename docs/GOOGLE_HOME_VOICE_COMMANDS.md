@@ -22,6 +22,17 @@ Interpretation:
 
 Rename devices for shorter phrases (env vars or in-app).
 
+## Air Quality
+
+```text
+Hey Google, what's the air quality of <device name>?
+Hey Google, is <device name> good or bad?
+```
+
+Responses like "Good", "Fair", "Moderate", or "Poor" are mapped from
+real-time train status. This is most useful when the Air Quality Sensor is
+exposed as the primary endpoint or via a bridge.
+
 ## Status (Mode)
 
 ```text

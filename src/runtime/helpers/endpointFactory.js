@@ -11,15 +11,19 @@ export async function createEndpoints(node, { tempBehaviors, modeBehaviors, airQ
     number: 1,
   });
 
-  const modeDevice = await addEndpoint(node, ModeSelectDevice, modeBehaviors, {
-    id: 'mode',
-    number: 2,
-  });
+  const modeDevice = modeBehaviors
+    ? await addEndpoint(node, ModeSelectDevice, modeBehaviors, {
+        id: 'mode',
+        number: 2,
+      })
+    : undefined;
 
-  const airQualityDevice = await addEndpoint(node, AirQualitySensorDevice, airQualityBehaviors, {
-    id: 'airquality',
-    number: 3,
-  });
+  const airQualityDevice = airQualityBehaviors
+    ? await addEndpoint(node, AirQualitySensorDevice, airQualityBehaviors, {
+        id: 'airquality',
+        number: 3,
+      })
+    : undefined;
 
   return { tempSensor, modeDevice, airQualityDevice };
 }
