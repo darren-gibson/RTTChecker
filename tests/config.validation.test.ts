@@ -227,9 +227,9 @@ describe('config validation integration', () => {
         throw new Error('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(ConfigurationError);
-        expect(error.message).toContain('ORIGIN_TIPLOC');
-        expect(error.message).toContain('PORT');
-        expect(error.message).toContain('DISCRIMINATOR');
+        expect((error as Error).message).toContain('ORIGIN_TIPLOC');
+        expect((error as Error).message).toContain('PORT');
+        expect((error as Error).message).toContain('DISCRIMINATOR');
       }
     });
   });

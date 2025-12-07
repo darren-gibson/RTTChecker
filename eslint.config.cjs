@@ -30,7 +30,7 @@ module.exports = [
     },
   },
   {
-    files: ['tests/**/*.js'],
+    files: ['tests/**/*.ts'],
     languageOptions: {
       globals: {
         ...globals.jest,

@@ -7,7 +7,7 @@ node_modules/
 # Test files
 tests/
 coverage/
-*.test.js
+*.test.ts
 jest.config.cjs
 
 # Development files
