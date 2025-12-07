@@ -6,6 +6,17 @@
 import { z } from 'zod';
 
 import { ConfigurationError } from './errors.js';
+import {
+  isTiploc,
+  isValidPort,
+  isValidDiscriminator,
+  isValidPasscode,
+  isValidDeviceName,
+  isValidLogLevel,
+  isValidMatterLogFormat,
+  sanitizeTiploc,
+  clampValue,
+} from './utils/validation.js';
 
 export const config = {
   // RTT API credentials
@@ -14,28 +25,28 @@ export const config = {
     pass: process.env.RTT_PASS,
   },
 
-  // Train search defaults
+  // Train search defaults (sanitize TIPLOCs and clamp numeric values)
   train: {
-    originTiploc: process.env.ORIGIN_TIPLOC || 'CAMBDGE',
-    destTiploc: process.env.DEST_TIPLOC || 'KNGX',
-    minAfterMinutes: Number(process.env.MIN_AFTER_MINUTES || 20),
-    windowMinutes: Number(process.env.WINDOW_MINUTES || 60),
+    originTiploc: sanitizeTiploc(process.env.ORIGIN_TIPLOC || 'CAMBDGE'),
+    destTiploc: sanitizeTiploc(process.env.DEST_TIPLOC || 'KNGX'),
+    minAfterMinutes: clampValue(Number(process.env.MIN_AFTER_MINUTES || 20), 0, 1440),
+    windowMinutes: clampValue(Number(process.env.WINDOW_MINUTES || 60), 1, 1440),
   },
 
-  // Server configuration (for testing/debugging)
+  // Server configuration (for testing/debugging, clamp port to valid range)
   server: {
-    port: Number(process.env.PORT || 8080),
+    port: clampValue(Number(process.env.PORT || 8080), 1, 65535),
     nodeEnv: process.env.NODE_ENV,
   },
 
-  // Matter device configuration
+  // Matter device configuration (clamp discriminator and passcode to valid ranges)
   matter: {
     deviceName: process.env.DEVICE_NAME || 'Train Status',
     vendorName: process.env.VENDOR_NAME || 'RTT Checker',
     productName: process.env.PRODUCT_NAME || 'Train Status Monitor',
     serialNumber: process.env.SERIAL_NUMBER || 'RTT-001',
-    discriminator: Number(process.env.DISCRIMINATOR || 3840),
-    passcode: Number(process.env.PASSCODE || 20202021),
+    discriminator: clampValue(Number(process.env.DISCRIMINATOR || 3840), 0, 4095),
+    passcode: clampValue(Number(process.env.PASSCODE || 20202021), 20000000, 99999999),
     // Use a Bridge (Aggregator) to group endpoints under a single device.
     // Set USE_BRIDGE=false to expose endpoints directly without a bridge in controllers like Google Home.
     useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false',
@@ -85,47 +96,124 @@ export const isTestEnv = () => config.server.nodeEnv === 'test';
 export const isProductionEnv = () => config.server.nodeEnv === 'production';
 
 /**
- * Zod schema for environment variable validation
+ * Zod schema for environment variable validation with custom refinements
  */
-const envSchema = z.object({
-  // Required RTT API credentials
-  RTT_USER: z.string().min(1, 'RTT_USER must not be empty'),
-  RTT_PASS: z.string().min(1, 'RTT_PASS must not be empty'),
+const envSchema = z
+  .object({
+    // Required RTT API credentials
+    RTT_USER: z.string().min(1, 'RTT_USER must not be empty'),
+    RTT_PASS: z.string().min(1, 'RTT_PASS must not be empty'),
 
-  // Optional train search configuration
-  ORIGIN_TIPLOC: z
-    .string()
-    .regex(/^[A-Z0-9]{3,8}$/, 'ORIGIN_TIPLOC must be 3-8 uppercase alphanumeric characters')
-    .optional(),
-  DEST_TIPLOC: z
-    .string()
-    .regex(/^[A-Z0-9]{3,8}$/, 'DEST_TIPLOC must be 3-8 uppercase alphanumeric characters')
-    .optional(),
-  MIN_AFTER_MINUTES: z.coerce.number().int().min(0).max(1440).optional(),
-  WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).optional(),
+    // Optional train search configuration
+    ORIGIN_TIPLOC: z.string().optional(),
+    DEST_TIPLOC: z.string().optional(),
+    MIN_AFTER_MINUTES: z.coerce.number().int().min(0).max(1440).optional(),
+    WINDOW_MINUTES: z.coerce.number().int().min(1).max(1440).optional(),
 
-  // Optional server configuration
-  PORT: z.coerce.number().int().min(1).max(65535).optional(),
-  NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
+    // Optional server configuration
+    PORT: z.coerce.number().int().optional(),
+    NODE_ENV: z.enum(['development', 'production', 'test']).optional(),
 
-  // Optional Matter device configuration
-  DEVICE_NAME: z.string().max(64).optional(),
-  VENDOR_NAME: z.string().max(64).optional(),
-  PRODUCT_NAME: z.string().max(64).optional(),
-  SERIAL_NUMBER: z.string().max(32).optional(),
-  DISCRIMINATOR: z.coerce.number().int().min(0).max(4095).optional(),
-  PASSCODE: z.coerce.number().int().min(1).max(99999999).optional(),
-  USE_BRIDGE: z.enum(['true', 'false']).optional(),
-  STATUS_DEVICE_NAME: z.string().max(64).optional(),
-  DELAY_DEVICE_NAME: z.string().max(64).optional(),
-  AIR_QUALITY_DEVICE_NAME: z.string().max(64).optional(),
-  PRIMARY_ENDPOINT: z.enum(['mode', 'airQuality']).optional(),
+    // Optional Matter device configuration
+    DEVICE_NAME: z.string().optional(),
+    VENDOR_NAME: z.string().max(64).optional(),
+    PRODUCT_NAME: z.string().max(64).optional(),
+    SERIAL_NUMBER: z.string().max(32).optional(),
+    DISCRIMINATOR: z.coerce.number().int().optional(),
+    PASSCODE: z.coerce.number().int().optional(),
+    USE_BRIDGE: z.enum(['true', 'false']).optional(),
+    STATUS_DEVICE_NAME: z.string().optional(),
+    DELAY_DEVICE_NAME: z.string().optional(),
+    AIR_QUALITY_DEVICE_NAME: z.string().optional(),
+    PRIMARY_ENDPOINT: z.enum(['mode', 'airQuality']).optional(),
 
-  // Optional logging configuration
-  LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'silent']).optional(),
-  MATTER_LOG_FORMAT: z.enum(['ansi', 'plain', 'html']).optional(),
-  EXIT_AFTER_MS: z.coerce.number().int().min(0).optional(),
-});
+    // Optional logging configuration
+    LOG_LEVEL: z.string().optional(),
+    MATTER_LOG_FORMAT: z.string().optional(),
+    EXIT_AFTER_MS: z.coerce.number().int().min(0).optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Validate TIPLOCs with custom validator
+    if (data.ORIGIN_TIPLOC !== undefined) {
+      const sanitized = sanitizeTiploc(data.ORIGIN_TIPLOC);
+      if (!isTiploc(sanitized)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['ORIGIN_TIPLOC'],
+          message: 'Must be a valid TIPLOC (1-7 uppercase alphanumeric characters)',
+        });
+      }
+    }
+
+    if (data.DEST_TIPLOC !== undefined) {
+      const sanitized = sanitizeTiploc(data.DEST_TIPLOC);
+      if (!isTiploc(sanitized)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['DEST_TIPLOC'],
+          message: 'Must be a valid TIPLOC (1-7 uppercase alphanumeric characters)',
+        });
+      }
+    }
+
+    // Validate port with custom validator
+    if (data.PORT !== undefined && !isValidPort(data.PORT)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PORT'],
+        message: 'Must be a valid port number (1-65535)',
+      });
+    }
+
+    // Validate discriminator with custom validator
+    if (data.DISCRIMINATOR !== undefined && !isValidDiscriminator(data.DISCRIMINATOR)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['DISCRIMINATOR'],
+        message: 'Must be a valid Matter discriminator (0-4095)',
+      });
+    }
+
+    // Validate passcode with custom validator
+    if (data.PASSCODE !== undefined && !isValidPasscode(data.PASSCODE)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['PASSCODE'],
+        message:
+          'Must be a valid Matter passcode (20000000-99999999, excluding reserved test codes)',
+      });
+    }
+
+    // Validate device names with custom validator
+    const deviceNameFields = ['DEVICE_NAME', 'STATUS_DEVICE_NAME', 'DELAY_DEVICE_NAME', 'AIR_QUALITY_DEVICE_NAME'];
+    for (const field of deviceNameFields) {
+      if (data[field] !== undefined && !isValidDeviceName(data[field])) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [field],
+          message: 'Must be 1-32 printable ASCII characters without leading/trailing spaces',
+        });
+      }
+    }
+
+    // Validate log level with custom validator
+    if (data.LOG_LEVEL !== undefined && !isValidLogLevel(data.LOG_LEVEL)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['LOG_LEVEL'],
+        message: 'Must be a valid Pino log level (trace, debug, info, warn, error, fatal, silent)',
+      });
+    }
+
+    // Validate Matter log format with custom validator
+    if (data.MATTER_LOG_FORMAT !== undefined && !isValidMatterLogFormat(data.MATTER_LOG_FORMAT)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['MATTER_LOG_FORMAT'],
+        message: 'Must be a valid Matter log format (ansi, plain, html)',
+      });
+    }
+  });
 
 /**
  * Validate required configuration
