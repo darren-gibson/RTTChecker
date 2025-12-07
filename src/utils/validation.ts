@@ -143,7 +143,12 @@ export function sanitizeTiploc(value: unknown): string | null {
  * clampValue(-10, 0, 100, 50) // 0
  * clampValue(NaN, 0, 100, 50) // 50
  */
-export function clampValue(value: unknown, min: number, max: number, defaultValue?: number): number {
+export function clampValue(
+  value: unknown,
+  min: number,
+  max: number,
+  defaultValue?: number
+): number {
   if (typeof value !== 'number' || Number.isNaN(value)) {
     return defaultValue ?? min;
   }

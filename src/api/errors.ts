@@ -25,7 +25,7 @@ export class RTTApiError extends RTTCheckerError {
   isAuthError(): boolean {
     return this.statusCode === 401 || this.statusCode === 403;
   }
-  
+
   isRetryable(): boolean {
     return (this.statusCode !== undefined && this.statusCode >= 500) || !this.statusCode;
   }

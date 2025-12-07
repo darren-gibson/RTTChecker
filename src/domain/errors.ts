@@ -23,7 +23,7 @@ export class NoTrainFoundError extends RTTCheckerError {
     this.searchWindow = options.searchWindow;
     this.candidateCount = options.candidateCount || 0;
   }
-  
+
   override toJSON(): Record<string, unknown> {
     return {
       ...super.toJSON(),
@@ -52,7 +52,7 @@ export class InvalidTrainDataError extends RTTCheckerError {
     this.serviceId = options.serviceId;
     this.missingField = options.missingField;
   }
-  
+
   override toJSON(): Record<string, unknown> {
     return { ...super.toJSON(), serviceId: this.serviceId, missingField: this.missingField };
   }

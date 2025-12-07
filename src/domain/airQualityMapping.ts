@@ -6,6 +6,8 @@
  * @see {@link https://github.com/project-chip/connectedhomeip/blob/master/src/app/clusters/air-quality-server/air-quality-server.h}
  */
 
+import type { TrainStatusType } from '../constants.js';
+
 /**
  * Maps train status codes to Matter AirQualityEnum values
  *
@@ -16,25 +18,21 @@
  * - major_delay: Poor (4) - Major delay (11+ min) → Red in Google Home
  * - unknown: VeryPoor (5) - Unknown status → Dark Red in Google Home
  * - critical: VeryPoor (5) - Critical status → Dark Red in Google Home
- *
- * @type {Object.<string, number>}
  */
-export const STATUS_TO_AIR_QUALITY = {
+export const STATUS_TO_AIR_QUALITY: Record<TrainStatusType | 'critical', number> = {
   on_time: 1, // Good - Green
   minor_delay: 2, // Fair - Yellow
   delayed: 3, // Moderate - Orange
   major_delay: 4, // Poor - Red
   unknown: 5, // VeryPoor - Dark Red
   critical: 5, // VeryPoor - Dark Red
-};
+} as const;
 
 /**
  * Air Quality Enum values from Matter specification
  *
  * These correspond to the AirQualityEnum in the Matter specification.
  * Each value has an associated color in Google Home's display.
- *
- * @enum {number}
  */
 export const AirQuality = {
   /** Unknown air quality - Gray */
@@ -51,14 +49,12 @@ export const AirQuality = {
   VeryPoor: 5,
   /** Extremely poor air quality - Requires FairAirQuality feature */
   ExtremelyPoor: 6,
-};
+} as const;
 
 /**
  * Reverse mapping from AirQuality enum values to descriptive names
- *
- * @type {Object.<number, string>}
  */
-export const AIR_QUALITY_NAMES = {
+export const AIR_QUALITY_NAMES: Record<number, string> = {
   0: 'Unknown',
   1: 'Good',
   2: 'Fair',
@@ -66,14 +62,12 @@ export const AIR_QUALITY_NAMES = {
   4: 'Poor',
   5: 'VeryPoor',
   6: 'ExtremelyPoor',
-};
+} as const;
 
 /**
  * Maps AirQuality enum values to display colors in Google Home
- *
- * @type {Object.<number, string>}
  */
-export const AIR_QUALITY_COLORS = {
+export const AIR_QUALITY_COLORS: Record<number, string> = {
   0: 'gray',
   1: 'green',
   2: 'yellow',
@@ -81,4 +75,4 @@ export const AIR_QUALITY_COLORS = {
   4: 'red',
   5: 'dark red',
   6: 'dark red',
-};
+} as const;

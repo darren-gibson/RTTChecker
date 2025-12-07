@@ -1,7 +1,7 @@
 // Mode/status mapping utilities
 // Keep domain policy separate from runtime wiring
 
-import { Timing } from '../constants.js';
+import { Timing, TrainStatusType } from '../constants.js';
 
 export const STATUS_TO_MODE = {
   on_time: 0,
@@ -9,9 +9,9 @@ export const STATUS_TO_MODE = {
   delayed: 2,
   major_delay: 3,
   unknown: 4,
-};
+} as const;
 
-export const MODE_TO_STATUS = {
+export const MODE_TO_STATUS: Record<number, TrainStatusType> = {
   0: 'on_time',
   1: 'minor_delay',
   2: 'delayed',
@@ -19,8 +19,12 @@ export const MODE_TO_STATUS = {
   4: 'unknown',
 };
 
-// Derive a mode integer from delay minutes (can be negative for early)
-export function deriveModeFromDelay(delayMinutes) {
+/**
+ * Derive a mode integer from delay minutes (can be negative for early)
+ * @param delayMinutes - Delay in minutes (positive for late, negative for early)
+ * @returns Mode integer corresponding to the delay magnitude
+ */
+export function deriveModeFromDelay(delayMinutes: number | null | undefined): number {
   if (delayMinutes == null || Number.isNaN(Number(delayMinutes))) {
     return STATUS_TO_MODE.unknown;
   }

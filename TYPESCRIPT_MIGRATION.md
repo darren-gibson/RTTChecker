@@ -3,6 +3,7 @@
 ## ✅ Completed
 
 ### Phase 1: Setup and Initial Conversion (DONE)
+
 - ✅ Created `feature/typescript-migration` branch
 - ✅ Installed TypeScript dependencies:
   - `typescript`, `@types/node`, `@types/jest`, `@types/pino`
@@ -14,6 +15,7 @@
 - ✅ Converted `src/utils/validation.ts` with type guards
 
 ### Files Renamed (34 files)
+
 All files in `src/` and `index.ts` have been renamed to `.ts`
 
 ## 🚧 In Progress
@@ -21,6 +23,7 @@ All files in `src/` and `index.ts` have been renamed to `.ts`
 ### Phase 2: Fix TypeScript Compilation Errors (~50 errors)
 
 **Error Categories:**
+
 1. **Process.env type errors** (~20 errors in `src/config.ts`)
    - Need to properly type `process.env` access
    - Consider creating environment variable types
@@ -47,23 +50,25 @@ All files in `src/` and `index.ts` have been renamed to `.ts`
 Create `src/types/` directory with:
 
 1. **`src/types/config.ts`**
+
    ```typescript
    export interface RTTConfig {
      user?: string;
      pass?: string;
    }
-   
+
    export interface TrainConfig {
      originTiploc: string;
      destTiploc: string;
      minAfterMinutes: number;
      windowMinutes: number;
    }
-   
+
    // ... etc
    ```
 
 2. **`src/types/api.ts`**
+
    ```typescript
    export interface RTTApiOptions {
      user: string;
@@ -71,7 +76,7 @@ Create `src/types/` directory with:
      fetchImpl?: typeof fetch;
      maxRetries?: number;
    }
-   
+
    // ... etc
    ```
 
@@ -82,6 +87,7 @@ Create `src/types/` directory with:
 ### Phase 4: Fix Remaining Files
 
 Priority order (easiest to hardest):
+
 1. ✅ `src/utils/validation.ts` (DONE)
 2. ✅ `src/constants.ts` (DONE)
 3. `src/utils/timeUtils.ts`
@@ -113,6 +119,7 @@ Priority order (easiest to hardest):
 ### Phase 6: Update Build Configuration
 
 1. Update `package.json` scripts:
+
    ```json
    {
      "scripts": {
@@ -175,6 +182,7 @@ npm run typecheck
 ## 🔄 Iterative Approach
 
 Work on 3-5 files at a time:
+
 1. Fix compilation errors for those files
 2. Commit changes
 3. Move to next batch

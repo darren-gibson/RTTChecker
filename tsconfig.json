@@ -5,7 +5,7 @@
     "lib": ["ES2022"],
     "module": "ES2022",
     "moduleResolution": "node",
-    
+
     /* Type Checking */
     "strict": true,
     "noImplicitAny": true,
@@ -22,12 +22,12 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    
+
     /* Modules */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    
+
     /* Emit */
     "outDir": "./dist",
     "rootDir": "./",
@@ -37,24 +37,14 @@
     "removeComments": false,
     "importHelpers": true,
     "downlevelIteration": true,
-    
+
     /* Interop Constraints */
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": false,
-    
+
     /* Skip Lib Check */
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-    "index.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "coverage",
-    "dist",
-    "docker",
-    "matter-storage"
-  ]
+  "include": ["src/**/*", "tests/**/*", "index.ts"],
+  "exclude": ["node_modules", "coverage", "dist", "docker", "matter-storage"]
 }

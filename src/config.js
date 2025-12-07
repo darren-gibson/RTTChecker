@@ -19,98 +19,103 @@ import {
   clampValue,
 } from './utils/validation.js';
 
-export interface RTTConfig {
-  user?: string;
-  pass?: string;
-}
+/**
+ * @typedef {Object} RTTConfig
+ * @property {string} [user] - RTT API username
+ * @property {string} [pass] - RTT API password
+ */
 
-export interface TrainConfig {
-  originTiploc: string | null;
-  destTiploc: string | null;
-  minAfterMinutes: number;
-  windowMinutes: number;
-}
+/**
+ * @typedef {Object} TrainConfig
+ * @property {string} originTiploc - Origin station TIPLOC code (1-7 uppercase alphanumeric)
+ * @property {string} destTiploc - Destination station TIPLOC code (1-7 uppercase alphanumeric)
+ * @property {number} minAfterMinutes - Minimum minutes after current time to search (0-1440)
+ * @property {number} windowMinutes - Search window duration in minutes (1-1440)
+ */
 
-export interface ServerConfig {
-  port: number;
-  nodeEnv?: string;
-}
+/**
+ * @typedef {Object} ServerConfig
+ * @property {number} port - HTTP server port (1-65535)
+ * @property {string} [nodeEnv] - Node environment ('development' | 'production' | 'test')
+ */
 
-export type PrimaryEndpoint = 'mode' | 'airQuality';
+/**
+ * @typedef {'mode' | 'airQuality'} PrimaryEndpoint
+ */
 
-export interface MatterConfig {
-  deviceName: string;
-  vendorName: string;
-  productName: string;
-  serialNumber: string;
-  discriminator: number;
-  passcode: number;
-  useBridge: boolean;
-  primaryEndpoint: PrimaryEndpoint;
-  statusDeviceName?: string;
-  delayDeviceName?: string;
-  airQualityDeviceName?: string;
-}
+/**
+ * @typedef {Object} MatterConfig
+ * @property {string} deviceName - Main Matter device name
+ * @property {string} vendorName - Vendor name (max 64 chars)
+ * @property {string} productName - Product name (max 64 chars)
+ * @property {string} serialNumber - Serial number (max 32 chars)
+ * @property {number} discriminator - Matter discriminator (0-4095)
+ * @property {number} passcode - Matter passcode (20000000-99999999)
+ * @property {boolean} useBridge - Whether to use Matter bridge/aggregator
+ * @property {PrimaryEndpoint} primaryEndpoint - Primary endpoint type
+ * @property {string} [statusDeviceName] - Status device name (set after initialization)
+ * @property {string} [delayDeviceName] - Delay device name (set after initialization)
+ * @property {string} [airQualityDeviceName] - Air quality device name (set after initialization)
+ */
 
-export interface Config {
-  rtt: RTTConfig;
-  train: TrainConfig;
-  server: ServerConfig;
-  matter: MatterConfig;
-}
-
-// Helper to safely access process.env with proper typing
-const env = process.env as Record<string, string | undefined>;
+/**
+ * @typedef {Object} Config
+ * @property {RTTConfig} rtt - RTT API configuration
+ * @property {TrainConfig} train - Train search configuration
+ * @property {ServerConfig} server - Server configuration
+ * @property {MatterConfig} matter - Matter device configuration
+ */
 
 /**
  * Application configuration object
+ * @type {Config}
  */
-export const config: Config = {
+export const config = {
   // RTT API credentials
   rtt: {
-    user: env['RTT_USER'],
-    pass: env['RTT_PASS'],
+    user: process.env.RTT_USER,
+    pass: process.env.RTT_PASS,
   },
 
   // Train search defaults (sanitize TIPLOCs and clamp numeric values)
   train: {
-    originTiploc: sanitizeTiploc(env['ORIGIN_TIPLOC'] || 'CAMBDGE'),
-    destTiploc: sanitizeTiploc(env['DEST_TIPLOC'] || 'KNGX'),
-    minAfterMinutes: clampValue(Number(env['MIN_AFTER_MINUTES'] || 20), 0, 1440),
-    windowMinutes: clampValue(Number(env['WINDOW_MINUTES'] || 60), 1, 1440),
+    originTiploc: sanitizeTiploc(process.env.ORIGIN_TIPLOC || 'CAMBDGE'),
+    destTiploc: sanitizeTiploc(process.env.DEST_TIPLOC || 'KNGX'),
+    minAfterMinutes: clampValue(Number(process.env.MIN_AFTER_MINUTES || 20), 0, 1440),
+    windowMinutes: clampValue(Number(process.env.WINDOW_MINUTES || 60), 1, 1440),
   },
 
   // Server configuration (for testing/debugging, clamp port to valid range)
   server: {
-    port: clampValue(Number(env['PORT'] || 8080), 1, 65535),
-    nodeEnv: env['NODE_ENV'],
+    port: clampValue(Number(process.env.PORT || 8080), 1, 65535),
+    nodeEnv: process.env.NODE_ENV,
   },
 
   // Matter device configuration (clamp discriminator and passcode to valid ranges)
   matter: {
-    deviceName: env['DEVICE_NAME'] || 'Train Status',
-    vendorName: env['VENDOR_NAME'] || 'RTT Checker',
-    productName: env['PRODUCT_NAME'] || 'Train Status Monitor',
-    serialNumber: env['SERIAL_NUMBER'] || 'RTT-001',
-    discriminator: clampValue(Number(env['DISCRIMINATOR'] || 3840), 0, 4095),
-    passcode: clampValue(Number(env['PASSCODE'] || 20202021), 20000000, 99999999),
+    deviceName: process.env.DEVICE_NAME || 'Train Status',
+    vendorName: process.env.VENDOR_NAME || 'RTT Checker',
+    productName: process.env.PRODUCT_NAME || 'Train Status Monitor',
+    serialNumber: process.env.SERIAL_NUMBER || 'RTT-001',
+    discriminator: clampValue(Number(process.env.DISCRIMINATOR || 3840), 0, 4095),
+    passcode: clampValue(Number(process.env.PASSCODE || 20202021), 20000000, 99999999),
     // Use a Bridge (Aggregator) to group endpoints under a single device.
     // Set USE_BRIDGE=false to expose endpoints directly without a bridge in controllers like Google Home.
-    useBridge: (env['USE_BRIDGE'] ?? 'true').toLowerCase() !== 'false',
+    useBridge: (process.env.USE_BRIDGE ?? 'true').toLowerCase() !== 'false',
     // Which visualisation endpoint to expose to controllers ("mode" or "airQuality").
     // This only affects which endpoint is presented as the primary device when not using a bridge.
     primaryEndpoint:
-      env['PRIMARY_ENDPOINT']?.toLowerCase() === 'airquality' ? 'airQuality' : 'mode',
+      process.env.PRIMARY_ENDPOINT?.toLowerCase() === 'airquality' ? 'airQuality' : 'mode',
   },
 };
 
 /**
  * Sanitize device name for Matter compatibility
  * Matter device names should be simple ASCII strings
- * @param name - Device name to sanitize
- * @returns Sanitized device name (max 64 chars, printable ASCII only)
+ * @param {string} name - Device name to sanitize
+ * @returns {string} Sanitized device name (max 64 chars, printable ASCII only)
  */
-function sanitizeDeviceName(name: string): string {
+function sanitizeDeviceName(name) {
   // Replace arrow with simple dash, limit to alphanumeric + spaces + basic punctuation
   return name
     .replace(/→/g, '-')
@@ -124,10 +129,14 @@ const defaultStatusName = `${config.train.originTiploc}-${config.train.destTiplo
 const defaultDelayName = `${config.train.originTiploc}-${config.train.destTiploc} Train Delay`;
 const defaultAirQualityName = `${config.train.originTiploc}-${config.train.destTiploc} Train Punctuality`;
 
-config.matter.statusDeviceName = sanitizeDeviceName(env['STATUS_DEVICE_NAME'] || defaultStatusName);
-config.matter.delayDeviceName = sanitizeDeviceName(env['DELAY_DEVICE_NAME'] || defaultDelayName);
+config.matter.statusDeviceName = sanitizeDeviceName(
+  process.env.STATUS_DEVICE_NAME || defaultStatusName
+);
+config.matter.delayDeviceName = sanitizeDeviceName(
+  process.env.DELAY_DEVICE_NAME || defaultDelayName
+);
 config.matter.airQualityDeviceName = sanitizeDeviceName(
-  env['AIR_QUALITY_DEVICE_NAME'] || defaultAirQualityName
+  process.env.AIR_QUALITY_DEVICE_NAME || defaultAirQualityName
 );
 
 /**
@@ -237,10 +246,9 @@ const envSchema = z
       'STATUS_DEVICE_NAME',
       'DELAY_DEVICE_NAME',
       'AIR_QUALITY_DEVICE_NAME',
-    ] as const;
+    ];
     for (const field of deviceNameFields) {
-      const value = data[field];
-      if (value !== undefined && !isValidDeviceName(value)) {
+      if (data[field] !== undefined && !isValidDeviceName(data[field])) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: [field],
@@ -270,16 +278,17 @@ const envSchema = z
 
 /**
  * Validate required configuration
- * @throws ConfigurationError If critical config is missing or invalid
+ * @throws {ConfigurationError} If critical config is missing or invalid
+ * @returns {void}
  */
-export function validateConfig(): void {
+export function validateConfig() {
   try {
     // Validate only the fields that are actually set or required
-    const envToValidate: Record<string, string | number | undefined> = {};
+    const envToValidate = {};
 
     // Always validate required fields
-    envToValidate['RTT_USER'] = env['RTT_USER'];
-    envToValidate['RTT_PASS'] = env['RTT_PASS'];
+    envToValidate.RTT_USER = process.env.RTT_USER;
+    envToValidate.RTT_PASS = process.env.RTT_PASS;
 
     // Add optional fields if they exist
     const optionalFields = [
@@ -301,11 +310,11 @@ export function validateConfig(): void {
       'LOG_LEVEL',
       'MATTER_LOG_FORMAT',
       'EXIT_AFTER_MS',
-    ] as const;
+    ];
 
     for (const field of optionalFields) {
-      if (env[field] !== undefined) {
-        envToValidate[field] = env[field];
+      if (process.env[field] !== undefined) {
+        envToValidate[field] = process.env[field];
       }
     }
 
@@ -327,10 +336,10 @@ export function validateConfig(): void {
       ].join('\n');
 
       throw new ConfigurationError(msg, {
+        validationErrors: error.issues,
         context: {
           rttUser: config.rtt.user ? '(set)' : '(not set)',
           rttPass: config.rtt.pass ? '(set)' : '(not set)',
-          validationErrors: error.issues,
         },
       });
     }

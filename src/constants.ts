@@ -10,7 +10,7 @@ export const TrainStatus = {
   UNKNOWN: 'unknown',
 } as const;
 
-export type TrainStatusType = typeof TrainStatus[keyof typeof TrainStatus];
+export type TrainStatusType = (typeof TrainStatus)[keyof typeof TrainStatus];
 
 /**
  * Matter device constants for Mode Select cluster

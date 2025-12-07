@@ -1,24 +1,30 @@
 /**
  * Domain logic for train status calculation.
  * Pure business logic without external dependencies.
- *
- * @typedef {import('../types.js').RTTService} RTTService
- * @typedef {import('../types.js').RTTLocation} RTTLocation
  */
 
-import { TrainStatus, Timing } from '../constants.js';
+import { TrainStatus, TrainStatusType, Timing } from '../constants.js';
 import { hhmmToMins } from '../utils/timeUtils.js';
+import type { RTTService } from '../api/rttApiClient.js';
+
+interface LocationDetail {
+  cancelReasonCode?: string;
+  realtimeGbttDepartureLateness?: number;
+  realtimeWttDepartureLateness?: number;
+  gbttBookedDeparture?: string;
+  realtimeDeparture?: string;
+}
 
 /**
  * Calculate on-time status based on service lateness.
  * Maps lateness in minutes to categorical status (on_time, minor_delay, etc.).
  *
- * @param {RTTService} service - Train service with location and timing details
- * @returns {string} Status constant from TrainStatus enum
+ * @param service - Train service with location and timing details
+ * @returns Status constant from TrainStatus enum
  */
-export function calculateOnTimeStatus(service) {
+export function calculateOnTimeStatus(service: RTTService | null | undefined): TrainStatusType {
   if (!service) return TrainStatus.UNKNOWN;
-  const loc = service.locationDetail || service;
+  const loc: LocationDetail = (service.locationDetail || service) as LocationDetail;
   if (loc.cancelReasonCode) return TrainStatus.MAJOR_DELAY;
 
   // Derive lateness: prefer explicit fields, fallback to booked vs realtime

@@ -98,13 +98,13 @@ export async function rttSearch(
 
   const RTT_USER = user || config.rtt.user;
   const RTT_PASS = pass || config.rtt.pass;
-  
+
   if (!RTT_USER || !RTT_PASS) {
     throw new RTTApiError('RTT API credentials not configured', {
       context: { from, to, date },
     });
   }
-  
+
   const url = `https://api.rtt.io/api/v1/json/search/${from}/to/${to}/${date}`;
 
   try {
