@@ -1,6 +1,7 @@
 /**
  * Application configuration
  * Loads and validates environment variables with sensible defaults
+ * @module config
  */
 
 import { z } from 'zod';
@@ -18,6 +19,57 @@ import {
   clampValue,
 } from './utils/validation.js';
 
+/**
+ * @typedef {Object} RTTConfig
+ * @property {string} [user] - RTT API username
+ * @property {string} [pass] - RTT API password
+ */
+
+/**
+ * @typedef {Object} TrainConfig
+ * @property {string} originTiploc - Origin station TIPLOC code (1-7 uppercase alphanumeric)
+ * @property {string} destTiploc - Destination station TIPLOC code (1-7 uppercase alphanumeric)
+ * @property {number} minAfterMinutes - Minimum minutes after current time to search (0-1440)
+ * @property {number} windowMinutes - Search window duration in minutes (1-1440)
+ */
+
+/**
+ * @typedef {Object} ServerConfig
+ * @property {number} port - HTTP server port (1-65535)
+ * @property {string} [nodeEnv] - Node environment ('development' | 'production' | 'test')
+ */
+
+/**
+ * @typedef {'mode' | 'airQuality'} PrimaryEndpoint
+ */
+
+/**
+ * @typedef {Object} MatterConfig
+ * @property {string} deviceName - Main Matter device name
+ * @property {string} vendorName - Vendor name (max 64 chars)
+ * @property {string} productName - Product name (max 64 chars)
+ * @property {string} serialNumber - Serial number (max 32 chars)
+ * @property {number} discriminator - Matter discriminator (0-4095)
+ * @property {number} passcode - Matter passcode (20000000-99999999)
+ * @property {boolean} useBridge - Whether to use Matter bridge/aggregator
+ * @property {PrimaryEndpoint} primaryEndpoint - Primary endpoint type
+ * @property {string} [statusDeviceName] - Status device name (set after initialization)
+ * @property {string} [delayDeviceName] - Delay device name (set after initialization)
+ * @property {string} [airQualityDeviceName] - Air quality device name (set after initialization)
+ */
+
+/**
+ * @typedef {Object} Config
+ * @property {RTTConfig} rtt - RTT API configuration
+ * @property {TrainConfig} train - Train search configuration
+ * @property {ServerConfig} server - Server configuration
+ * @property {MatterConfig} matter - Matter device configuration
+ */
+
+/**
+ * Application configuration object
+ * @type {Config}
+ */
 export const config = {
   // RTT API credentials
   rtt: {
@@ -60,6 +112,8 @@ export const config = {
 /**
  * Sanitize device name for Matter compatibility
  * Matter device names should be simple ASCII strings
+ * @param {string} name - Device name to sanitize
+ * @returns {string} Sanitized device name (max 64 chars, printable ASCII only)
  */
 function sanitizeDeviceName(name) {
   // Replace arrow with simple dash, limit to alphanumeric + spaces + basic punctuation
@@ -87,11 +141,13 @@ config.matter.airQualityDeviceName = sanitizeDeviceName(
 
 /**
  * Check if running in test environment
+ * @returns {boolean} True if NODE_ENV is 'test'
  */
 export const isTestEnv = () => config.server.nodeEnv === 'test';
 
 /**
  * Check if running in production environment
+ * @returns {boolean} True if NODE_ENV is 'production'
  */
 export const isProductionEnv = () => config.server.nodeEnv === 'production';
 
@@ -185,7 +241,12 @@ const envSchema = z
     }
 
     // Validate device names with custom validator
-    const deviceNameFields = ['DEVICE_NAME', 'STATUS_DEVICE_NAME', 'DELAY_DEVICE_NAME', 'AIR_QUALITY_DEVICE_NAME'];
+    const deviceNameFields = [
+      'DEVICE_NAME',
+      'STATUS_DEVICE_NAME',
+      'DELAY_DEVICE_NAME',
+      'AIR_QUALITY_DEVICE_NAME',
+    ];
     for (const field of deviceNameFields) {
       if (data[field] !== undefined && !isValidDeviceName(data[field])) {
         ctx.addIssue({
@@ -217,7 +278,8 @@ const envSchema = z
 
 /**
  * Validate required configuration
- * Throws ConfigurationError if critical config is missing or invalid
+ * @throws {ConfigurationError} If critical config is missing or invalid
+ * @returns {void}
  */
 export function validateConfig() {
   try {
