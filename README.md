@@ -277,7 +277,13 @@ The repository is organized for clear separation of concerns:
 │   │   ├── TrainStatusTemperatureSensor.js
 │   │   └── TrainStatusModeDevice.js
 │   ├── runtime/              # Server orchestration
-│   │   └── MatterServer.js
+│   │   ├── MatterServer.js
+│   │   ├── behaviors/        # Custom Matter behaviors
+│   │   │   ├── TrainTemperatureServer.js
+│   │   │   ├── TrainStatusModeServer.js
+│   │   │   ├── TrainStatusAirQualityServer.js
+│   │   │   └── baseBehaviorHelpers.js  # Shared behavior utilities
+│   │   └── helpers/          # Runtime helper functions
 │   ├── utils/                # Utilities
 │   │   ├── logger.js
 │   │   └── timeUtils.js
@@ -285,14 +291,19 @@ The repository is organized for clear separation of concerns:
 │   ├── constants.js          # Application constants
 │   ├── errors.js             # Custom error classes
 │   └── types.js              # JSDoc type definitions
-├── tests/                    # Jest test suite (143 tests)
+├── tests/                    # Jest test suite (371 tests)
+│   ├── bdd/                  # BDD acceptance tests (jest-cucumber)
 │   ├── integration/          # End-to-end scenarios
 │   ├── unit/                 # Unit tests
 │   │   ├── api/              # API client tests
 │   │   ├── domain/           # Domain logic tests
 │   │   ├── devices/          # Device tests
+│   │   ├── runtime/          # Behavior & server tests
 │   │   └── utils/            # Utility tests
-│   └── ...
+│   ├── helpers/              # Test utilities
+│   │   ├── testUtils.js      # Common test factories
+│   │   └── behaviorTestHelpers.js  # Behavior test patterns
+│   └── fixtures/             # Test data
 ├── docker/                   # Container deployment assets
 │   ├── Dockerfile            # Multi-arch container definition
 │   ├── docker-compose.yml    # Base compose configuration

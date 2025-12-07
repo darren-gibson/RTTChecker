@@ -3,6 +3,8 @@ import { AirQualityServer } from '@matter/main/behaviors/air-quality';
 import { STATUS_TO_AIR_QUALITY } from '../../domain/airQualityMapping.js';
 import { loggers } from '../../utils/logger.js';
 
+import { BaseBehaviorHelper } from './baseBehaviorHelpers.js';
+
 const log = loggers.matter;
 
 /**
@@ -22,11 +24,11 @@ const log = loggers.matter;
  */
 export class TrainStatusAirQualityServer extends AirQualityServer {
   async initialize() {
-    log.debug('Initializing TrainStatusAirQualityServer...');
-    // Start with Unknown (0) until first status update
-    this.state.airQuality = 0; // AirQualityEnum.Unknown
-    await super.initialize?.();
-    log.debug('Initialized TrainStatusAirQualityServer');
+    await BaseBehaviorHelper.wrapInitialize('TrainStatusAirQualityServer', async () => {
+      // Start with Unknown (0) until first status update
+      this.state.airQuality = 0; // AirQualityEnum.Unknown
+      await super.initialize?.();
+    });
   }
 
   /**

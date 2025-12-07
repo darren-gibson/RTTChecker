@@ -1,8 +1,11 @@
 import { TemperatureMeasurementServer } from '@matter/main/behaviors/temperature-measurement';
 
-import { loggers } from '../../utils/logger.js';
-
-const log = loggers.matter;
+import {
+  BaseBehaviorHelper,
+  TemperatureConstants,
+  celsiusToMeasuredValue,
+  clampDelay,
+} from './baseBehaviorHelpers.js';
 
 /**
  * Custom Temperature Measurement Behavior
@@ -18,12 +21,12 @@ const log = loggers.matter;
  */
 export class TrainTemperatureServer extends TemperatureMeasurementServer {
   async initialize() {
-    log.debug('Initializing TrainTemperatureServer...');
-    this.state.minMeasuredValue = -1000; // -10.00°C
-    this.state.maxMeasuredValue = 5000; // 50.00°C
-    this.state.measuredValue = null; // unknown until first update
-    await super.initialize?.();
-    log.debug('Initialized TrainTemperatureServer');
+    await BaseBehaviorHelper.wrapInitialize('TrainTemperatureServer', async () => {
+      this.state.minMeasuredValue = TemperatureConstants.MIN_MEASURED_VALUE;
+      this.state.maxMeasuredValue = TemperatureConstants.MAX_MEASURED_VALUE;
+      this.state.measuredValue = null; // unknown until first update
+      await super.initialize?.();
+    });
   }
 
   /**
@@ -32,7 +35,7 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
    * between on-time (0°C) and no-service (50°C - max delay).
    */
   async setNoServiceTemperature() {
-    await this.setMeasuredValue(50 * 100);
+    await this.setMeasuredValue(TemperatureConstants.NO_SERVICE_SENTINEL);
   }
 
   /**
@@ -45,8 +48,8 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
       await this.setMeasuredValue(null);
       return;
     }
-    const tempCelsius = Math.min(Math.max(delayMinutes, -10), 50);
-    const tempValue = Math.round(tempCelsius * 100);
+    const tempCelsius = clampDelay(delayMinutes);
+    const tempValue = celsiusToMeasuredValue(tempCelsius);
     await this.setMeasuredValue(tempValue);
   }
 
@@ -55,7 +58,7 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
    * @param {number} tempCelsius - Temperature in degrees Celsius
    */
   async setTemperature(tempCelsius) {
-    const tempValue = Math.round(tempCelsius * 100);
+    const tempValue = celsiusToMeasuredValue(tempCelsius);
     await this.setMeasuredValue(tempValue);
   }
 
