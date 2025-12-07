@@ -1,7 +1,7 @@
 /**
  * Resilient request wrapper combining Circuit Breaker and Retry patterns
  * Provides comprehensive fault tolerance for external service calls
- * 
+ *
  * @see src/utils/circuitBreaker.js for circuit breaker implementation
  * @see src/utils/retryableRequest.js for retry logic
  */
@@ -24,19 +24,19 @@ import { withRetry, fetchJsonWithRetry, DEFAULT_RETRY_CONFIG } from './retryable
 
 /**
  * Resilient request handler with circuit breaker and retry logic
- * 
+ *
  * @example
  * const resilient = new ResilientRequest({
  *   failureThreshold: 5,
  *   timeout: 60000,
  *   logger: myLogger,
  * });
- * 
+ *
  * // Execute with full protection
  * const data = await resilient.execute(async () => {
  *   return await fetchData();
  * });
- * 
+ *
  * // HTTP JSON request with built-in retry
  * const result = await resilient.fetchJson('https://api.example.com/data');
  */
@@ -50,8 +50,10 @@ export class ResilientRequest {
       maxRetries: config.maxRetries ?? DEFAULT_RETRY_CONFIG.maxRetries,
       baseDelayMs: config.baseDelayMs ?? DEFAULT_RETRY_CONFIG.baseDelayMs,
       maxDelayMs: config.maxDelayMs ?? DEFAULT_RETRY_CONFIG.maxDelayMs,
-      retryableStatusCodes: config.retryableStatusCodes ?? DEFAULT_RETRY_CONFIG.retryableStatusCodes,
-      nonRetryableStatusCodes: config.nonRetryableStatusCodes ?? DEFAULT_RETRY_CONFIG.nonRetryableStatusCodes,
+      retryableStatusCodes:
+        config.retryableStatusCodes ?? DEFAULT_RETRY_CONFIG.retryableStatusCodes,
+      nonRetryableStatusCodes:
+        config.nonRetryableStatusCodes ?? DEFAULT_RETRY_CONFIG.nonRetryableStatusCodes,
       logger: this.logger,
     };
 
@@ -158,11 +160,11 @@ export class ResilientRequest {
 /**
  * Create a singleton resilient request instance with shared circuit breaker
  * Useful for managing a single service's health across multiple call sites
- * 
+ *
  * @param {string} serviceName - Unique name for this service
  * @param {ResilientConfig} config - Configuration options
  * @returns {ResilientRequest} Singleton instance
- * 
+ *
  * @example
  * // In RTTBridge.js
  * const rttClient = createResilientClient('RTT_API', {
@@ -170,7 +172,7 @@ export class ResilientRequest {
  *   timeout: 60000,
  *   logger: myLogger,
  * });
- * 
+ *
  * // Multiple calls share the same circuit breaker
  * const search = await rttClient.fetchJson('https://api/search');
  * const service = await rttClient.fetchJson('https://api/service/123');

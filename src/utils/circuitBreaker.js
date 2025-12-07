@@ -1,7 +1,7 @@
 /**
  * Circuit Breaker Pattern Implementation
  * Prevents cascading failures by temporarily blocking requests to failing services
- * 
+ *
  * @see docs/VALIDATION_AND_RETRY.md for usage examples
  */
 
@@ -27,14 +27,14 @@ export const CircuitState = {
 
 /**
  * Circuit Breaker for protecting against cascading failures
- * 
+ *
  * @example
  * const breaker = new CircuitBreaker({
  *   failureThreshold: 5,
  *   successThreshold: 2,
  *   timeout: 60000,
  * });
- * 
+ *
  * const result = await breaker.execute(async () => {
  *   return await apiCall();
  * });

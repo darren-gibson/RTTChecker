@@ -12,15 +12,17 @@ const log = loggers.bridge;
 
 // Create singleton resilient client with circuit breaker for RTT API
 const rttClient = createResilientClient('RTT_API', {
-  failureThreshold: 5,      // Open circuit after 5 consecutive failures
-  successThreshold: 2,      // Close circuit after 2 consecutive successes
-  timeout: 60000,           // Wait 60s before trying half-open
-  maxRetries: 3,            // Retry each request up to 3 times
-  baseDelayMs: 1000,        // Start with 1s delay
-  maxDelayMs: 10000,        // Cap at 10s delay
+  failureThreshold: 5, // Open circuit after 5 consecutive failures
+  successThreshold: 2, // Close circuit after 2 consecutive successes
+  timeout: 60000, // Wait 60s before trying half-open
+  maxRetries: 3, // Retry each request up to 3 times
+  baseDelayMs: 1000, // Start with 1s delay
+  maxDelayMs: 10000, // Cap at 10s delay
   logger: log,
   onCircuitOpen: (breaker) => {
-    log.error(`RTT API circuit opened after ${breaker.getFailureCount()} failures - service degraded`);
+    log.error(
+      `RTT API circuit opened after ${breaker.getFailureCount()} failures - service degraded`
+    );
   },
   onCircuitClose: () => {
     log.info('RTT API circuit closed - service recovered');
@@ -106,7 +108,7 @@ export async function rttSearch(from, to, date, { user, pass, fetchImpl, maxRetr
 /**
  * Get RTT API circuit breaker health statistics.
  * Useful for monitoring, health checks, and diagnostics.
- * 
+ *
  * @returns {Object} Circuit breaker statistics including state, failure count, etc.
  * @example
  * const health = getRTTApiHealth();
@@ -122,7 +124,7 @@ export function getRTTApiHealth() {
 /**
  * Manually reset the RTT API circuit breaker.
  * Use this for administrative control after fixing underlying issues.
- * 
+ *
  * @example
  * // After fixing RTT API credentials or service issues
  * resetRTTApiCircuit();

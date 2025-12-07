@@ -17,7 +17,9 @@ Located in `src/utils/validation.js`, provides reusable input validation functio
 ### Available Functions
 
 #### `isTiploc(value)`
+
 Validates UK railway TIPLOC codes (Timing Point Location).
+
 - **Valid**: 1-7 uppercase alphanumeric characters
 - **Examples**: `"PADTON"`, `"WATRLO"`, `"RDNG"`
 
@@ -30,6 +32,7 @@ if (!isTiploc(stationCode)) {
 ```
 
 #### `isWithinRange(value, min, max, inclusive = true)`
+
 Validates numeric values within a specified range.
 
 ```javascript
@@ -42,6 +45,7 @@ if (!isWithinRange(temperature, -50, 50)) {
 ```
 
 #### `isValidPort(port)`
+
 Validates network port numbers (1-65535).
 
 ```javascript
@@ -53,6 +57,7 @@ if (!isValidPort(config.port)) {
 ```
 
 #### `isValidDiscriminator(discriminator)`
+
 Validates Matter device discriminators (0-4095).
 
 ```javascript
@@ -64,6 +69,7 @@ if (!isValidDiscriminator(config.discriminator)) {
 ```
 
 #### `isValidPasscode(passcode)`
+
 Validates Matter device passcodes (20000000-99999999, excluding test codes).
 
 ```javascript
@@ -75,6 +81,7 @@ if (!isValidPasscode(config.passcode)) {
 ```
 
 #### `isValidDeviceName(name)`
+
 Validates device names (1-32 printable ASCII characters, no leading/trailing spaces).
 
 ```javascript
@@ -86,6 +93,7 @@ if (!isValidDeviceName(deviceName)) {
 ```
 
 #### `isValidLogLevel(level)`
+
 Validates Pino log levels.
 
 ```javascript
@@ -97,6 +105,7 @@ if (!isValidLogLevel(config.logLevel)) {
 ```
 
 #### `isValidMatterLogFormat(format)`
+
 Validates Matter.js log format strings.
 
 ```javascript
@@ -108,6 +117,7 @@ if (!isValidMatterLogFormat(config.matterLogFormat)) {
 ```
 
 #### `sanitizeTiploc(value)`
+
 Sanitizes and normalizes TIPLOC codes.
 
 ```javascript
@@ -117,6 +127,7 @@ const cleaned = sanitizeTiploc('  padton  '); // Returns "PADTON"
 ```
 
 #### `clampValue(value, min, max)`
+
 Clamps numeric values to a specified range.
 
 ```javascript
@@ -155,9 +166,9 @@ CLOSED ────[Failure Threshold]────> OPEN
 import { CircuitBreaker, CircuitState } from './src/utils/circuitBreaker.js';
 
 const breaker = new CircuitBreaker({
-  failureThreshold: 5,      // Open after 5 failures
-  successThreshold: 2,      // Close after 2 successes in half-open
-  timeout: 60000,           // Wait 60s before trying again
+  failureThreshold: 5, // Open after 5 failures
+  successThreshold: 2, // Close after 2 successes in half-open
+  timeout: 60000, // Wait 60s before trying again
 });
 
 try {
@@ -177,10 +188,10 @@ try {
 
 ```javascript
 const breaker = new CircuitBreaker({
-  failureThreshold: 5,          // Failures before opening circuit
-  successThreshold: 2,          // Successes to close circuit
-  timeout: 60000,               // Circuit open timeout (ms)
-  
+  failureThreshold: 5, // Failures before opening circuit
+  successThreshold: 2, // Successes to close circuit
+  timeout: 60000, // Circuit open timeout (ms)
+
   // Optional callbacks
   onStateChange: ({ from, to, breaker }) => {
     console.log(`Circuit: ${from} → ${to}`);
@@ -198,8 +209,8 @@ const breaker = new CircuitBreaker({
 
 ```javascript
 // Check current state
-console.log(breaker.getState());        // "CLOSED" | "OPEN" | "HALF_OPEN"
-console.log(breaker.isOpen());          // true/false
+console.log(breaker.getState()); // "CLOSED" | "OPEN" | "HALF_OPEN"
+console.log(breaker.isOpen()); // true/false
 
 // Get detailed statistics
 const stats = breaker.getStats();
@@ -251,12 +262,12 @@ const resilient = new ResilientRequest({
   failureThreshold: 5,
   successThreshold: 2,
   timeout: 60000,
-  
+
   // Retry config
   maxRetries: 3,
   baseDelayMs: 1000,
   maxDelayMs: 10000,
-  
+
   // Optional logger
   logger: myLogger,
 });
@@ -268,7 +279,7 @@ const data = await resilient.execute(async () => {
 
 // Or use built-in HTTP JSON fetcher
 const result = await resilient.fetchJson('https://api.example.com/data', {
-  headers: { 'Authorization': 'Bearer token' }
+  headers: { Authorization: 'Bearer token' },
 });
 ```
 
@@ -298,16 +309,16 @@ const sameClient = createResilientClient('RTT_API'); // Gets the same instance
 
 ```javascript
 // Check circuit state
-console.log(resilient.getCircuitState());    // "CLOSED" | "OPEN" | "HALF_OPEN"
-console.log(resilient.isCircuitOpen());      // true/false
+console.log(resilient.getCircuitState()); // "CLOSED" | "OPEN" | "HALF_OPEN"
+console.log(resilient.isCircuitOpen()); // true/false
 
 // Get statistics
 const stats = resilient.getStats();
 console.log(`Failures: ${stats.failureCount}/${stats.failureThreshold}`);
 
 // Manual control
-resilient.resetCircuit();  // Reset to CLOSED
-resilient.openCircuit();   // Force OPEN (maintenance mode)
+resilient.resetCircuit(); // Reset to CLOSED
+resilient.openCircuit(); // Force OPEN (maintenance mode)
 ```
 
 ### State Change Callbacks
@@ -315,13 +326,13 @@ resilient.openCircuit();   // Force OPEN (maintenance mode)
 ```javascript
 const resilient = new ResilientRequest({
   failureThreshold: 5,
-  
+
   onCircuitOpen: (breaker) => {
     // Alert team, update metrics, disable feature flag, etc.
     metrics.increment('circuit_breaker.opened');
     alerting.send('RTT API circuit opened');
   },
-  
+
   onCircuitClose: (breaker) => {
     // Log recovery, update metrics, re-enable feature
     metrics.increment('circuit_breaker.closed');
@@ -359,21 +370,18 @@ export async function searchTrains(from, to) {
   // Validate inputs
   const fromTiploc = sanitizeTiploc(from);
   const toTiploc = sanitizeTiploc(to);
-  
+
   if (!isTiploc(fromTiploc) || !isTiploc(toTiploc)) {
     throw new Error('Invalid TIPLOC codes');
   }
-  
+
   // Make resilient request
   try {
-    return await rttClient.fetchJson(
-      `https://api.rtt.io/search/${fromTiploc}/to/${toTiploc}`,
-      {
-        headers: {
-          'Authorization': `Basic ${credentials}`,
-        },
-      }
-    );
+    return await rttClient.fetchJson(`https://api.rtt.io/search/${fromTiploc}/to/${toTiploc}`, {
+      headers: {
+        Authorization: `Basic ${credentials}`,
+      },
+    });
   } catch (error) {
     if (error.circuitBreakerOpen) {
       logger.warn('Service temporarily unavailable');
@@ -397,36 +405,36 @@ import {
 
 export function validateConfig(config) {
   const errors = [];
-  
+
   // Validate port
   if (!isValidPort(config.port)) {
     errors.push(`Invalid port: ${config.port} (must be 1-65535)`);
   }
-  
+
   // Validate discriminator
   if (!isValidDiscriminator(config.discriminator)) {
     errors.push(`Invalid discriminator: ${config.discriminator} (must be 0-4095)`);
   }
-  
+
   // Validate passcode
   if (!isValidPasscode(config.passcode)) {
     errors.push(`Invalid passcode: ${config.passcode}`);
   }
-  
+
   // Validate log level
   if (!isValidLogLevel(config.logLevel)) {
     errors.push(`Invalid log level: ${config.logLevel}`);
   }
-  
+
   if (errors.length > 0) {
     throw new ValidationError(errors.join(', '));
   }
-  
+
   // Clamp numeric values to safe ranges
   return {
     ...config,
     pollInterval: clampValue(config.pollInterval, 1000, 3600000), // 1s to 1h
-    timeout: clampValue(config.timeout, 1000, 60000),             // 1s to 60s
+    timeout: clampValue(config.timeout, 1000, 60000), // 1s to 60s
   };
 }
 ```
@@ -452,7 +460,7 @@ export async function getTrainWithWeather(trainId) {
     rttClient.fetchJson(`https://rtt.api/trains/${trainId}`),
     weatherClient.fetchJson(`https://weather.api/current`),
   ]);
-  
+
   return {
     train: results[0].status === 'fulfilled' ? results[0].value : null,
     weather: results[1].status === 'fulfilled' ? results[1].value : null,
@@ -471,22 +479,22 @@ export async function getTrainWithWeather(trainId) {
 ```javascript
 // Fast-failing service (e.g., authentication)
 const authClient = new ResilientRequest({
-  failureThreshold: 3,    // Open quickly
-  timeout: 10000,         // Retry after 10s
+  failureThreshold: 3, // Open quickly
+  timeout: 10000, // Retry after 10s
 });
 
 // Critical service (e.g., payment)
 const paymentClient = new ResilientRequest({
-  failureThreshold: 2,    // Very sensitive
-  timeout: 120000,        // Long recovery time
-  maxRetries: 1,          // Don't spam
+  failureThreshold: 2, // Very sensitive
+  timeout: 120000, // Long recovery time
+  maxRetries: 1, // Don't spam
 });
 
 // Non-critical service (e.g., analytics)
 const analyticsClient = new ResilientRequest({
-  failureThreshold: 10,   // More tolerant
-  timeout: 30000,         // Quick recovery
-  maxRetries: 0,          // Don't retry
+  failureThreshold: 10, // More tolerant
+  timeout: 30000, // Quick recovery
+  maxRetries: 0, // Don't retry
 });
 ```
 
@@ -499,14 +507,14 @@ export async function searchTrains(from, to) {
   // Validate BEFORE making expensive network calls
   const fromClean = sanitizeTiploc(from);
   const toClean = sanitizeTiploc(to);
-  
+
   if (!isTiploc(fromClean)) {
     throw new ValidationError(`Invalid origin: ${from}`);
   }
   if (!isTiploc(toClean)) {
     throw new ValidationError(`Invalid destination: ${to}`);
   }
-  
+
   // Now make the protected request
   return await rttClient.fetchJson(`/search/${fromClean}/to/${toClean}`);
 }
@@ -551,8 +559,8 @@ export function getHealthMetrics() {
 // Expose on health endpoint
 app.get('/health', (req, res) => {
   const metrics = getHealthMetrics();
-  const allHealthy = Object.values(metrics).every(m => m.isHealthy);
-  
+  const allHealthy = Object.values(metrics).every((m) => m.isHealthy);
+
   res.status(allHealthy ? 200 : 503).json(metrics);
 });
 ```
@@ -567,10 +575,12 @@ export async function getTrainStatus(trainId) {
     if (error.circuitBreakerOpen) {
       // Return cached data or default value
       logger.warn('Circuit open, returning cached data');
-      return getCachedTrainStatus(trainId) || {
-        status: 'unknown',
-        message: 'Service temporarily unavailable',
-      };
+      return (
+        getCachedTrainStatus(trainId) || {
+          status: 'unknown',
+          message: 'Service temporarily unavailable',
+        }
+      );
     }
     throw error; // Re-throw other errors
   }
@@ -583,7 +593,7 @@ export async function getTrainStatus(trainId) {
 // Admin API for manual circuit control
 app.post('/admin/circuit/:service/reset', async (req, res) => {
   const { service } = req.params;
-  
+
   if (service === 'rtt') {
     rttClient.resetCircuit();
     logger.info('RTT circuit manually reset');
@@ -605,6 +615,7 @@ All utilities have comprehensive test coverage:
 - **resilientRequest.js**: 22 tests covering integration scenarios
 
 Run tests:
+
 ```bash
 npm test -- validation
 npm test -- circuitBreaker

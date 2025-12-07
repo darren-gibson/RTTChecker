@@ -1,8 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import {
-  CircuitBreaker,
-  CircuitState,
-} from '../../../src/utils/circuitBreaker.js';
+import { CircuitBreaker, CircuitState } from '../../../src/utils/circuitBreaker.js';
 
 describe('CircuitBreaker', () => {
   describe('initialization', () => {
@@ -157,16 +154,12 @@ describe('CircuitBreaker', () => {
 
       // Next call should fail immediately without calling operation
       const attemptOperation = jest.fn().mockResolvedValue('success');
-      await expect(breaker.execute(attemptOperation)).rejects.toThrow(
-        /Circuit breaker is OPEN/
-      );
+      await expect(breaker.execute(attemptOperation)).rejects.toThrow(/Circuit breaker is OPEN/);
       expect(attemptOperation).not.toHaveBeenCalled();
     });
 
     it('should include last error message in circuit open error', async () => {
-      const operation = jest
-        .fn()
-        .mockRejectedValue(new Error('Connection timeout'));
+      const operation = jest.fn().mockRejectedValue(new Error('Connection timeout'));
 
       // Open the circuit
       await expect(breaker.execute(operation)).rejects.toThrow();
@@ -398,9 +391,7 @@ describe('CircuitBreaker', () => {
       const breaker = new CircuitBreaker({ failureThreshold: 5 });
       const operation = jest.fn().mockRejectedValue(new Error('Rapid fail'));
 
-      const promises = Array.from({ length: 10 }, () =>
-        breaker.execute(operation).catch((e) => e)
-      );
+      const promises = Array.from({ length: 10 }, () => breaker.execute(operation).catch((e) => e));
 
       await Promise.all(promises);
 

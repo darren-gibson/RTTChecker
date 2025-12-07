@@ -21,9 +21,9 @@ describe('rttApiClient circuit breaker integration', () => {
     it('should indicate healthy when circuit is closed', () => {
       // Reset to ensure clean state
       resetRTTApiCircuit();
-      
+
       const health = getRTTApiHealth();
-      
+
       expect(health.state).toBe('CLOSED');
       expect(health.isHealthy).toBe(true);
     });
@@ -32,9 +32,9 @@ describe('rttApiClient circuit breaker integration', () => {
   describe('resetRTTApiCircuit', () => {
     it('should reset circuit breaker to closed state', () => {
       resetRTTApiCircuit();
-      
+
       const health = getRTTApiHealth();
-      
+
       expect(health.state).toBe('CLOSED');
       expect(health.failureCount).toBe(0);
       expect(health.successCount).toBe(0);
@@ -47,7 +47,7 @@ describe('rttApiClient circuit breaker integration', () => {
     beforeEach(() => {
       // Reset circuit before each test
       resetRTTApiCircuit();
-      
+
       mockFetch = jest.fn();
     });
 
@@ -114,7 +114,7 @@ describe('rttApiClient circuit breaker integration', () => {
       });
 
       expect(result).toEqual({ services: [] });
-      
+
       const health = getRTTApiHealth();
       expect(health.state).toBe('CLOSED');
       expect(health.isHealthy).toBe(true);
@@ -167,7 +167,7 @@ describe('rttApiClient circuit breaker integration', () => {
       // Verify configuration matches production requirements
       expect(health.failureThreshold).toBe(5); // Tolerant of some failures
       expect(health.successThreshold).toBe(2); // Quick recovery
-      expect(health.timeout).toBe(60000);      // 60s before retry
+      expect(health.timeout).toBe(60000); // 60s before retry
     });
   });
 });

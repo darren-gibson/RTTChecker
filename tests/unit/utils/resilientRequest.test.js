@@ -141,16 +141,12 @@ describe('ResilientRequest', () => {
         json: async () => ({ data: 'test' }),
       });
 
-      const result = await resilient.fetchJson(
-        'https://api.test.com/data',
-        { fetchImpl: mockFetch }
-      );
+      const result = await resilient.fetchJson('https://api.test.com/data', {
+        fetchImpl: mockFetch,
+      });
 
       expect(result).toEqual({ data: 'test' });
-      expect(mockFetch).toHaveBeenCalledWith(
-        'https://api.test.com/data',
-        expect.any(Object)
-      );
+      expect(mockFetch).toHaveBeenCalledWith('https://api.test.com/data', expect.any(Object));
     });
 
     it('should retry on server error', async () => {
@@ -167,10 +163,9 @@ describe('ResilientRequest', () => {
           json: async () => ({ data: 'recovered' }),
         });
 
-      const result = await resilient.fetchJson(
-        'https://api.test.com/data',
-        { fetchImpl: mockFetch }
-      );
+      const result = await resilient.fetchJson('https://api.test.com/data', {
+        fetchImpl: mockFetch,
+      });
 
       expect(result).toEqual({ data: 'recovered' });
       expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -209,13 +204,10 @@ describe('ResilientRequest', () => {
         json: async () => ({}),
       });
 
-      await resilient.fetchJson(
-        'https://api.test.com/data',
-        {
-          fetchImpl: mockFetch,
-          headers: { 'X-Custom': 'value' },
-        }
-      );
+      await resilient.fetchJson('https://api.test.com/data', {
+        fetchImpl: mockFetch,
+        headers: { 'X-Custom': 'value' },
+      });
 
       expect(mockFetch).toHaveBeenCalledWith(
         'https://api.test.com/data',
@@ -295,12 +287,8 @@ describe('ResilientRequest', () => {
       await expect(resilient.execute(operation)).rejects.toThrow();
       await expect(resilient.execute(operation)).rejects.toThrow();
 
-      expect(logger.info).toHaveBeenCalledWith(
-        expect.stringContaining('Circuit breaker state')
-      );
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Circuit OPENED')
-      );
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Circuit breaker state'));
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Circuit OPENED'));
     });
   });
 
