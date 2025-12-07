@@ -9,26 +9,22 @@ const log = loggers.matter;
 export class BaseBehaviorHelper {
   /**
    * Log behavior initialization start
-   * @param {string} behaviorName - Name of the behavior being initialized
    */
-  static logInitStart(behaviorName) {
+  static logInitStart(behaviorName: string): void {
     log.debug(`Initializing ${behaviorName}...`);
   }
 
   /**
    * Log behavior initialization completion
-   * @param {string} behaviorName - Name of the behavior that was initialized
    */
-  static logInitComplete(behaviorName) {
+  static logInitComplete(behaviorName: string): void {
     log.debug(`Initialized ${behaviorName}`);
   }
 
   /**
    * Wrap initialize call with standard logging
-   * @param {string} behaviorName - Name of the behavior
-   * @param {Function} initFn - Initialization function to execute
    */
-  static async wrapInitialize(behaviorName, initFn) {
+  static async wrapInitialize(behaviorName: string, initFn: () => Promise<void>): Promise<void> {
     this.logInitStart(behaviorName);
     await initFn();
     this.logInitComplete(behaviorName);
@@ -49,19 +45,15 @@ export const TemperatureConstants = {
 
 /**
  * Convert Celsius to Matter measured value
- * @param {number} celsius - Temperature in Celsius
- * @returns {number} Temperature in 0.01°C units
  */
-export function celsiusToMeasuredValue(celsius) {
+export function celsiusToMeasuredValue(celsius: number): number {
   return Math.round(celsius * TemperatureConstants.CELSIUS_TO_MEASURED_VALUE);
 }
 
 /**
  * Clamp delay within valid temperature range
- * @param {number} delayMinutes - Delay in minutes
- * @returns {number} Clamped delay
  */
-export function clampDelay(delayMinutes) {
+export function clampDelay(delayMinutes: number): number {
   return Math.min(
     Math.max(delayMinutes, TemperatureConstants.MIN_CELSIUS),
     TemperatureConstants.MAX_CELSIUS

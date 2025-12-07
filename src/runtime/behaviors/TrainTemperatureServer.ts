@@ -34,15 +34,14 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
    * This bypasses delayMinutes mapping so controllers can distinguish
    * between on-time (0°C) and no-service (50°C - max delay).
    */
-  async setNoServiceTemperature() {
+  async setNoServiceTemperature(): Promise<void> {
     await this.setMeasuredValue(TemperatureConstants.NO_SERVICE_SENTINEL);
   }
 
   /**
    * Update temperature based on train delay in minutes
-   * @param {number|null} delayMinutes - Train delay in minutes, or null for unknown
    */
-  async setDelayMinutes(delayMinutes) {
+  async setDelayMinutes(delayMinutes: number | null): Promise<void> {
     if (delayMinutes == null) {
       // Unknown delay → expose unknown temperature by setting measuredValue to null
       await this.setMeasuredValue(null);
@@ -55,18 +54,16 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
 
   /**
    * Set temperature directly in Celsius
-   * @param {number} tempCelsius - Temperature in degrees Celsius
    */
-  async setTemperature(tempCelsius) {
+  async setTemperature(tempCelsius: number): Promise<void> {
     const tempValue = celsiusToMeasuredValue(tempCelsius);
     await this.setMeasuredValue(tempValue);
   }
 
   /**
    * Set the measured temperature value
-   * @param {number|null} value - Temperature in hundredths of degrees, or null for unknown
    */
-  async setMeasuredValue(value) {
-    this.state.measuredValue = value;
+  async setMeasuredValue(value: number | null): Promise<void> {
+    (this as any).state.measuredValue = value;
   }
 }

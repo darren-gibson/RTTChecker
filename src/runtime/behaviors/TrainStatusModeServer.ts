@@ -1,4 +1,5 @@
 import { ModeSelectServer } from '@matter/main/behaviors/mode-select';
+import type { TrainStatusType } from '../../constants.js';
 
 import { STATUS_TO_MODE } from '../../domain/modeMapping.js';
 import { loggers } from '../../utils/logger.js';
@@ -19,9 +20,8 @@ const log = loggers.matter;
 export class TrainStatusModeServer extends ModeSelectServer {
   /**
    * Update the mode based on train status code
-   * @param {string} statusCode - Status code (on_time, minor_delay, delayed, major_delay, unknown)
    */
-  async setTrainStatus(statusCode) {
+  async setTrainStatus(statusCode: TrainStatusType): Promise<void> {
     const modeValue = STATUS_TO_MODE[statusCode] ?? STATUS_TO_MODE.unknown;
     await this.changeToMode({ newMode: modeValue });
   }
@@ -43,8 +43,9 @@ export class TrainStatusModeServer extends ModeSelectServer {
     try {
       await super.initialize?.();
     } catch (err) {
-      log.error('BridgedInfoMode super.initialize failed:', err?.stack || err);
-      throw err;
+      const error = err as Error;
+      log.error('BridgedInfoMode super.initialize failed:', error?.stack || error);
+      throw error;
     }
   }
 }

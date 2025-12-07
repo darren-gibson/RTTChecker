@@ -1,23 +1,40 @@
-/**
- * @typedef {import('../types.js').StatusChangeEvent} StatusChangeEvent
- * @typedef {import('../types.js').RTTService} RTTService
- * @typedef {import('../types.js').RTTSearchResponse} RTTSearchResponse
- */
-
 import { EventEmitter } from 'events';
 
-import { TrainStatus, MatterDevice as MatterConstants } from '../constants.js';
+import { TrainStatus, type TrainStatusType, MatterDevice as MatterConstants } from '../constants.js';
 import { config } from '../config.js';
 import { getTrainStatus } from '../services/trainStatusService.js';
 import { loggers } from '../utils/logger.js';
 import { RTTCheckerError } from '../errors.js';
 import { RTTApiError } from '../api/errors.js';
 import { NoTrainFoundError } from '../domain/errors.js';
+import type { RTTService, RTTSearchResponse } from '../api/rttApiClient.js';
+
+export interface StatusChangeEvent {
+  timestamp: Date;
+  previousMode: number;
+  currentMode: number;
+  modeChanged: boolean;
+  trainStatus: TrainStatusType;
+  selectedService: RTTService | null;
+  delayMinutes: number | null;
+  raw: RTTSearchResponse | null;
+  error: string | null;
+}
+
+export interface DeviceInfo {
+  deviceName: string;
+  vendorName: string;
+  productName: string;
+  serialNumber: string;
+  vendorId: number;
+  productId: number;
+  deviceType: number;
+}
 
 const log = loggers.rtt;
 
 // Map TrainStatus to Matter mode numbers
-const STATUS_TO_MODE = {
+const STATUS_TO_MODE: Record<TrainStatusType, number> = {
   [TrainStatus.ON_TIME]: MatterConstants.Modes.ON_TIME.mode,
   [TrainStatus.MINOR_DELAY]: MatterConstants.Modes.MINOR_DELAY.mode,
   [TrainStatus.DELAYED]: MatterConstants.Modes.DELAYED.mode,
@@ -30,16 +47,23 @@ const STATUS_TO_MODE = {
  * Implements a Matter device with Mode Select cluster for train status monitoring
  */
 export class TrainStatusDevice extends EventEmitter {
+  private currentMode: number;
+  private currentDelayMinutes: number | null;
+  private isFirstUpdate: boolean;
+  private updateInterval: NodeJS.Timeout | null;
+  private readonly updateIntervalMs: number;
+
   constructor() {
     super();
     this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
     this.currentDelayMinutes = null;
     this.isFirstUpdate = true;
     this.updateInterval = null;
-    this.updateIntervalMs = Number(process.env.UPDATE_INTERVAL_MS || 60000); // Default 1 minute
+    const env = process.env as Record<string, string | undefined>;
+    this.updateIntervalMs = Number(env['UPDATE_INTERVAL_MS'] || 60000); // Default 1 minute
   }
 
-  getSupportedModes() {
+  getSupportedModes(): Array<{ mode: number; label: string }> {
     return [
       MatterConstants.Modes.ON_TIME,
       MatterConstants.Modes.MINOR_DELAY,
@@ -49,11 +73,11 @@ export class TrainStatusDevice extends EventEmitter {
     ];
   }
 
-  getCurrentMode() {
+  getCurrentMode(): number {
     return this.currentMode;
   }
 
-  async updateTrainStatus() {
+  async updateTrainStatus(): Promise<{ status: TrainStatusType; selected: RTTService | null; raw: RTTSearchResponse | null }> {
     const timestamp = new Date();
     try {
       const result = await getTrainStatus({
@@ -147,15 +171,15 @@ export class TrainStatusDevice extends EventEmitter {
     }
   }
 
-  startPeriodicUpdates() {
+  startPeriodicUpdates(): void {
     log.debug('🔁 Triggering initial train status fetch...');
-    this.updateTrainStatus().catch((err) => {
+    this.updateTrainStatus().catch((err: Error) => {
       log.error('Initial train status update failed:', err);
     });
 
     this.updateInterval = setInterval(() => {
       log.debug('⏱️ Periodic train status fetch...');
-      this.updateTrainStatus().catch((err) => {
+      this.updateTrainStatus().catch((err: Error) => {
         log.error('Periodic train status update failed:', err);
       });
     }, this.updateIntervalMs);
@@ -163,7 +187,7 @@ export class TrainStatusDevice extends EventEmitter {
     log.info(`Started periodic updates every ${this.updateIntervalMs}ms`);
   }
 
-  stopPeriodicUpdates() {
+  stopPeriodicUpdates(): void {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = null;
@@ -171,7 +195,7 @@ export class TrainStatusDevice extends EventEmitter {
     }
   }
 
-  getDeviceInfo() {
+  getDeviceInfo(): DeviceInfo {
     return {
       deviceName: config.matter.deviceName,
       vendorName: config.matter.vendorName,

@@ -1,4 +1,5 @@
 import { AirQualityServer } from '@matter/main/behaviors/air-quality';
+import type { TrainStatusType } from '../../constants.js';
 
 import { STATUS_TO_AIR_QUALITY } from '../../domain/airQualityMapping.js';
 import { loggers } from '../../utils/logger.js';
@@ -33,18 +34,16 @@ export class TrainStatusAirQualityServer extends AirQualityServer {
 
   /**
    * Update air quality based on train status code
-   * @param {string} statusCode - Status code (on_time, minor_delay, delayed, major_delay, unknown, critical)
    */
-  async setTrainStatus(statusCode) {
+  async setTrainStatus(statusCode: TrainStatusType | 'critical'): Promise<void> {
     const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0; // Default to Unknown
     await this.setAirQuality(airQualityValue);
   }
 
   /**
    * Set air quality value directly
-   * @param {number} value - AirQualityEnum value (0-6)
    */
-  async setAirQuality(value) {
+  async setAirQuality(value: number): Promise<void> {
     log.debug(`Setting air quality to: ${value}`);
     this.state.airQuality = value;
   }
