@@ -18,8 +18,8 @@ module.exports = {
     ],
     '^.+\\.js$': 'babel-jest',
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.js'],
-  testMatch: ['**/*.test.ts', '**/*.test.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],
+  testMatch: ['**/*.test.ts'],
   coverageThreshold: {
     global: {
       branches: 40,
