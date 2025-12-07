@@ -141,7 +141,7 @@ For deeper insights, inspect tests and source modules in `src/`.
 
 ## Supplementary Guides
 
-See [docs/GOOGLE_HOME_SETUP.md](docs/GOOGLE_HOME_SETUP.md) (commissioning & naming), [docs/GOOGLE_HOME_VOICE_COMMANDS.md](docs/GOOGLE_HOME_VOICE_COMMANDS.md) (voice usage), [docs/VALIDATION_AND_RETRY.md](docs/VALIDATION_AND_RETRY.md) (config schema & retry design), and [docs/CONTAINER_BUILD.md](docs/CONTAINER_BUILD.md) (multi-arch build).
+See [docs/GOOGLE_HOME_SETUP.md](docs/GOOGLE_HOME_SETUP.md) (commissioning & naming), [docs/GOOGLE_HOME_VOICE_COMMANDS.md](docs/GOOGLE_HOME_VOICE_COMMANDS.md) (voice usage), [docs/VALIDATION_AND_RESILIENCE.md](docs/VALIDATION_AND_RESILIENCE.md) (validation utilities & circuit breaker), and [docs/CONTAINER_BUILD.md](docs/CONTAINER_BUILD.md) (multi-arch build).
 
 ### Device Types
 
@@ -212,6 +212,10 @@ Use the mode state in Matter automations:
 ### Infrastructure
 
 - `src/utils/logger.js`: Unified logging with Pino (facility-based organization: rtt-checker, matter-server, rtt-bridge)
+- `src/utils/validation.js`: Input validation utilities (TIPLOC, port, range validation, etc.)
+- `src/utils/circuitBreaker.js`: Circuit breaker pattern for fault tolerance
+- `src/utils/resilientRequest.js`: Combined circuit breaker + retry wrapper for HTTP requests
+- `src/utils/retryableRequest.js`: Generic retry logic with exponential backoff and jitter
 - `src/errors.js`: Custom error classes for structured error handling
 - `src/types.js`: JSDoc type definitions for IDE support
 
@@ -291,7 +295,7 @@ The repository is organized for clear separation of concerns:
 │   ├── constants.js          # Application constants
 │   ├── errors.js             # Custom error classes
 │   └── types.js              # JSDoc type definitions
-├── tests/                    # Jest test suite (371 tests)
+├── tests/                    # Jest test suite (456 tests, 91.66% coverage)
 │   ├── bdd/                  # BDD acceptance tests (jest-cucumber)
 │   ├── integration/          # End-to-end scenarios
 │   ├── unit/                 # Unit tests
