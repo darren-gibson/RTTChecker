@@ -7,7 +7,7 @@ node_modules/
 # Test files
 tests/
 coverage/
-*.test.js
+*.test.ts
 jest.config.cjs
 
 # Development files
@@ -27,7 +27,8 @@ jest.config.cjs
 .vscode/
 .idea/
 
-# Build artifacts
+# Build artifacts (pre-compiled, will build fresh in container)
 *.log
 npm-debug.log*
 train-status-*.tar.gz
+dist/

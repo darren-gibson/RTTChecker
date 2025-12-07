@@ -1,9 +1,28 @@
 module.exports = {
+  preset: 'ts-jest',
   testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: {
+          module: 'ES2022',
+          moduleResolution: 'node',
+        },
+        diagnostics: {
+          ignoreCodes: [4112], // Ignore "cannot have override modifier" error in jest
+        },
+      },
+    ],
     '^.+\\.js$': 'babel-jest',
   },
-  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],
+  testMatch: ['**/*.test.ts'],
   coverageThreshold: {
     global: {
       branches: 40,

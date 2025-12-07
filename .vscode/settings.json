@@ -4,6 +4,8 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+  "javascript.validate.enable": false,
+  "js/ts.implicitProjectConfig.checkJs": false,
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
