@@ -1,8 +1,14 @@
 import { Environment, ServerNode } from '@matter/main';
 import { StorageBackendDisk } from '@matter/nodejs';
 import { ModeSelectDevice } from '@matter/main/devices/mode-select';
+import type { Config } from '../../config.js';
 
-export async function createServerNode(config) {
+export interface ServerNodeResult {
+  environment: Environment;
+  node: ServerNode;
+}
+
+export async function createServerNode(config: Config): Promise<ServerNodeResult> {
   const environment = Environment.default;
   environment.vars.set('storage.path', '.matter-storage');
   environment.set(StorageBackendDisk, new StorageBackendDisk('.matter-storage'));

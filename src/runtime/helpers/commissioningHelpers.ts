@@ -1,6 +1,9 @@
 import qr from 'qrcode-terminal';
+import type { ServerNode } from '@matter/main';
+import type { Logger } from '../../utils/retryableRequest.js';
+import type { Config } from '../../config.js';
 
-export function printCommissioningInfo(node, log, config) {
+export function printCommissioningInfo(node: ServerNode, log: Logger, config: Config): void {
   const { qrPairingCode, manualPairingCode } = node.state.commissioning.pairingCodes;
   log.info('📱 Commissioning information:');
   log.info(`   Discriminator: ${config.matter.discriminator}`);
