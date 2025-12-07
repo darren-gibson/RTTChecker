@@ -15,6 +15,7 @@ export function makeBridgedInfoBehavior({
   uniqueIdFactory,
 }: BridgedInfoBehaviorConfig): typeof BridgedDeviceBasicInformationServer {
   return class BridgedInfoBehavior extends BridgedDeviceBasicInformationServer {
+    // @ts-ignore - TS wants override but ts-jest has issues with it in dynamic classes
     async initialize() {
       const state = (this as any).state;
       const env = (this as any).env;

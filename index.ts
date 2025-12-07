@@ -20,7 +20,7 @@ if (!isTestEnv()) {
   try {
     validateConfig();
   } catch (error) {
-    log.error(error.message);
+    log.error((error as Error).message);
     process.exit(1);
   }
 
@@ -42,7 +42,7 @@ if (!isTestEnv()) {
   log.debug('🔧 Debug verification: this should be hidden unless LOG_LEVEL=debug');
 
   // Start Matter server for Google Home integration
-  let matterServer;
+  let matterServer: Awaited<ReturnType<typeof startMatterServer>> | undefined;
   startMatterServer(device)
     .then((server) => {
       matterServer = server;
@@ -75,7 +75,7 @@ if (!isTestEnv()) {
   process.on('SIGTERM', shutdown);
 
   // Allow short-lived runs for CI / manual verification using EXIT_AFTER_MS.
-  const exitAfterMs = parseInt(process.env.EXIT_AFTER_MS || '', 10);
+  const exitAfterMs = parseInt(process.env['EXIT_AFTER_MS'] || '', 10);
   if (!Number.isNaN(exitAfterMs) && exitAfterMs > 0) {
     setTimeout(() => {
       log.info(`⏱ Exiting after ${exitAfterMs}ms (EXIT_AFTER_MS) for verification.`);

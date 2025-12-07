@@ -86,9 +86,9 @@ export async function startMatterServer(
   log.info(
     `📝 Adding endpoints: temperature "${config.matter.delayDeviceName}", mode "${config.matter.statusDeviceName}", air quality "${config.matter.airQualityDeviceName}"`
   );
-  const tempBehaviors = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
-  const modeBehaviors = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
-  const airQualityBehaviors = [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer];
+  const tempBehaviors: any[] = [TrainTemperatureServer, UserLabelServer, FixedLabelServer];
+  const modeBehaviors: any[] = [TrainStatusModeServer, UserLabelServer, FixedLabelServer];
+  const airQualityBehaviors: any[] = [TrainStatusAirQualityServer, UserLabelServer, FixedLabelServer];
   if (config.matter.useBridge) {
     tempBehaviors.push(BridgedInfoTemp);
     modeBehaviors.push(BridgedInfoMode);

@@ -20,7 +20,7 @@ import {
  * - Null delay sets measuredValue to null (unknown)
  */
 export class TrainTemperatureServer extends TemperatureMeasurementServer {
-  async initialize() {
+  override async initialize() {
     await BaseBehaviorHelper.wrapInitialize('TrainTemperatureServer', async () => {
       this.state.minMeasuredValue = TemperatureConstants.MIN_MEASURED_VALUE;
       this.state.maxMeasuredValue = TemperatureConstants.MAX_MEASURED_VALUE;

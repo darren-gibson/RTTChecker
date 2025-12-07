@@ -24,7 +24,7 @@ const log = loggers.matter;
  * - Worse air quality = Worse train punctuality
  */
 export class TrainStatusAirQualityServer extends AirQualityServer {
-  async initialize() {
+  override async initialize() {
     await BaseBehaviorHelper.wrapInitialize('TrainStatusAirQualityServer', async () => {
       // Start with Unknown (0) until first status update
       this.state.airQuality = 0; // AirQualityEnum.Unknown

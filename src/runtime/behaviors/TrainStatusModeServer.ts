@@ -26,7 +26,7 @@ export class TrainStatusModeServer extends ModeSelectServer {
     await this.changeToMode({ newMode: modeValue });
   }
 
-  async initialize() {
+  override async initialize() {
     // Define available modes and required attributes BEFORE calling super.initialize()
     // This ensures supportedModes is set when currentMode is validated
     this.state.description = 'Train punctuality status';
@@ -44,7 +44,7 @@ export class TrainStatusModeServer extends ModeSelectServer {
       await super.initialize?.();
     } catch (err) {
       const error = err as Error;
-      log.error('BridgedInfoMode super.initialize failed:', error?.stack || error);
+      log.error(`BridgedInfoMode super.initialize failed: ${error?.stack || error}`);
       throw error;
     }
   }
