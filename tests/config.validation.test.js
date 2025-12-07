@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+
 import { validateConfig } from '../src/config.js';
 import { ConfigurationError } from '../src/errors.js';
 

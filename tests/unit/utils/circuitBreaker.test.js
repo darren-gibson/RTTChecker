@@ -1,4 +1,5 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+
 import { CircuitBreaker, CircuitState } from '../../../src/utils/circuitBreaker.js';
 
 describe('CircuitBreaker', () => {
