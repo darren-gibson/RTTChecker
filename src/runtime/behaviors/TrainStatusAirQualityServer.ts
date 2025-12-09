@@ -17,11 +17,13 @@ const log = loggers.matter;
  * - Minor Delay (3-5 mins) → Fair (2) - Yellow
  * - Delayed (6-10 mins)    → Moderate (3) - Orange
  * - Major Delay (11+ mins) → Poor (4) - Red
- * - Unknown/Critical       → VeryPoor (5) - Dark Red
+ * - Unknown/Critical       → Poor (4) - Red
  *
  * This provides an intuitive color-coded visualization in Google Home:
  * - Better air quality = Better train service
  * - Worse air quality = Worse train punctuality
+ *
+ * Note: VeryPoor (5) is not used as it requires VPOOR conformance feature
  */
 export class TrainStatusAirQualityServer extends AirQualityServer {
   override async initialize() {

@@ -35,9 +35,6 @@ if (!isTestEnv()) {
   log.info(`  Serial: ${deviceInfo.serialNumber}`);
   log.info('');
 
-  // Start periodic status updates for train data
-  device.startPeriodicUpdates();
-
   // Emit a debug message for runtime verification. Should only appear when LOG_LEVEL=debug.
   log.debug('🔧 Debug verification: this should be hidden unless LOG_LEVEL=debug');
 
@@ -47,6 +44,10 @@ if (!isTestEnv()) {
     .then((server) => {
       matterServer = server;
       log.info('🎯 Device ready! Monitor train status updates below:\n');
+
+      // Start periodic status updates AFTER Matter server is ready
+      // This ensures the first status update can be received by the endpoints
+      device.startPeriodicUpdates();
     })
     .catch((error) => {
       log.error('❌ Failed to start Matter server:', error);

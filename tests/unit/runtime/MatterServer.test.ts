@@ -415,14 +415,14 @@ describe('MatterServer Custom Behaviors', () => {
         expect(mockBehavior.state.airQuality).toBe(4);
       });
 
-      it('should map unknown to VeryPoor (5)', async () => {
+      it('should map unknown to Poor (4)', async () => {
         await mockBehavior.setTrainStatus('unknown');
-        expect(mockBehavior.state.airQuality).toBe(5);
+        expect(mockBehavior.state.airQuality).toBe(4);
       });
 
-      it('should map critical to VeryPoor (5)', async () => {
+      it('should map critical to Poor (4)', async () => {
         await mockBehavior.setTrainStatus('critical');
-        expect(mockBehavior.state.airQuality).toBe(5);
+        expect(mockBehavior.state.airQuality).toBe(4);
       });
 
       it('should default to Unknown (0) for invalid status', async () => {

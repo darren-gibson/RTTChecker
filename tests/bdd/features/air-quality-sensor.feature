@@ -35,19 +35,19 @@ Feature: Air Quality Sensor for Train Status
     And it should display as red in Google Home
     And the numeric value should be 4
 
-  Scenario: Unknown status shows VeryPoor air quality (Dark Red)
+  Scenario: Unknown status shows Poor air quality (Red)
     Given the train status is unknown
     When I query the air quality sensor device
-    Then the air quality should be "VeryPoor"
-    And it should display as dark red in Google Home
-    And the numeric value should be 5
+    Then the air quality should be "Poor"
+    And it should display as red in Google Home
+    And the numeric value should be 4
 
-  Scenario: Critical status shows VeryPoor air quality (Dark Red)
+  Scenario: Critical status shows Poor air quality (Red)
     Given the train status is critical
     When I query the air quality sensor device
-    Then the air quality should be "VeryPoor"
-    And it should display as dark red in Google Home
-    And the numeric value should be 5
+    Then the air quality should be "Poor"
+    And it should display as red in Google Home
+    And the numeric value should be 4
 
   Scenario: Air quality improves as train recovers from delay
     Given my train has a 15 minute delay
@@ -73,7 +73,7 @@ Feature: Air Quality Sensor for Train Status
       | minor_delay | Fair             | 2              |
       | delayed     | Moderate         | 3              |
       | major_delay | Poor             | 4              |
-      | unknown     | VeryPoor         | 5              |
+      | unknown     | Poor             | 4              |
     Then each transition should update the air quality correctly
     And the sensor should emit change events for each transition
 

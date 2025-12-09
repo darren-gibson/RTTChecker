@@ -16,16 +16,18 @@ import type { TrainStatusType } from '../constants.js';
  * - minor_delay: Fair (2) - Minor delay (3-5 min) → Yellow in Google Home
  * - delayed: Moderate (3) - Delayed (6-10 min) → Orange in Google Home
  * - major_delay: Poor (4) - Major delay (11+ min) → Red in Google Home
- * - unknown: VeryPoor (5) - Unknown status → Dark Red in Google Home
- * - critical: VeryPoor (5) - Critical status → Dark Red in Google Home
+ * - unknown: Poor (4) - Unknown status → Red in Google Home
+ * - critical: Poor (4) - Critical status → Red in Google Home
+ *
+ * Note: VeryPoor (5) requires VPOOR conformance feature which is not enabled
  */
 export const STATUS_TO_AIR_QUALITY: Record<TrainStatusType | 'critical', number> = {
   on_time: 1, // Good - Green
   minor_delay: 2, // Fair - Yellow
   delayed: 3, // Moderate - Orange
   major_delay: 4, // Poor - Red
-  unknown: 5, // VeryPoor - Dark Red
-  critical: 5, // VeryPoor - Dark Red
+  unknown: 4, // Poor - Red (VeryPoor not supported without VPOOR feature)
+  critical: 4, // Poor - Red (VeryPoor not supported without VPOOR feature)
 } as const;
 
 /**

@@ -171,7 +171,7 @@ defineFeature(feature, (test) => {
     });
   });
 
-  test('Unknown status shows VeryPoor air quality (Dark Red)', ({ given, when, then, and }) => {
+  test('Unknown status shows Poor air quality (Red)', ({ given, when, then, and }) => {
     given('a Matter-enabled RTT Checker with air quality sensor is running', () => {
       mockAirQualitySensor = createMockAirQualitySensor();
     });
@@ -185,20 +185,20 @@ defineFeature(feature, (test) => {
 
     when('I query the air quality sensor device', () => {});
 
-    then('the air quality should be "VeryPoor"', () => {
-      expect(mockAirQualitySensor.getAirQualityName()).toBe('VeryPoor');
+    then('the air quality should be "Poor"', () => {
+      expect(mockAirQualitySensor.getAirQualityName()).toBe('Poor');
     });
 
-    and('it should display as dark red in Google Home', () => {
-      expect(mockAirQualitySensor.getColorDisplay()).toBe('dark red');
+    and('it should display as red in Google Home', () => {
+      expect(mockAirQualitySensor.getColorDisplay()).toBe('red');
     });
 
-    and('the numeric value should be 5', () => {
-      expect(mockAirQualitySensor.state.airQuality).toBe(AirQuality.VeryPoor);
+    and('the numeric value should be 4', () => {
+      expect(mockAirQualitySensor.state.airQuality).toBe(AirQuality.Poor);
     });
   });
 
-  test('Critical status shows VeryPoor air quality (Dark Red)', ({ given, when, then, and }) => {
+  test('Critical status shows Poor air quality (Red)', ({ given, when, then, and }) => {
     given('a Matter-enabled RTT Checker with air quality sensor is running', () => {
       mockAirQualitySensor = createMockAirQualitySensor();
     });
@@ -212,16 +212,16 @@ defineFeature(feature, (test) => {
 
     when('I query the air quality sensor device', () => {});
 
-    then('the air quality should be "VeryPoor"', () => {
-      expect(mockAirQualitySensor.getAirQualityName()).toBe('VeryPoor');
+    then('the air quality should be "Poor"', () => {
+      expect(mockAirQualitySensor.getAirQualityName()).toBe('Poor');
     });
 
-    and('it should display as dark red in Google Home', () => {
-      expect(mockAirQualitySensor.getColorDisplay()).toBe('dark red');
+    and('it should display as red in Google Home', () => {
+      expect(mockAirQualitySensor.getColorDisplay()).toBe('red');
     });
 
-    and('the numeric value should be 5', () => {
-      expect(mockAirQualitySensor.state.airQuality).toBe(AirQuality.VeryPoor);
+    and('the numeric value should be 4', () => {
+      expect(mockAirQualitySensor.state.airQuality).toBe(AirQuality.Poor);
     });
   });
 
@@ -332,8 +332,9 @@ defineFeature(feature, (test) => {
     });
 
     and('the sensor should emit change events for each transition', () => {
-      // Should have 5 events (starting from Unknown, transitioning through 5 states)
-      expect(mockAirQualitySensor.events.length).toBe(5);
+      // Should have 4 events (starting from Unknown (0), transitioning through on_time (1), minor_delay (2), delayed (3), major_delay (4), unknown stays at (4))
+      // Unknown → Good, Good → Fair, Fair → Moderate, Moderate → Poor (unknown also maps to Poor, so no change)
+      expect(mockAirQualitySensor.events.length).toBe(4);
     });
   });
 

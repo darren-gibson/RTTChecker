@@ -206,9 +206,11 @@ export async function startMatterServer(
     log.info('   ✓ Train device event listeners attached');
   }
 
-  // Start the server
+  // Start the server (non-blocking - node.run() starts in background)
   log.info('🚀 Starting Matter server...');
-  await node.run();
+  node.run().catch((err: Error) => {
+    log.error(`Matter server runtime error: ${err.message}`);
+  });
 
   log.info('✅ Matter server running and discoverable');
   log.info(`   Listening on port: ${(config.matter as any).port ?? 5540}`);

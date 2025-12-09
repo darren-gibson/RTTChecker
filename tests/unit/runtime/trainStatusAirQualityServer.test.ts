@@ -54,14 +54,14 @@ describe('TrainStatusAirQualityServer', () => {
       expect(mockBehavior.state.airQuality).toBe(4);
     });
 
-    it('should map unknown to VeryPoor (5)', async () => {
+    it('should map unknown to Poor (4)', async () => {
       await mockBehavior.setTrainStatus('unknown');
-      expect(mockBehavior.state.airQuality).toBe(5);
+      expect(mockBehavior.state.airQuality).toBe(4);
     });
 
-    it('should map critical to VeryPoor (5)', async () => {
+    it('should map critical to Poor (4)', async () => {
       await mockBehavior.setTrainStatus('critical');
-      expect(mockBehavior.state.airQuality).toBe(5);
+      expect(mockBehavior.state.airQuality).toBe(4);
     });
 
     it('should default to Unknown (0) for invalid status codes', async () => {
@@ -166,10 +166,10 @@ describe('TrainStatusAirQualityServer', () => {
       expect(mockBehavior.state.airQuality).toBe(4);
     });
 
-    it('should map to dark red for VeryPoor air quality (unknown)', async () => {
+    it('should map to red for Poor air quality (unknown)', async () => {
       await mockBehavior.setTrainStatus('unknown');
-      // VeryPoor (5) = Dark Red in Google Home
-      expect(mockBehavior.state.airQuality).toBe(5);
+      // Poor (4) = Red in Google Home (VeryPoor requires VPOOR feature)
+      expect(mockBehavior.state.airQuality).toBe(4);
     });
   });
 
