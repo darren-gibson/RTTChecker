@@ -19,7 +19,15 @@ export async function handleStatusChange(
     airQualityDevice?: Endpoint;
   }
 ): Promise<void> {
-  log.debug(`Train status changed: ${JSON.stringify(status)}`);
+  log.debug(
+    {
+      mode: status?.currentMode,
+      previousMode: status?.previousMode,
+      delay: status?.delayMinutes,
+      status: status?.trainStatus,
+    },
+    'Train status changed'
+  );
 
   try {
     // Derive mode from delay when available; otherwise use currentMode or unknown
