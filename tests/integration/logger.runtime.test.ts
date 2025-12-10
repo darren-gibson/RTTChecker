@@ -2,8 +2,8 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-// Allow extra time for spawning the Node process and Matter server init
-jest.setTimeout(20000);
+// Reduced timeout - we only need enough time for quick startup and shutdown
+jest.setTimeout(10000);
 
 function runWithEnv(env) {
   return new Promise((resolve, reject) => {
@@ -36,7 +36,7 @@ describe('Runtime log level behavior (child process)', () => {
     NODE_ENV: 'development', // ensure index.js runs the device startup logic
     RTT_USER: 'demo',
     RTT_PASS: 'demo',
-    EXIT_AFTER_MS: '1500', // allow a bit more time to flush logs
+    EXIT_AFTER_MS: '800', // Reduced from 1500ms - just need enough time to verify logging
     MATTER_LOG_FORMAT: 'plain', // avoid ANSI color codes for easier matching
     FORCE_COLOR: '0', // ensure no color codes interfere
   };

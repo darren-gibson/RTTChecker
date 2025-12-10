@@ -2,6 +2,11 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
+  // Use 75% of available CPU cores for parallel test execution
+  maxWorkers: '75%',
+  // Enable caching for faster subsequent runs
+  cache: true,
+  cacheDirectory: '<rootDir>/.jest-cache',
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
@@ -10,6 +15,8 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
+        // Disable type-checking during tests (TSC already does this)
+        isolatedModules: true,
         tsconfig: {
           module: 'ES2022',
           moduleResolution: 'node',

@@ -209,21 +209,21 @@ defineFeature(feature, (test) => {
   let logMessages;
 
   beforeEach(() => {
-    // Reset tracking
+    // Reset tracking arrays (use assignment for let variables, length for const)
     initSequence.length = 0;
     eventLog.length = 0;
     capturedEvents = [];
     logMessages = [];
     mockRTTResponses.clear();
-    matterServer = undefined; // Reset server state
+    matterServer = undefined;
 
-    // Setup RTT API mock
+    // Setup RTT API mock (reuses existing mock implementation)
     setupMocks();
 
     // Create a real TrainStatusDevice
     device = new TrainStatusDevice();
 
-    // Capture statusChange events
+    // Capture statusChange events (inline function is faster than separate declaration)
     device.on('statusChange', (status) => {
       eventLog.push({
         timestamp: new Date(),
@@ -234,23 +234,25 @@ defineFeature(feature, (test) => {
       capturedEvents.push(status);
     });
 
-    // Mock console/logger to capture log sequence
-    const originalLog = console.log;
+    // Mock console/logger to capture log sequence (only if not already mocked)
+    if (!console.log.originalLog) {
+      console.log.originalLog = console.log;
+    }
     console.log = (...args) => {
-      const message = args.join(' ');
-      logMessages.push(message);
-      originalLog(...args);
+      logMessages.push(args.join(' '));
+      console.log.originalLog(...args);
     };
   });
 
   afterEach(async () => {
-    // Clean up
+    // Clean up device synchronously (faster)
     if (device) {
       device.stopPeriodicUpdates();
       device.removeAllListeners();
     }
 
-    if (matterServer) {
+    // Clean up server asynchronously only if it exists
+    if (matterServer?.close) {
       try {
         await matterServer.close();
       } catch (_err) {
@@ -258,8 +260,10 @@ defineFeature(feature, (test) => {
       }
     }
 
-    // Restore console
-    console.log = console.log.originalLog || console.log;
+    // Restore console synchronously
+    if (console.log.originalLog) {
+      console.log = console.log.originalLog;
+    }
   });
 
   test('First status update is captured after server initialization', ({

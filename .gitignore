@@ -1,6 +1,7 @@
 node_modules/
 coverage/
 dist/
+.jest-cache/
 .env
 .vscode/launch.json
 .matter-storage/
