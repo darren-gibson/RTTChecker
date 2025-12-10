@@ -11,7 +11,7 @@ import type { RTTService } from '../api/rttApiClient.js';
  * Uses realtimeGbttDepartureLateness or realtimeWttDepartureLateness
  *
  * @param service - RTT service data
- * @returns Delay in minutes (positive = late, negative = early) or null if unavailable
+ * @returns Delay in minutes (positive = late, negative = early, 0 = on time) or null if no service data
  */
 export function calculateDelayMinutes(service: RTTService | null): number | null {
   if (!service?.locationDetail) {
@@ -22,8 +22,9 @@ export function calculateDelayMinutes(service: RTTService | null): number | null
     service.locationDetail.realtimeGbttDepartureLateness ??
     service.locationDetail.realtimeWttDepartureLateness;
 
+  // Follow same pattern as calculateOnTimeStatus: null/NaN lateness means on-time (0)
   if (lateness == null || isNaN(Number(lateness))) {
-    return null;
+    return 0;
   }
 
   return Number(lateness);

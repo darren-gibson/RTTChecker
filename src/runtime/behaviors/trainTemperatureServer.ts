@@ -1,12 +1,13 @@
 import { TemperatureMeasurementServer } from '@matter/main/behaviors/temperature-measurement';
 
+import { log } from '../../utils/logger.js';
+
 import {
   BaseBehaviorHelper,
   TemperatureConstants,
   celsiusToMeasuredValue,
   clampDelay,
 } from './baseBehaviorHelpers.js';
-import { log } from '../../utils/logger.js';
 
 /**
  * Custom Temperature Measurement Behavior
@@ -49,7 +50,7 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
    */
   async setDelayMinutes(delayMinutes: number | null): Promise<void> {
     const oldValue = (this as any).state.measuredValue;
-    
+
     if (delayMinutes == null) {
       // Unknown delay → expose unknown temperature by setting measuredValue to null
       log.debug(

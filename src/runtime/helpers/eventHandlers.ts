@@ -39,7 +39,10 @@ export async function handleStatusChange(
 
     const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
 
-    log.debug({ computedMode, statusCode, delay: status?.delayMinutes }, 'Computed status from delay');
+    log.debug(
+      { computedMode, statusCode, delay: status?.delayMinutes },
+      'Computed status from delay'
+    );
 
     // Update mode device if present
     if (endpoints.modeDevice) {
@@ -53,10 +56,7 @@ export async function handleStatusChange(
     // Special case: if status is unknown and no train selected, use 999°C sentinel
     if (endpoints.tempSensor) {
       const isNoService = statusCode === 'unknown' && status?.selectedService === null;
-      log.debug(
-        { delay: status?.delayMinutes, isNoService },
-        'Updating temperature sensor'
-      );
+      log.debug({ delay: status?.delayMinutes, isNoService }, 'Updating temperature sensor');
       await endpoints.tempSensor.act(async (agent) => {
         const typedAgent = agent as any;
         if (isNoService) {
