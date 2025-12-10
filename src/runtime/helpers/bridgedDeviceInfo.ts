@@ -1,7 +1,8 @@
 import { createHash } from 'crypto';
 
-import { makeBridgedInfoBehavior } from './matterHelpers.js';
 import type { Config } from '../../config/configTypes.js';
+
+import { makeBridgedInfoBehavior } from './matterHelpers.js';
 
 /**
  * Generate a unique 32-character ID for a bridged device.
