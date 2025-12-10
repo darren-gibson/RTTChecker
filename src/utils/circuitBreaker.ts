@@ -8,6 +8,7 @@ export {
   CircuitState,
   type CircuitBreakerConfig,
   type CircuitBreakerError,
+  type CircuitBreakerStats,
   type CircuitStateType,
   type FailureEvent,
   type StateChangeEvent,

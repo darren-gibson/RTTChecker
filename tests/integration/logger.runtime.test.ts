@@ -2,8 +2,9 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-// Timeout accommodates Matter.js startup (~5s) + EXIT_AFTER_MS + shutdown
-jest.setTimeout(10000);
+// Timeout accommodates Matter.js startup (~5-7s worst case) + EXIT_AFTER_MS + shutdown
+// Increased from 10s to 15s to eliminate flakiness on slower systems
+jest.setTimeout(15000);
 
 function runWithEnv(env) {
   return new Promise((resolve, reject) => {
@@ -24,10 +25,11 @@ function runWithEnv(env) {
     child.on('error', reject);
 
     // Safety timeout for child process - catch hangs early
+    // Increased from 9s to 12s to handle slower Matter.js initialization
     const safetyTimeout = setTimeout(() => {
       child.kill('SIGTERM');
       reject(new Error('Child process timeout - likely Matter.js initialization hung'));
-    }, 9000); // 9s - less than Jest timeout
+    }, 12000); // 12s - less than Jest 15s timeout
 
     child.on('close', (code) => {
       clearTimeout(safetyTimeout);

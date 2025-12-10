@@ -12,7 +12,7 @@
     "lint": "eslint . --ext .js,.cjs,.mjs,.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "ci": "npm run lint && npm run format:check && npm test && npm audit --production",
+    "ci": "npm run build && npm run lint && npm run format:check && npm test && npm audit --production",
     "diagnose": "./scripts/diagnose.sh",
     "reset": "./scripts/reset-commissioning.sh"
   },

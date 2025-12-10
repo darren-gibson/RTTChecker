@@ -6,7 +6,7 @@
  * @see src/utils/retryableRequest.js for retry logic
  */
 
-import { CircuitBreaker, CircuitState } from './circuitBreaker.js';
+import { CircuitBreaker, CircuitState, type CircuitBreakerStats } from './circuitBreaker.js';
 import {
   withRetry,
   fetchJsonWithRetry,
@@ -74,18 +74,20 @@ export class ResilientRequest {
       successThreshold: config.successThreshold ?? 2,
       timeout: config.timeout ?? 60000,
       onStateChange: ({ from, to, breaker }) => {
+        const cb = breaker as CircuitBreaker;
         this.logger?.info?.(`Circuit breaker state: ${from} → ${to}`);
         if (to === CircuitState.OPEN) {
-          this.logger?.error?.(`Circuit OPENED after ${breaker.getFailureCount()} failures`);
-          config.onCircuitOpen?.(breaker);
+          this.logger?.error?.(`Circuit OPENED after ${cb.getFailureCount()} failures`);
+          config.onCircuitOpen?.(cb);
         } else if (to === CircuitState.CLOSED) {
           this.logger?.info?.('Circuit CLOSED - service recovered');
-          config.onCircuitClose?.(breaker);
+          config.onCircuitClose?.(cb);
         }
       },
       onFailure: ({ error, breaker }) => {
+        const cb = breaker as CircuitBreaker;
         this.logger?.debug?.(
-          `Operation failed (${breaker.getFailureCount()}/${breaker.failureThreshold}): ${error.message}`
+          `Operation failed (${cb.getFailureCount()}/${cb.failureThreshold}): ${error.message}`
         );
       },
       onSuccess: () => {
@@ -125,7 +127,7 @@ export class ResilientRequest {
   /**
    * Get circuit breaker statistics
    */
-  getStats(): Record<string, unknown> {
+  getStats(): CircuitBreakerStats {
     return this.circuitBreaker.getStats();
   }
 

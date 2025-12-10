@@ -169,8 +169,8 @@ export interface RTTApiHealth {
   failureThreshold: number;
   successThreshold: number;
   timeout: number;
-  lastFailureTime: Date | null;
-  lastSuccessTime: Date | null;
+  nextAttemptTime: number | null;
+  lastError: { message: string; name: string } | null;
   isHealthy: boolean;
 }
 
@@ -186,14 +186,14 @@ export interface RTTApiHealth {
 export function getRTTApiHealth(): RTTApiHealth {
   const stats = rttClient.getStats();
   return {
-    state: stats['state'] as string,
-    failureCount: stats['failureCount'] as number,
-    successCount: stats['successCount'] as number,
-    failureThreshold: stats['failureThreshold'] as number,
-    successThreshold: stats['successThreshold'] as number,
-    timeout: stats['timeout'] as number,
-    lastFailureTime: stats['lastFailureTime'] as Date | null,
-    lastSuccessTime: stats['lastSuccessTime'] as Date | null,
+    state: stats.state,
+    failureCount: stats.failureCount,
+    successCount: stats.successCount,
+    failureThreshold: stats.failureThreshold,
+    successThreshold: stats.successThreshold,
+    timeout: stats.timeout,
+    nextAttemptTime: stats.nextAttemptTime,
+    lastError: stats.lastError,
     isHealthy: !rttClient.isCircuitOpen(),
   };
 }

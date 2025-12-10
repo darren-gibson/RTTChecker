@@ -18,7 +18,13 @@ This project prioritizes **clean, well-structured, maintainable code**:
 
 ## Code Quality Checklist
 
-### 1. ✅ Linting & Formatting
+### 1. ✅ Build & Compilation
+
+- [ ] **Build succeeds**: `npm run build` completes with no TypeScript errors
+- [ ] **Types are correct**: No type errors or suppressions added without justification
+- [ ] **Build verified before commit**: Always run `npm run build` before committing
+
+### 2. ✅ Linting & Formatting
 
 - [ ] **Linting passes**: `npm run lint` completes with no errors
 - [ ] **Formatting applied**: `npm run format` has been executed
@@ -27,9 +33,11 @@ This project prioritizes **clean, well-structured, maintainable code**:
 - [ ] No unused variables or imports (prefix with `_` if intentionally unused)
 - [ ] TypeScript types are properly defined (avoid `any` unless absolutely necessary)
 
-### 2. ✅ Testing (BDD-First Approach)
+### 3. ✅ Testing (BDD-First Approach)
 
-- [ ] **All tests pass**: `npm test` completes successfully
+- [ ] **All tests pass**: `npm test` completes successfully with **zero flaky tests**
+- [ ] **Tests are stable**: Run `npm test` at least 2-3 times to verify no intermittent failures
+- [ ] **Timeouts are appropriate**: Tests have sufficient timeout margins for CI/slower systems
 - [ ] **BDD tests for business logic**: New user-facing features MUST have Cucumber/Gherkin scenarios
 - [ ] **Test pyramid balance**: Prefer BDD scenarios > integration tests > unit tests
 - [ ] **Test coverage maintained**: No decrease in overall coverage percentage
@@ -49,7 +57,7 @@ This project prioritizes **clean, well-structured, maintainable code**:
 - [ ] Step definitions are reusable across scenarios
 - [ ] Tests document expected behavior as living documentation
 
-### 3. ✅ Code Structure & Patterns (Clean Code)
+### 4. ✅ Code Structure & Patterns (Clean Code)
 
 - [ ] **Follows existing patterns**: Consistent with codebase architecture
 - [ ] **Separation of concerns**: Domain logic, API clients, runtime, utilities properly separated
@@ -64,7 +72,7 @@ This project prioritizes **clean, well-structured, maintainable code**:
 - [ ] **Async/await**: Promises handled correctly, no dangling promises
 - [ ] **Event emitters**: Proper cleanup of listeners to prevent memory leaks
 
-### 4. ✅ Documentation
+### 5. ✅ Documentation
 
 - [ ] **Code comments**: Complex logic explained with inline comments
 - [ ] **JSDoc**: Public APIs documented with parameter and return types
@@ -72,21 +80,21 @@ This project prioritizes **clean, well-structured, maintainable code**:
 - [ ] **Architecture docs**: Significant changes documented in `/docs` directory
 - [ ] **Breaking changes**: Clearly documented with migration guidance
 
-### 5. ✅ Dependencies & Security
+### 6. ✅ Dependencies & Security
 
 - [ ] **Dependencies justified**: New dependencies have clear rationale
 - [ ] **Vulnerability check**: `npm audit --production` passes or vulnerabilities documented
 - [ ] **Version pinning**: Critical dependencies use exact versions
 - [ ] **License compliance**: New dependencies use compatible licenses (Apache 2.0, MIT, BSD)
 
-### 6. ✅ Git & Version Control
+### 7. ✅ Git & Version Control
 
 - [ ] **Meaningful commit messages**: Clear, concise description of what and why
 - [ ] **Commits are atomic**: Each commit represents a single logical change
 - [ ] **No debugging artifacts**: Console.logs, commented code, TODO markers addressed
 - [ ] **Branch is clean**: No merge conflicts or uncommitted changes
 
-### 7. ✅ Matter.js Specific Standards
+### 8. ✅ Matter.js Specific Standards
 
 - [ ] **Event timing**: Race conditions considered, especially around Matter server initialization
 - [ ] **Device lifecycle**: Proper startup, shutdown, and cleanup sequences
@@ -94,7 +102,7 @@ This project prioritizes **clean, well-structured, maintainable code**:
 - [ ] **Endpoint management**: Proper device type and cluster assignments
 - [ ] **Commissioning support**: QR codes and pairing information correct
 
-### 8. ✅ Performance & Reliability
+### 9. ✅ Performance & Reliability
 
 - [ ] **No blocking operations**: Long-running tasks use proper async patterns
 - [ ] **Resource cleanup**: Timers, intervals, connections properly closed
@@ -107,20 +115,21 @@ This project prioritizes **clean, well-structured, maintainable code**:
 When completing a task, AI assistants should:
 
 1. **Make the changes** requested by the user
-2. **Run linting**: `npm run lint` and fix any issues
-3. **Run formatting**: `npm run format`
-4. **Run tests**: `npm test` to verify nothing broke
-5. **Verify quality**: Check all applicable items above
-6. **Document if needed**: Update docs for significant changes
-7. **Commit appropriately**: Use clear commit messages
-8. **Report completion**: Summarize what was done and what quality checks passed
+2. **Run build**: `npm run build` to verify TypeScript compilation
+3. **Run linting**: `npm run lint` and fix any issues
+4. **Run formatting**: `npm run format`
+5. **Run tests**: `npm test` to verify nothing broke (run 2-3 times for stability)
+6. **Verify quality**: Check all applicable items above
+7. **Document if needed**: Update docs for significant changes
+8. **Commit appropriately**: Use clear commit messages
+9. **Report completion**: Summarize what was done and what quality checks passed
 
 ## Pre-Push Validation
 
 Before pushing to remote, always run:
 
 ```bash
-npm run lint && npm run format:check && npm test
+npm run build && npm run lint && npm run format:check && npm test
 ```
 
 Or use the comprehensive CI check:
