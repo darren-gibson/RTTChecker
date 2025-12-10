@@ -11,13 +11,31 @@ jest.unstable_mockModule('@matter/nodejs', () => ({
 }));
 */
 
+import { rmSync } from 'fs';
+
 let createServerNode, Environment, StorageBackendDisk;
+let testStoragePath: string;
+
 beforeAll(async () => {
   ({ createServerNode } = await import('../../../src/runtime/helpers/serverNodeFactory.js'));
   const main = await import('@matter/main');
   Environment = main.Environment;
   const nodejs = await import('@matter/nodejs');
   StorageBackendDisk = nodejs.StorageBackendDisk;
+});
+
+beforeEach(() => {
+  // Generate unique storage path for each test to avoid race conditions
+  testStoragePath = `.matter-storage-test-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+});
+
+afterEach(() => {
+  // Clean up test storage directory
+  try {
+    rmSync(testStoragePath, { recursive: true, force: true });
+  } catch (_error) {
+    // Ignore cleanup errors
+  }
 });
 
 describe('serverNodeFactory.createServerNode', () => {
@@ -37,13 +55,13 @@ describe('serverNodeFactory.createServerNode', () => {
       },
     };
 
-    const { environment, node } = await createServerNode(config);
+    const { environment, node } = await createServerNode(config, testStoragePath);
     expect(environment).toBe(Environment.default);
-    // Ensure storage path set
-    expect(environment.vars.get('storage.path')).toBe('.matter-storage');
+    // Ensure storage path set to our test path
+    expect(environment.vars.get('storage.path')).toBe(testStoragePath);
     // Ensure StorageBackendDisk is registered
     expect(() =>
-      environment.set(StorageBackendDisk, new StorageBackendDisk('.matter-storage'))
+      environment.set(StorageBackendDisk, new StorageBackendDisk(testStoragePath))
     ).not.toThrow();
 
     // Basic existence checks; detailed shape is owned by matter.js and mocked
@@ -85,12 +103,30 @@ describe('serverNodeFactory.createServerNode', () => {
       },
     };
 
-    const { node } = await createServerNode(config);
+    const { node } = await createServerNode(config, testStoragePath);
     expect(node).toBeDefined();
     // Factory should provide defaults (0xfff1 for vendorId, 0x8001 for productId)
   });
 
-  test('uses consistent storage path', async () => {
+  test('uses provided storage path', async () => {
+    const config = {
+      matter: {
+        port: 5540,
+        passcode: 20202021,
+        discriminator: 3840,
+        productName: 'Test',
+        statusDeviceName: 'Test Status',
+        vendorName: 'Test Vendor',
+        serialNumber: 'TEST-001',
+        useBridge: false,
+      },
+    };
+
+    const { environment } = await createServerNode(config, testStoragePath);
+    expect(environment.vars.get('storage.path')).toBe(testStoragePath);
+  });
+
+  test('defaults to .matter-storage when no storage path provided', async () => {
     const config = {
       matter: {
         port: 5540,
@@ -128,7 +164,7 @@ describe('serverNodeFactory.createServerNode', () => {
     expect(config.matter.discriminator).toBeGreaterThanOrEqual(0);
     expect(config.matter.discriminator).toBeLessThanOrEqual(4095);
 
-    const { node } = await createServerNode(config);
+    const { node } = await createServerNode(config, testStoragePath);
     expect(node).toBeDefined();
   });
 });

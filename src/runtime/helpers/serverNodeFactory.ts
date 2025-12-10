@@ -11,10 +11,13 @@ export interface ServerNodeResult {
   node: ServerNode;
 }
 
-export async function createServerNode(config: Config): Promise<ServerNodeResult> {
+export async function createServerNode(
+  config: Config,
+  storagePath: string = '.matter-storage'
+): Promise<ServerNodeResult> {
   const environment = Environment.default;
-  environment.vars.set('storage.path', '.matter-storage');
-  environment.set(StorageBackendDisk, new StorageBackendDisk('.matter-storage'));
+  environment.vars.set('storage.path', storagePath);
+  environment.set(StorageBackendDisk, new StorageBackendDisk(storagePath));
 
   // Type assertion for Matter configuration with optional properties
   const matterConfig = config.matter as typeof config.matter & {
