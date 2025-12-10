@@ -1,15 +1,15 @@
 /**
- * @deprecated This file is kept for backward compatibility.
- * Import from './circuitBreaker/index.js' instead.
+ * Circuit Breaker module barrel export
  */
 
+export { CircuitBreaker } from './CircuitBreaker.js';
 export {
-  CircuitBreaker,
   CircuitState,
   type CircuitBreakerConfig,
   type CircuitBreakerError,
+  type CircuitBreakerStats,
   type CircuitStateType,
   type FailureEvent,
   type StateChangeEvent,
   type SuccessEvent,
-} from './circuitBreaker/index.js';
+} from './types.js';
