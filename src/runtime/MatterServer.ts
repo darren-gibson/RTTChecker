@@ -1,5 +1,3 @@
-import { createHash } from 'crypto';
-
 import { UserLabelServer } from '@matter/main/behaviors/user-label';
 import { FixedLabelServer } from '@matter/main/behaviors/fixed-label';
 import type { ServerNode, Endpoint } from '@matter/main';
@@ -7,7 +5,6 @@ import type { ServerNode, Endpoint } from '@matter/main';
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
 import type { TrainStatusDevice, StatusChangeEvent } from '../devices/TrainStatusDevice.js';
-import { MODE_TO_STATUS, deriveModeFromDelay } from '../domain/modeMapping.js';
 
 import { TrainTemperatureServer } from './behaviors/TrainTemperatureServer.js';
 import { TrainStatusModeServer } from './behaviors/TrainStatusModeServer.js';
@@ -15,8 +12,9 @@ import { TrainStatusAirQualityServer } from './behaviors/TrainStatusAirQualitySe
 import { printCommissioningInfo } from './helpers/commissioningHelpers.js';
 import { ensureAggregatorRoot } from './helpers/bridgeSetup.js';
 import { createServerNode } from './helpers/serverNodeFactory.js';
-import { makeBridgedInfoBehavior, setEndpointName } from './helpers/matterHelpers.js';
 import { createEndpoints } from './helpers/endpointFactory.js';
+import { createBridgedDeviceInfoBehaviors } from './helpers/bridgedDeviceInfo.js';
+import { handleStatusChange, setEndpointLabels } from './helpers/eventHandlers.js';
 
 /**
  * Matter Server Implementation (v0.15 API)
@@ -32,33 +30,6 @@ export interface MatterServerResult {
 }
 
 const log = loggers.matter;
-
-function makeUniqueId(suffix: string): string {
-  const base = `${config.matter.serialNumber}-${suffix}`;
-  const hash = createHash('sha256').update(base).digest('hex');
-  // UniqueId must be 32 chars; take first 32 hex chars
-  return hash.slice(0, 32);
-}
-
-// Use helper to generate BD-BI behaviors
-
-const BridgedInfoTemp = makeBridgedInfoBehavior({
-  productName: config.matter.delayDeviceName ?? 'Train Delay',
-  nodeLabel: config.matter.delayDeviceName ?? 'Train Delay',
-  uniqueIdFactory: () => makeUniqueId('TEMP'),
-});
-
-const BridgedInfoMode = makeBridgedInfoBehavior({
-  productName: config.matter.statusDeviceName ?? 'Train Status',
-  nodeLabel: config.matter.statusDeviceName ?? 'Train Status',
-  uniqueIdFactory: () => makeUniqueId('MODE'),
-});
-
-const BridgedInfoAirQuality = makeBridgedInfoBehavior({
-  productName: config.matter.airQualityDeviceName ?? 'Train Air Quality',
-  nodeLabel: config.matter.airQualityDeviceName ?? 'Train Air Quality',
-  uniqueIdFactory: () => makeUniqueId('AIR'),
-});
 
 /**
  * Initialize and start the Matter server with train status device
@@ -94,6 +65,8 @@ export async function startMatterServer(
     FixedLabelServer,
   ];
   if (config.matter.useBridge) {
+    const { BridgedInfoTemp, BridgedInfoMode, BridgedInfoAirQuality } =
+      createBridgedDeviceInfoBehaviors(config);
     tempBehaviors.push(BridgedInfoTemp);
     modeBehaviors.push(BridgedInfoMode);
     airQualityBehaviors.push(BridgedInfoAirQuality);
@@ -140,67 +113,17 @@ export async function startMatterServer(
     log.info('🔗 Connecting train device to Matter endpoints...');
 
     // Set friendly labels; BD-BI already initialized with names when bridged
-    try {
-      if (tempSensor) {
-        await setEndpointName(tempSensor, config.matter.delayDeviceName ?? 'Train Delay');
+    await setEndpointLabels(
+      { tempSensor, modeDevice, airQualityDevice },
+      {
+        delayDeviceName: config.matter.delayDeviceName,
+        statusDeviceName: config.matter.statusDeviceName,
+        airQualityDeviceName: config.matter.airQualityDeviceName,
       }
-      if (modeDevice) {
-        await setEndpointName(modeDevice, config.matter.statusDeviceName ?? 'Train Status');
-      }
-      if (airQualityDevice) {
-        await setEndpointName(
-          airQualityDevice,
-          config.matter.airQualityDeviceName ?? 'Train Air Quality'
-        );
-      }
-      log.info('   ✓ Endpoint labels set');
-    } catch (e) {
-      const error = e as Error;
-      log.warn(`⚠️ Could not set endpoint labels: ${error.message}`);
-    }
+    );
 
     trainDevice.on('statusChange', async (status: StatusChangeEvent) => {
-      log.debug(`Train status changed: ${JSON.stringify(status)}`);
-      try {
-        // Derive mode from delay when available; otherwise use currentMode or unknown
-        let computedMode = deriveModeFromDelay(status?.delayMinutes);
-        // Fallback to provided currentMode if derivation failed (e.g., non-numeric)
-        if (Number.isNaN(Number(status?.delayMinutes)) && typeof status?.currentMode === 'number') {
-          computedMode = status.currentMode;
-        }
-
-        const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
-
-        // Update mode device if present
-        if (modeDevice) {
-          await modeDevice.act(async (agent) => {
-            await (agent as any).modeSelect.setTrainStatus(statusCode);
-          });
-        }
-
-        // Update temperature sensor from delay minutes (nullable supported)
-        // Special case: if status is unknown and no train selected, use 999°C sentinel
-        if (tempSensor) {
-          await tempSensor.act(async (agent) => {
-            const typedAgent = agent as any;
-            if (statusCode === 'unknown' && status?.selectedService === null) {
-              await typedAgent.temperatureMeasurement.setNoServiceTemperature();
-            } else {
-              await typedAgent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
-            }
-          });
-        }
-
-        // Update air quality device with color-coded status if present
-        if (airQualityDevice) {
-          await airQualityDevice.act(async (agent) => {
-            await (agent as any).airQuality.setTrainStatus(statusCode);
-          });
-        }
-      } catch (error) {
-        const err = error as Error;
-        log.error(`Error updating Matter endpoints: ${err.message}`);
-      }
+      await handleStatusChange(status, { tempSensor, modeDevice, airQualityDevice });
     });
 
     log.info('   ✓ Train device event listeners attached');
