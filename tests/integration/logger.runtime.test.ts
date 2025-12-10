@@ -11,7 +11,7 @@ function runWithEnv(env) {
     const stdoutChunks = [];
     const stderrChunks = [];
     let isReady = false;
-    
+
     // Use tsx to execute TypeScript directly - it's faster and better with ESM
     const tsxPath = path.resolve(__dirname, '../../node_modules/.bin/tsx');
     const child = spawn(tsxPath, [path.resolve(__dirname, '../../index.ts')], {
@@ -32,7 +32,7 @@ function runWithEnv(env) {
     child.stderr.on('data', (data) => {
       stderrChunks.push(data);
       const output = data.toString();
-      
+
       if (output.includes('__READY__')) {
         isReady = true;
         // Give it a moment to capture any trailing logs, then gracefully exit
@@ -51,9 +51,11 @@ function runWithEnv(env) {
     // Normal operation completes via __READY__ signal
     const safetyTimeout = setTimeout(() => {
       child.kill('SIGKILL'); // Force kill on timeout
-      reject(new Error(
-        `Test timeout: ${isReady ? 'Ready signal received but process hung' : 'No ready signal received - Matter.js may have hung'}`
-      ));
+      reject(
+        new Error(
+          `Test timeout: ${isReady ? 'Ready signal received but process hung' : 'No ready signal received - Matter.js may have hung'}`
+        )
+      );
     }, 18000); // 18s - gives plenty of margin but catches real hangs
 
     child.on('close', (code) => {

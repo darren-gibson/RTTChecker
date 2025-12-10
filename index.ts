@@ -58,12 +58,12 @@ if (!isTestEnv()) {
     })
     .catch((error) => {
       log.error('❌ Failed to start Matter server:', error);
-      
+
       // Emit failure signal for test environments
       if (process.env['EMIT_READY_SIGNAL'] === 'true') {
         process.stderr.write('__FAILED__\n');
       }
-      
+
       process.exit(1);
     });
 
