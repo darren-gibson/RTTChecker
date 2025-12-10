@@ -102,14 +102,27 @@ This document summarizes the systematic code refactoring work completed to impro
   - `src/config/validation/index.ts` (37 lines) - Validation orchestration
 - **Benefit**: Clear separation of schema → refinements → loading → error handling, 98.75% test coverage
 
+### ✅ Priority #8: Extract Domain Logic from TrainStatusDevice.ts
+
+**File**: `src/devices/TrainStatusDevice.ts`
+
+- **Before**: 218 lines (mixed device logic, domain calculations, error handling)
+- **After**: 179 lines (focused device orchestration)
+- **Reduction**: 39 lines (17.9%)
+- **Created**:
+  - `src/domain/delayCalculation.ts` (45 lines) - Delay calculation utilities
+  - `src/devices/errorHandlers.ts` (48 lines) - Error logging and classification
+  - `src/devices/statusMapping.ts` (47 lines) - Train status to Matter mode mapping
+- **Benefit**: Domain logic separated from device implementation, improved testability, 96.29% devices module coverage
+
 ## Summary Statistics
 
 ### Lines of Code Impact
 
-- **Total files refactored**: 7 major files + 26 new modules created
-- **Total lines reorganized**: ~2,300+ lines
+- **Total files refactored**: 8 major files + 29 new modules created
+- **Total lines reorganized**: ~2,450+ lines
 - **Wrapper files**: 7 backward-compatible wrappers (7-17 lines each)
-- **New focused modules**: 26 files (average ~75 lines each)
+- **New focused modules**: 29 files (average ~70 lines each)
 
 ### Code Quality Metrics
 
