@@ -22,10 +22,10 @@ export class TrainStatusModeServer extends ModeSelectServer {
    * Update the mode based on train status code
    */
   async setTrainStatus(statusCode: TrainStatusType): Promise<void> {
+    const oldMode = this.state.currentMode;
     const modeValue = STATUS_TO_MODE[statusCode] ?? STATUS_TO_MODE.unknown;
     log.debug(
-      { statusCode, modeValue, currentMode: this.state.currentMode },
-      'Mode device: setTrainStatus called'
+      `Mode device: setTrainStatus statusCode=${statusCode} oldMode=${oldMode} newMode=${modeValue} changed=${oldMode !== modeValue}`
     );
     await this.changeToMode({ newMode: modeValue });
   }

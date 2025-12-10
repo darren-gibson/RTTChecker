@@ -6,6 +6,7 @@ import {
   celsiusToMeasuredValue,
   clampDelay,
 } from './baseBehaviorHelpers.js';
+import { log } from '../../utils/logger.js';
 
 /**
  * Custom Temperature Measurement Behavior
@@ -35,20 +36,33 @@ export class TrainTemperatureServer extends TemperatureMeasurementServer {
    * between on-time (0°C) and no-service (50°C - max delay).
    */
   async setNoServiceTemperature(): Promise<void> {
-    await this.setMeasuredValue(TemperatureConstants.NO_SERVICE_SENTINEL);
+    const oldValue = (this as any).state.measuredValue;
+    const newValue = TemperatureConstants.NO_SERVICE_SENTINEL;
+    log.debug(
+      `Temperature: setNoServiceTemperature oldValue=${oldValue} newValue=${newValue} changed=${oldValue !== newValue}`
+    );
+    await this.setMeasuredValue(newValue);
   }
 
   /**
    * Update temperature based on train delay in minutes
    */
   async setDelayMinutes(delayMinutes: number | null): Promise<void> {
+    const oldValue = (this as any).state.measuredValue;
+    
     if (delayMinutes == null) {
       // Unknown delay → expose unknown temperature by setting measuredValue to null
+      log.debug(
+        `Temperature: setDelayMinutes delayMinutes=null oldValue=${oldValue} newValue=null`
+      );
       await this.setMeasuredValue(null);
       return;
     }
     const tempCelsius = clampDelay(delayMinutes);
     const tempValue = celsiusToMeasuredValue(tempCelsius);
+    log.debug(
+      `Temperature: setDelayMinutes delayMinutes=${delayMinutes} tempCelsius=${tempCelsius} oldValue=${oldValue} newValue=${tempValue} changed=${oldValue !== tempValue}`
+    );
     await this.setMeasuredValue(tempValue);
   }
 
