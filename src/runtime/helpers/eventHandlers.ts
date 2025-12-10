@@ -39,8 +39,11 @@ export async function handleStatusChange(
 
     const statusCode = MODE_TO_STATUS[computedMode] || 'unknown';
 
+    log.debug({ computedMode, statusCode, delay: status?.delayMinutes }, 'Computed status from delay');
+
     // Update mode device if present
     if (endpoints.modeDevice) {
+      log.debug({ statusCode }, 'Updating mode device');
       await endpoints.modeDevice.act(async (agent) => {
         await (agent as any).modeSelect.setTrainStatus(statusCode);
       });
@@ -49,9 +52,14 @@ export async function handleStatusChange(
     // Update temperature sensor from delay minutes (nullable supported)
     // Special case: if status is unknown and no train selected, use 999°C sentinel
     if (endpoints.tempSensor) {
+      const isNoService = statusCode === 'unknown' && status?.selectedService === null;
+      log.debug(
+        { delay: status?.delayMinutes, isNoService },
+        'Updating temperature sensor'
+      );
       await endpoints.tempSensor.act(async (agent) => {
         const typedAgent = agent as any;
-        if (statusCode === 'unknown' && status?.selectedService === null) {
+        if (isNoService) {
           await typedAgent.temperatureMeasurement.setNoServiceTemperature();
         } else {
           await typedAgent.temperatureMeasurement.setDelayMinutes(status?.delayMinutes ?? null);
@@ -61,6 +69,7 @@ export async function handleStatusChange(
 
     // Update air quality device with color-coded status if present
     if (endpoints.airQualityDevice) {
+      log.debug({ statusCode }, 'Updating air quality device');
       await endpoints.airQualityDevice.act(async (agent) => {
         await (agent as any).airQuality.setTrainStatus(statusCode);
       });

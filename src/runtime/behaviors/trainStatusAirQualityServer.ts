@@ -39,6 +39,10 @@ export class TrainStatusAirQualityServer extends AirQualityServer {
    */
   async setTrainStatus(statusCode: TrainStatusType | 'critical'): Promise<void> {
     const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode] ?? 0; // Default to Unknown
+    log.debug(
+      { statusCode, airQualityValue, currentValue: this.state.airQuality },
+      'Air quality: setTrainStatus called'
+    );
     await this.setAirQuality(airQualityValue);
   }
 
@@ -46,7 +50,11 @@ export class TrainStatusAirQualityServer extends AirQualityServer {
    * Set air quality value directly
    */
   async setAirQuality(value: number): Promise<void> {
-    log.debug(`Setting air quality to: ${value}`);
+    const oldValue = this.state.airQuality;
     this.state.airQuality = value;
+    log.debug(
+      { oldValue, newValue: value, changed: oldValue !== value },
+      'Air quality: state updated'
+    );
   }
 }
