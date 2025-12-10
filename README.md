@@ -84,11 +84,27 @@ Configure via `LOG_LEVEL` / `MATTER_LOG_FORMAT`. Core facilities: `rtt-checker`,
 ## 8. Development & Testing
 
 ```bash
-npm test            # Full Jest suite
-npm run coverage    # (if defined) open coverage report
+npm test            # Full Jest suite (533+ tests)
+npm run test:bdd    # BDD scenarios only
+npm run lint        # ESLint checks
+npm run format      # Auto-format with Prettier
+npm run ci          # Full quality check (lint + format + test + audit)
 ```
 
 Coverage includes selection logic, error handling, retry backoff jitter, and utility edge cases.
+
+### Contributing & Quality Standards
+
+All code changes must meet the quality standards defined in [.github/DEFINITION_OF_DONE.md](.github/DEFINITION_OF_DONE.md):
+
+- ✅ All tests passing (533+ tests)
+- ✅ Linting clean (`npm run lint`)
+- ✅ Formatting applied (`npm run format`)
+- ✅ New functionality has tests (BDD, unit, or integration)
+- ✅ TypeScript best practices (proper types, no `any`)
+- ✅ Proper error handling and logging
+
+GitHub Copilot and AI assistants are configured to follow these standards automatically via [.github/copilot-instructions.md](.github/copilot-instructions.md).
 
 ## 10. Deployment
 

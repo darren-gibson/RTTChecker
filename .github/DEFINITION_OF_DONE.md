@@ -1,0 +1,165 @@
+# Definition of Done - Quality Standards
+
+## Overview
+
+All changes to this codebase must meet the following quality standards before being considered complete. AI-based code assistants should validate these criteria before marking work as done.
+
+## Code Quality Checklist
+
+### 1. ✅ Linting & Formatting
+
+- [ ] **Linting passes**: `npm run lint` completes with no errors
+- [ ] **Formatting applied**: `npm run format` has been executed
+- [ ] **Formatting verified**: `npm run format:check` passes
+- [ ] Import order follows project conventions (external imports, blank line, internal imports sorted alphabetically)
+- [ ] No unused variables or imports (prefix with `_` if intentionally unused)
+- [ ] TypeScript types are properly defined (avoid `any` unless absolutely necessary)
+
+### 2. ✅ Testing
+
+- [ ] **All tests pass**: `npm test` completes successfully
+- [ ] **New functionality has tests**: Unit tests, integration tests, or BDD scenarios as appropriate
+- [ ] **Test coverage maintained**: No decrease in overall coverage percentage
+- [ ] **Edge cases tested**: Zero values, null/undefined, boundary conditions
+- [ ] **Error paths tested**: Failure scenarios and error handling validated
+- [ ] BDD tests use Gherkin syntax in `.feature` files for business logic
+- [ ] Tests are readable and maintainable with clear descriptions
+
+### 3. ✅ Code Structure & Patterns
+
+- [ ] **Follows existing patterns**: Consistent with codebase architecture
+- [ ] **Separation of concerns**: Domain logic, API clients, runtime, utilities properly separated
+- [ ] **Error handling**: Uses custom error classes from `src/errors.ts` or domain-specific errors
+- [ ] **Logging**: Appropriate use of logger with correct log levels (debug, info, warn, error)
+- [ ] **TypeScript best practices**: Proper use of types, interfaces, and generics
+- [ ] **Async/await**: Promises handled correctly, no dangling promises
+- [ ] **Event emitters**: Proper cleanup of listeners to prevent memory leaks
+
+### 4. ✅ Documentation
+
+- [ ] **Code comments**: Complex logic explained with inline comments
+- [ ] **JSDoc**: Public APIs documented with parameter and return types
+- [ ] **README updates**: User-facing changes reflected in relevant README files
+- [ ] **Architecture docs**: Significant changes documented in `/docs` directory
+- [ ] **Breaking changes**: Clearly documented with migration guidance
+
+### 5. ✅ Dependencies & Security
+
+- [ ] **Dependencies justified**: New dependencies have clear rationale
+- [ ] **Vulnerability check**: `npm audit --production` passes or vulnerabilities documented
+- [ ] **Version pinning**: Critical dependencies use exact versions
+- [ ] **License compliance**: New dependencies use compatible licenses (Apache 2.0, MIT, BSD)
+
+### 6. ✅ Git & Version Control
+
+- [ ] **Meaningful commit messages**: Clear, concise description of what and why
+- [ ] **Commits are atomic**: Each commit represents a single logical change
+- [ ] **No debugging artifacts**: Console.logs, commented code, TODO markers addressed
+- [ ] **Branch is clean**: No merge conflicts or uncommitted changes
+
+### 7. ✅ Matter.js Specific Standards
+
+- [ ] **Event timing**: Race conditions considered, especially around Matter server initialization
+- [ ] **Device lifecycle**: Proper startup, shutdown, and cleanup sequences
+- [ ] **Cluster implementations**: Follow Matter specification patterns
+- [ ] **Endpoint management**: Proper device type and cluster assignments
+- [ ] **Commissioning support**: QR codes and pairing information correct
+
+### 8. ✅ Performance & Reliability
+
+- [ ] **No blocking operations**: Long-running tasks use proper async patterns
+- [ ] **Resource cleanup**: Timers, intervals, connections properly closed
+- [ ] **Error recovery**: Retry logic and circuit breakers where appropriate
+- [ ] **Memory leaks**: Event listeners and resources properly disposed
+- [ ] **API rate limiting**: External API calls respect rate limits and timeouts
+
+## AI Assistant Workflow
+
+When completing a task, AI assistants should:
+
+1. **Make the changes** requested by the user
+2. **Run linting**: `npm run lint` and fix any issues
+3. **Run formatting**: `npm run format`
+4. **Run tests**: `npm test` to verify nothing broke
+5. **Verify quality**: Check all applicable items above
+6. **Document if needed**: Update docs for significant changes
+7. **Commit appropriately**: Use clear commit messages
+8. **Report completion**: Summarize what was done and what quality checks passed
+
+## Pre-Push Validation
+
+Before pushing to remote, always run:
+
+```bash
+npm run lint && npm run format:check && npm test
+```
+
+Or use the comprehensive CI check:
+
+```bash
+npm run ci
+```
+
+## When to Skip Checks
+
+Some checks may be skipped in specific situations:
+
+- **Draft/WIP work**: Mark clearly with `[WIP]` in commit messages
+- **Documentation only**: May skip tests if only markdown changed
+- **Emergency hotfixes**: Document technical debt for follow-up
+
+## Examples of Good Practices
+
+### ✅ Good Commit Message
+
+```
+Add BDD tests for Matter server startup race condition
+
+- Implement 7 Cucumber scenarios covering initialization sequence
+- Test event listener timing and first status update capture
+- Validate zero delay edge case and all delay ranges
+- All 533 tests passing with proper formatting
+```
+
+### ✅ Good Test Description
+
+```typescript
+test('should emit statusChange event when train delay changes', () => {
+  // Arrange: Set up device with initial state
+  // Act: Trigger status update
+  // Assert: Verify event emitted with correct data
+});
+```
+
+### ✅ Good Error Handling
+
+```typescript
+try {
+  const result = await rttSearch(config);
+  return processResult(result);
+} catch (error) {
+  if (error instanceof RTTAPIError) {
+    logger.error('RTT API failed', { error: error.message, code: error.code });
+    throw new TrainSelectionError('Failed to fetch train data', { cause: error });
+  }
+  throw error;
+}
+```
+
+## Enforcement
+
+- **CI Pipeline**: GitHub Actions enforces linting, formatting, and tests
+- **Pre-commit hooks**: Consider adding hooks for local validation (optional)
+- **Code review**: Human reviewers verify quality standards are met
+- **AI assistants**: Should validate these standards before marking work complete
+
+## Related Documents
+
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
+- [README.md](../README.md) - Project overview
+- [docs/](../docs/) - Technical documentation
+- [tests/bdd/README.md](../tests/bdd/README.md) - BDD testing guide
+
+---
+
+**Note**: This is a living document. Update it as project standards evolve.
