@@ -10,6 +10,12 @@ import {
 import { TrainStatusDevice } from '../../src/devices/TrainStatusDevice.js';
 import { rttSearch } from '../../src/api/rttApiClient.js';
 import { startMatterServer } from '../../src/runtime/MatterServer.js';
+import {
+  MockTrainFactory,
+  MatterServerMockSetup,
+  StatusEventCapture,
+  ConsoleLogCapture,
+} from '../helpers/matterStartupTestHelpers.js';
 
 // Mock RTT API (external dependency)
 jest.mock('../../src/api/rttApiClient.js', () => ({
@@ -44,225 +50,66 @@ const feature = loadFeature('./tests/bdd/features/matter-startup-initialization.
  * test the critical race condition fix without requiring full Matter.js native dependencies.
  */
 
-// Mock RTT API responses
+// Test helper instances
 const mockRTTResponses = new Map();
-
-// Track initialization sequence
 const initSequence = [];
-const eventLog = [];
+const mockTrainFactory = new MockTrainFactory();
+const eventCapture = new StatusEventCapture();
+const consoleCapture = new ConsoleLogCapture();
 
-// Helper to create mock RTT API response that matches real RTT API structure
-// Based on actual RTT API response from tests/examples/search.json
+// Legacy function for backward compatibility - delegates to factory
 function createMockRTTResponse(delayMinutes) {
-  const now = new Date();
-  // Schedule train to depart 30 minutes from now (within default 20-80 minute window)
-  const scheduledTime = new Date(now.getTime() + 30 * 60000);
-  const scheduledHHMM = scheduledTime.toTimeString().slice(0, 5).replace(':', ''); // "0957" format
-
-  // Calculate arrival time (45 minute journey)
-  const arrivalTime = new Date(scheduledTime.getTime() + 45 * 60000);
-  const arrivalHHMM = arrivalTime.toTimeString().slice(0, 5).replace(':', '');
-
-  // Calculate realtime departure with delay
-  const realtimeTime = new Date(scheduledTime.getTime() + delayMinutes * 60000);
-  const realtimeHHMM = realtimeTime.toTimeString().slice(0, 5).replace(':', '');
-
-  return {
-    location: {
-      name: 'Cambridge',
-      crs: 'CBG',
-      tiploc: 'CAMBDGE',
-      country: 'gb',
-      system: 'nr',
-    },
-    filter: {
-      destination: {
-        name: 'London Kings Cross',
-        crs: 'KGX',
-        tiploc: 'KNGX',
-        country: 'gb',
-        system: 'nr',
-      },
-    },
-    services: [
-      {
-        locationDetail: {
-          realtimeActivated: true,
-          tiploc: 'CAMBDGE',
-          crs: 'CBG',
-          description: 'Cambridge',
-          // Scheduled times in HHMM format (no colon)
-          gbttBookedDeparture: scheduledHHMM,
-          // Realtime times in HHMM format
-          realtimeDeparture: realtimeHHMM,
-          realtimeDepartureActual: false,
-          // This is the key field - lateness in minutes
-          realtimeGbttDepartureLateness: delayMinutes,
-          origin: [
-            {
-              tiploc: 'CAMBDGE',
-              description: 'Cambridge',
-              workingTime: scheduledHHMM + '00', // "095700" format
-              publicTime: scheduledHHMM,
-            },
-          ],
-          destination: [
-            {
-              tiploc: 'KNGX', // MUST match destTiploc from config
-              description: 'London Kings Cross',
-              workingTime: arrivalHHMM + '00',
-              publicTime: arrivalHHMM,
-            },
-          ],
-          isCall: true,
-          isPublicCall: true,
-          platform: '2',
-          platformConfirmed: true,
-          displayAs: 'ORIGIN',
-        },
-        serviceUid: 'TEST123',
-        runDate: now.toISOString().split('T')[0],
-        trainIdentity: '2C23',
-        runningIdentity: '2C23',
-        atocCode: 'GN',
-        atocName: 'Great Northern',
-        serviceType: 'train',
-        isPassenger: true,
-      },
-    ],
-  };
+  return mockTrainFactory.createMockRTTResponse(delayMinutes);
 }
 
-// Setup mock implementations
-function setupMocks() {
-  // Mock RTT API to return configured response
-  (rttSearch as jest.Mock).mockImplementation(async () => {
-    const response = mockRTTResponses.get('current');
-    if (!response) {
-      throw new Error('RTT API not configured for test');
-    }
-    return response;
-  });
-
-  // Mock MatterServer with realistic behavior
-  // This simulates the REAL initialization sequence and event listener attachment
-  (startMatterServer as jest.Mock).mockImplementation(async (device) => {
-    initSequence.push('Matter server start called');
-
-    // Create lightweight endpoint mocks
-    const createEndpoint = () => ({
-      act: jest.fn(async (callback) => {
-        await callback({
-          temperatureMeasurement: { setDelayMinutes: jest.fn() },
-          modeSelect: { setTrainStatus: jest.fn() },
-          airQuality: { setAirQuality: jest.fn() },
-        });
-      }),
-    });
-
-    const mockServer = {
-      node: {
-        close: jest.fn(async () => {}),
-        run: jest.fn(async () => {}),
-      },
-      tempSensor: createEndpoint(),
-      modeDevice: createEndpoint(),
-      airQualityDevice: createEndpoint(),
-      close: jest.fn(async () => {}),
-    };
-
-    // This is the CRITICAL part - attach event listeners just like real MatterServer does
-    // This must happen BEFORE the function returns
-    if (device) {
-      device.on('statusChange', async (status) => {
-        initSequence.push('Event handler called');
-        // Simulate updating all endpoints (like real MatterServer.ts does)
-        if (mockServer.tempSensor) {
-          await mockServer.tempSensor.act(async (agent) => {
-            await agent.temperatureMeasurement?.setDelayMinutes?.(status.delayMinutes);
-          });
-        }
-        if (mockServer.modeDevice) {
-          await mockServer.modeDevice.act(async (agent) => {
-            await agent.modeSelect?.setTrainStatus?.(status.trainStatus);
-          });
-        }
-        if (mockServer.airQualityDevice) {
-          await mockServer.airQualityDevice.act(async (agent) => {
-            const airQuality = STATUS_TO_AIR_QUALITY[status.trainStatus] ?? 0;
-            await agent.airQuality?.setAirQuality?.(airQuality);
-          });
-        }
-      });
-    }
-
-    initSequence.push('Matter server initialized');
-
-    return mockServer;
-  });
-}
+// Mock setup instance
+const mockSetup = new MatterServerMockSetup(
+  initSequence,
+  mockRTTResponses,
+  rttSearch as jest.Mock,
+  startMatterServer as jest.Mock
+);
 
 defineFeature(feature, (test) => {
   let device;
   let matterServer;
-  let capturedEvents;
-  let logMessages;
 
   beforeEach(() => {
-    // Reset tracking arrays (use assignment for let variables, length for const)
+    // Reset all tracking via helper classes
     initSequence.length = 0;
-    eventLog.length = 0;
-    capturedEvents = [];
-    logMessages = [];
     mockRTTResponses.clear();
+    eventCapture.reset();
+    consoleCapture.reset();
     matterServer = undefined;
 
-    // Setup RTT API mock (reuses existing mock implementation)
-    setupMocks();
+    // Setup mocks
+    mockSetup.setupMocks();
 
-    // Create a real TrainStatusDevice
+    // Create device and attach event capture
     device = new TrainStatusDevice();
+    eventCapture.captureFrom(device);
 
-    // Capture statusChange events (inline function is faster than separate declaration)
-    device.on('statusChange', (status) => {
-      eventLog.push({
-        timestamp: new Date(),
-        event: 'statusChange',
-        mode: status.currentMode,
-        delay: status.delayMinutes,
-      });
-      capturedEvents.push(status);
-    });
-
-    // Mock console/logger to capture log sequence (only if not already mocked)
-    if (!console.log.originalLog) {
-      console.log.originalLog = console.log;
-    }
-    console.log = (...args) => {
-      logMessages.push(args.join(' '));
-      console.log.originalLog(...args);
-    };
+    // Start console capture
+    consoleCapture.start();
   });
 
   afterEach(async () => {
-    // Clean up device synchronously (faster)
+    // Stop console capture
+    consoleCapture.stop();
+
+    // Clean up device
     if (device) {
       device.stopPeriodicUpdates();
       device.removeAllListeners();
     }
 
-    // Clean up server asynchronously only if it exists
+    // Clean up server
     if (matterServer?.close) {
       try {
         await matterServer.close();
       } catch (_err) {
         // Ignore cleanup errors
       }
-    }
-
-    // Restore console synchronously
-    if (console.log.originalLog) {
-      console.log = console.log.originalLog;
     }
   });
 
@@ -320,17 +167,17 @@ defineFeature(feature, (test) => {
     });
 
     and('the first train status should be received by Matter endpoints', () => {
-      expect(capturedEvents.length).toBeGreaterThan(0);
-      expect(eventLog.length).toBeGreaterThan(0);
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
+      expect(eventCapture.eventLog.length).toBeGreaterThan(0);
     });
 
     and('the air quality sensor should reflect the actual train status', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       expect(firstEvent).toBeDefined();
       expect(firstEvent.currentMode).toBeDefined();
 
       // Verify the event was processed (not lost)
-      expect(eventLog[0].event).toBe('statusChange');
+      expect(eventCapture.eventLog[0].event).toBe('statusChange');
     });
   });
 
@@ -357,8 +204,8 @@ defineFeature(feature, (test) => {
     });
 
     then('the air quality should be "Good"', () => {
-      expect(capturedEvents.length).toBeGreaterThan(0);
-      const firstEvent = capturedEvents[0];
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
+      const firstEvent = eventCapture.capturedEvents[0];
 
       // Map the mode to status to air quality
       const mode = firstEvent.currentMode;
@@ -372,21 +219,21 @@ defineFeature(feature, (test) => {
     });
 
     and('it should display as green in Google Home', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(AIR_QUALITY_COLORS[airQualityValue]).toBe('green');
     });
 
     and('the numeric value should be 1', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(airQualityValue).toBe(1); // AirQuality.Good
     });
 
     and('the temperature sensor should show 0 degrees', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       expect(firstEvent.delayMinutes).toBe(0);
     });
   });
@@ -414,29 +261,29 @@ defineFeature(feature, (test) => {
     });
 
     then('the air quality should be "Poor"', () => {
-      expect(capturedEvents.length).toBeGreaterThan(0);
-      const firstEvent = capturedEvents[0];
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(AIR_QUALITY_NAMES[airQualityValue]).toBe('Poor');
     });
 
     and('it should display as red in Google Home', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(AIR_QUALITY_COLORS[airQualityValue]).toBe('red');
     });
 
     and('the numeric value should be 4', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(airQualityValue).toBe(4); // AirQuality.Poor
     });
 
     and('the temperature sensor should show 15 degrees', () => {
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       expect(firstEvent.delayMinutes).toBe(15);
     });
   });
@@ -484,7 +331,7 @@ defineFeature(feature, (test) => {
 
     and('I should see "Started periodic updates" logged', () => {
       // Verify periodic updates happened - we should have captured events
-      expect(capturedEvents.length).toBeGreaterThan(0);
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
     });
 
     and('the log sequence should be in the correct order', () => {
@@ -534,7 +381,7 @@ defineFeature(feature, (test) => {
     });
 
     and('the first statusChange event should be handled', () => {
-      expect(capturedEvents.length).toBeGreaterThan(0);
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
       expect(firstEventTime).toBeDefined();
     });
 
@@ -544,7 +391,7 @@ defineFeature(feature, (test) => {
       expect(listenersAttachedTime).toBeLessThanOrEqual(firstEventTime);
 
       // Verify all emitted events were captured
-      expect(capturedEvents.length).toBe(eventLog.length);
+      expect(eventCapture.capturedEvents.length).toBe(eventCapture.eventLog.length);
     });
   });
 
@@ -583,8 +430,8 @@ defineFeature(feature, (test) => {
 
     then(/the air quality should be "(.*)"/, (quality) => {
       expectedQuality = quality;
-      expect(capturedEvents.length).toBeGreaterThan(0);
-      const firstEvent = capturedEvents[0];
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(AIR_QUALITY_NAMES[airQualityValue]).toBe(expectedQuality);
@@ -592,7 +439,7 @@ defineFeature(feature, (test) => {
 
     and(/it should display as (.*) in Google Home/, (color) => {
       expectedColor = color;
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(AIR_QUALITY_COLORS[airQualityValue]).toBe(expectedColor);
@@ -600,7 +447,7 @@ defineFeature(feature, (test) => {
 
     and(/the numeric value should be (\d+)/, (value) => {
       expectedValue = parseInt(value);
-      const firstEvent = capturedEvents[0];
+      const firstEvent = eventCapture.capturedEvents[0];
       const statusCode = firstEvent.trainStatus;
       const airQualityValue = STATUS_TO_AIR_QUALITY[statusCode];
       expect(airQualityValue).toBe(expectedValue);
@@ -649,21 +496,21 @@ defineFeature(feature, (test) => {
 
     then('all status updates should be captured', () => {
       // Should have at least the initial update
-      expect(capturedEvents.length).toBeGreaterThan(0);
+      expect(eventCapture.capturedEvents.length).toBeGreaterThan(0);
     });
 
     and('the air quality should reflect the latest train status', () => {
-      const latestEvent = capturedEvents[capturedEvents.length - 1];
+      const latestEvent = eventCapture.capturedEvents[eventCapture.capturedEvents.length - 1];
       expect(latestEvent).toBeDefined();
       expect(latestEvent.currentMode).toBeDefined();
     });
 
     and('no updates should be lost during initialization', () => {
       // All emitted events should be in eventLog
-      expect(eventLog.length).toBe(capturedEvents.length);
+      expect(eventCapture.eventLog.length).toBe(eventCapture.capturedEvents.length);
 
       // Verify no gaps in event sequence
-      eventLog.forEach((log, _index) => {
+      eventCapture.eventLog.forEach((log, _index) => {
         expect(log.event).toBe('statusChange');
         expect(log.mode).toBeDefined();
       });

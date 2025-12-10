@@ -2,7 +2,7 @@
  * Circuit Breaker Pattern Implementation
  * Prevents cascading failures by temporarily blocking requests to failing services
  *
- * @see docs/VALIDATION_AND_RETRY.md for usage examples
+ * @see docs/VALIDATION_AND_RESILIENCE.md for usage examples
  */
 
 import type {
