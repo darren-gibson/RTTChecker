@@ -4,6 +4,18 @@
 
 All changes to this codebase must meet the following quality standards before being considered complete. AI-based code assistants should validate these criteria before marking work as done.
 
+## Clean Code Principles
+
+This project prioritizes **clean, well-structured, maintainable code**:
+
+- **Clear intent over clever code**: Readable code that clearly expresses its purpose
+- **Small, focused functions**: Each function does one thing well
+- **Meaningful names**: Variables, functions, and classes have descriptive names
+- **Minimal nesting**: Prefer early returns and guard clauses
+- **DRY principle**: Don't repeat yourself - extract common patterns
+- **Separation of concerns**: Domain logic separate from infrastructure
+- **Explicit over implicit**: Clear, obvious code over hidden magic
+
 ## Code Quality Checklist
 
 ### 1. ✅ Linting & Formatting
@@ -15,20 +27,37 @@ All changes to this codebase must meet the following quality standards before be
 - [ ] No unused variables or imports (prefix with `_` if intentionally unused)
 - [ ] TypeScript types are properly defined (avoid `any` unless absolutely necessary)
 
-### 2. ✅ Testing
+### 2. ✅ Testing (BDD-First Approach)
 
 - [ ] **All tests pass**: `npm test` completes successfully
-- [ ] **New functionality has tests**: Unit tests, integration tests, or BDD scenarios as appropriate
+- [ ] **BDD tests for business logic**: New user-facing features MUST have Cucumber/Gherkin scenarios
+- [ ] **Test pyramid balance**: Prefer BDD scenarios > integration tests > unit tests
 - [ ] **Test coverage maintained**: No decrease in overall coverage percentage
 - [ ] **Edge cases tested**: Zero values, null/undefined, boundary conditions
 - [ ] **Error paths tested**: Failure scenarios and error handling validated
-- [ ] BDD tests use Gherkin syntax in `.feature` files for business logic
-- [ ] Tests are readable and maintainable with clear descriptions
 
-### 3. ✅ Code Structure & Patterns
+**Testing Strategy Priority:**
+
+1. **BDD/Cucumber** (`.feature` files): For business logic, user stories, acceptance criteria
+2. **Integration tests**: For external system interactions, API clients, database operations
+3. **Unit tests**: For isolated utility functions, pure domain logic, edge cases
+
+**BDD Best Practices:**
+
+- [ ] Feature files use clear, non-technical language (Given/When/Then)
+- [ ] Scenarios test business value, not implementation details
+- [ ] Step definitions are reusable across scenarios
+- [ ] Tests document expected behavior as living documentation
+
+### 3. ✅ Code Structure & Patterns (Clean Code)
 
 - [ ] **Follows existing patterns**: Consistent with codebase architecture
 - [ ] **Separation of concerns**: Domain logic, API clients, runtime, utilities properly separated
+- [ ] **Single Responsibility**: Each class/function has one clear purpose
+- [ ] **Small functions**: Functions are < 20 lines when possible (exceptions for readability)
+- [ ] **Descriptive naming**: Names reveal intent without needing comments
+- [ ] **No code duplication**: Extract repeated logic into reusable functions
+- [ ] **Minimal complexity**: Avoid deeply nested conditionals, prefer early returns
 - [ ] **Error handling**: Uses custom error classes from `src/errors.ts` or domain-specific errors
 - [ ] **Logging**: Appropriate use of logger with correct log levels (debug, info, warn, error)
 - [ ] **TypeScript best practices**: Proper use of types, interfaces, and generics
@@ -110,6 +139,21 @@ Some checks may be skipped in specific situations:
 
 ## Examples of Good Practices
 
+### ✅ Good BDD Feature (Preferred for Business Logic)
+
+```gherkin
+Feature: Train Status Air Quality Mapping
+  As a user
+  I want train delays mapped to air quality levels
+  So I can see train status in my smart home app
+
+  Scenario: Train running on time
+    Given a train with 0 minutes delay
+    When I check the air quality
+    Then it should be "Good (Green)"
+    And the air quality value should be 1
+```
+
 ### ✅ Good Commit Message
 
 ```
@@ -121,7 +165,7 @@ Add BDD tests for Matter server startup race condition
 - All 533 tests passing with proper formatting
 ```
 
-### ✅ Good Test Description
+### ✅ Good Unit Test (For Utilities)
 
 ```typescript
 test('should emit statusChange event when train delay changes', () => {

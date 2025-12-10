@@ -18,9 +18,25 @@ RTTChecker is a Matter.js-based smart home device that monitors UK train delays 
 
 2. **Follow the Definition of Done**: See [DEFINITION_OF_DONE.md](./DEFINITION_OF_DONE.md) for complete checklist
 
-3. **Test new functionality**: Add appropriate unit tests, integration tests, or BDD scenarios
+3. **Write BDD tests FIRST for business logic**: New features need Cucumber scenarios in `.feature` files
 
-4. **Maintain code patterns**: Follow existing architectural patterns in the codebase
+4. **Write clean, well-structured code**: Small functions, clear names, minimal nesting, DRY principle
+
+5. **Maintain code patterns**: Follow existing architectural patterns in the codebase
+
+## Testing Philosophy: BDD-First
+
+**Priority Order for Tests:**
+
+1. **BDD/Cucumber** (`.feature` files) - For business logic, user stories, acceptance criteria
+2. **Integration tests** - For API clients, external systems, database operations
+3. **Unit tests** - For isolated utilities, pure functions, edge case validation
+
+**When to Use Each:**
+
+- **BDD**: User-facing features, business rules, status mapping, train selection logic
+- **Integration**: RTT API calls, Matter.js server initialization, event sequencing
+- **Unit**: Time parsing, validation helpers, retry logic, error classification
 
 ## Code Organization
 
@@ -39,6 +55,17 @@ tests/
 ├── integration/      # Integration tests for external systems
 └── fixtures/         # Test data and helpers
 ```
+
+## Clean Code Principles
+
+**Always prioritize:**
+
+- **Readability over cleverness**: Code should be obvious, not clever
+- **Small, focused functions**: Each function does one thing well (< 20 lines ideal)
+- **Meaningful names**: `getUserTrainStatus()` not `get()` or `fetch()`
+- **Early returns**: Avoid deep nesting, return early for error cases
+- **Extract duplicates**: Don't repeat yourself - extract common logic
+- **Separation of concerns**: Keep domain logic, API calls, and infrastructure separate
 
 ## Critical Patterns to Respect
 
@@ -111,7 +138,9 @@ emitter.off('event', handler);
 
 ## Testing Requirements
 
-### BDD Tests (Cucumber)
+**Default to BDD for new features!** Write Cucumber scenarios BEFORE implementation.
+
+### BDD Tests (Cucumber) - PREFERRED FOR BUSINESS LOGIC
 
 Use for business logic and user-facing features:
 
@@ -201,12 +230,15 @@ npm run reset               # Reset Matter commissioning state
 
 ## When Suggesting Changes
 
-1. **Understand context**: Read related files before suggesting changes
-2. **Follow patterns**: Match existing code style and architecture
-3. **Test thoroughly**: Include test cases with production code
-4. **Document decisions**: Add comments for non-obvious logic
-5. **Consider edge cases**: Null, undefined, empty arrays, zero values
-6. **Clean up**: Remove debug code, unused imports, commented code
+1. **Start with BDD**: Write Cucumber scenario first for business logic changes
+2. **Keep it simple**: Prefer clear, straightforward code over clever solutions
+3. **Small functions**: Break complex logic into small, named functions
+4. **Understand context**: Read related files before suggesting changes
+5. **Follow patterns**: Match existing code style and architecture
+6. **Test thoroughly**: BDD scenarios for features, unit tests for utilities
+7. **Document decisions**: Add comments for non-obvious logic
+8. **Consider edge cases**: Null, undefined, empty arrays, zero values
+9. **Clean up**: Remove debug code, unused imports, commented code
 
 ## Red Flags - Avoid These
 
