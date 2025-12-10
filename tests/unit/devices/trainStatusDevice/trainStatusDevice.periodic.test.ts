@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
+import { TrainStatusDevice } from '../../../../src/devices/trainStatusDevice.js';
 import { TrainStatus } from '../../../../src/constants.js';
 import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
 

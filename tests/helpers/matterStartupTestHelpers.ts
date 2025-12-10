@@ -3,7 +3,7 @@
  * Provides reusable mock factories and event capture utilities
  */
 
-import type { TrainStatusDevice, StatusChangeEvent } from '../../src/devices/TrainStatusDevice.js';
+import type { TrainStatusDevice, StatusChangeEvent } from '../../src/devices/trainStatusDevice.js';
 
 /**
  * Factory for creating mock RTT API responses

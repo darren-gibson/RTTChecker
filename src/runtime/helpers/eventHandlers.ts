@@ -1,7 +1,7 @@
 import type { Endpoint } from '@matter/main';
 
 import { loggers } from '../../utils/logger.js';
-import type { StatusChangeEvent } from '../../devices/TrainStatusDevice.js';
+import type { StatusChangeEvent } from '../../devices/trainStatusDevice.js';
 import { deriveModeFromDelay, MODE_TO_STATUS } from '../../domain/modeMapping.js';
 
 const log = loggers.matter;

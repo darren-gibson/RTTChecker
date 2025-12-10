@@ -58,7 +58,7 @@ train status codes to `AirQualityEnum` values using the shared
 ### Endpoint Configuration
 
 The air quality sensor is created alongside the existing temperature and
-mode endpoints by the Matter server runtime (`src/runtime/MatterServer.js`),
+mode endpoints by the Matter server runtime (`src/runtime/matterServer.js`),
 using the shared behavior and mapping described above.
 
 ### Event Wiring

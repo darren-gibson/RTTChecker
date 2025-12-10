@@ -186,7 +186,7 @@ defineFeature(feature, (test) => {
 
     given('the device has just started', async () => {
       // Dynamically import to use real TrainStatusDevice
-      const { TrainStatusDevice } = await import('../../src/devices/TrainStatusDevice.js');
+      const { TrainStatusDevice } = await import('../../src/devices/trainStatusDevice.js');
       device = new TrainStatusDevice();
 
       // Verify initial state

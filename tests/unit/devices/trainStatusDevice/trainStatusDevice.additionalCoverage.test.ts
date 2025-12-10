@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
+import { TrainStatusDevice } from '../../../../src/devices/trainStatusDevice.js';
 import { TrainStatus, MatterDevice } from '../../../../src/constants.js';
 import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
 import { RTTCheckerError } from '../../../../src/errors.js';

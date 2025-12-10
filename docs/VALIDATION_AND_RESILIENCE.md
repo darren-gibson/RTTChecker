@@ -140,7 +140,7 @@ const temperature = clampValue(reading, -50, 50); // Ensures -50 ≤ temperature
 
 ## Circuit Breaker Pattern
 
-Located in `src/utils/circuitBreaker.js`, implements the Circuit Breaker pattern to prevent cascading failures.
+Located in `src/utils/circuitBreaker/circuitBreakerImpl.js`, implements the Circuit Breaker pattern to prevent cascading failures.
 
 ### Circuit States
 

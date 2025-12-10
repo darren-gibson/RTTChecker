@@ -7,9 +7,9 @@ import {
   AIR_QUALITY_NAMES,
   AIR_QUALITY_COLORS,
 } from '../../src/domain/airQualityMapping.js';
-import { TrainStatusDevice } from '../../src/devices/TrainStatusDevice.js';
+import { TrainStatusDevice } from '../../src/devices/trainStatusDevice.js';
 import { rttSearch } from '../../src/api/rttApiClient.js';
-import { startMatterServer } from '../../src/runtime/MatterServer.js';
+import { startMatterServer } from '../../src/runtime/matterServer.js';
 import {
   MockTrainFactory,
   MatterServerMockSetup,
@@ -23,7 +23,7 @@ jest.mock('../../src/api/rttApiClient.js', () => ({
 }));
 
 // Mock MatterServer (to avoid TypeScript subpath import issues with Matter.js in Jest)
-jest.mock('../../src/runtime/MatterServer.js', () => ({
+jest.mock('../../src/runtime/matterServer.js', () => ({
   startMatterServer: jest.fn(),
 }));
 

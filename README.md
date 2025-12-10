@@ -222,8 +222,8 @@ Use the mode state in Matter automations:
 
 ### Matter Device Implementation
 
-- `src/runtime/MatterServer.js`: Matter server (v0.15) with ServerNode API, custom temperature and mode select behaviors
-- `src/devices/TrainStatusDevice.js`: TrainStatusDevice class with periodic updates and event emission
+- `src/runtime/matterServer.js`: Matter server (v0.15) with ServerNode API, custom temperature and mode select behaviors
+- `src/devices/trainStatusDevice.js`: TrainStatusDevice class with periodic updates and event emission
 
 ### Infrastructure
 
@@ -293,15 +293,15 @@ The repository is organized for clear separation of concerns:
 │   ├── domain/               # Pure domain logic
 │   │   └── trainStatus.js    # Status calculation
 │   ├── devices/              # Matter device implementations
-│   │   ├── TrainStatusDevice.js
+│   │   ├── trainStatusDevice.js
 │   │   ├── TrainStatusTemperatureSensor.js
 │   │   └── TrainStatusModeDevice.js
 │   ├── runtime/              # Server orchestration
-│   │   ├── MatterServer.js
+│   │   ├── matterServer.js
 │   │   ├── behaviors/        # Custom Matter behaviors
-│   │   │   ├── TrainTemperatureServer.js
-│   │   │   ├── TrainStatusModeServer.js
-│   │   │   ├── TrainStatusAirQualityServer.js
+│   │   │   ├── trainTemperatureServer.js
+│   │   │   ├── trainStatusModeServer.js
+│   │   │   ├── trainStatusAirQualityServer.js
 │   │   │   └── baseBehaviorHelpers.js  # Shared behavior utilities
 │   │   └── helpers/          # Runtime helper functions
 │   ├── utils/                # Utilities

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { TrainStatusDevice } from '../../../../src/devices/TrainStatusDevice.js';
+import { TrainStatusDevice } from '../../../../src/devices/trainStatusDevice.js';
 import { getTrainStatus } from '../../../../src/services/trainStatusService.js';
 import { RTTApiError } from '../../../../src/api/errors.js';
 import { NoTrainFoundError } from '../../../../src/domain/errors.js';

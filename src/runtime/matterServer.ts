@@ -4,11 +4,11 @@ import type { ServerNode, Endpoint } from '@matter/main';
 
 import { config } from '../config.js';
 import { loggers } from '../utils/logger.js';
-import type { TrainStatusDevice, StatusChangeEvent } from '../devices/TrainStatusDevice.js';
+import type { TrainStatusDevice, StatusChangeEvent } from '../devices/trainStatusDevice.js';
 
-import { TrainTemperatureServer } from './behaviors/TrainTemperatureServer.js';
-import { TrainStatusModeServer } from './behaviors/TrainStatusModeServer.js';
-import { TrainStatusAirQualityServer } from './behaviors/TrainStatusAirQualityServer.js';
+import { TrainTemperatureServer } from './behaviors/trainTemperatureServer.js';
+import { TrainStatusModeServer } from './behaviors/trainStatusModeServer.js';
+import { TrainStatusAirQualityServer } from './behaviors/trainStatusAirQualityServer.js';
 import { printCommissioningInfo } from './helpers/commissioningHelpers.js';
 import { ensureAggregatorRoot } from './helpers/bridgeSetup.js';
 import { createServerNode } from './helpers/serverNodeFactory.js';

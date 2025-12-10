@@ -2,7 +2,7 @@
  * Circuit Breaker module barrel export
  */
 
-export { CircuitBreaker } from './CircuitBreaker.js';
+export { CircuitBreaker } from './circuitBreakerImpl.js';
 export {
   CircuitState,
   type CircuitBreakerConfig,

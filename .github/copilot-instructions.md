@@ -187,7 +187,7 @@ import { defineFeature, loadFeature } from 'jest-cucumber';
 
 // 3. Internal imports (alphabetical by path)
 import { rttSearch } from '../../src/api/rttApiClient.js';
-import { TrainStatusDevice } from '../../src/devices/TrainStatusDevice.js';
+import { TrainStatusDevice } from '../../src/devices/trainStatusDevice.js';
 import { STATUS_TO_AIR_QUALITY } from '../../src/domain/airQualityMapping.js';
 ```
 
