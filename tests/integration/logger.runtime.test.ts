@@ -2,34 +2,59 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-// Timeout accommodates Matter.js startup (~5-7s worst case) + EXIT_AFTER_MS + shutdown
-// Increased from 10s to 15s to eliminate flakiness on slower systems
-jest.setTimeout(15000);
+// Timeout is now a safety net for exceptional failures only
+// Normal operation completes when __READY__ signal is received
+jest.setTimeout(20000);
 
 function runWithEnv(env) {
   return new Promise((resolve, reject) => {
     const stdoutChunks = [];
     const stderrChunks = [];
+    let isReady = false;
+    
     // Use tsx to execute TypeScript directly - it's faster and better with ESM
     const tsxPath = path.resolve(__dirname, '../../node_modules/.bin/tsx');
     const child = spawn(tsxPath, [path.resolve(__dirname, '../../index.ts')], {
       env: {
         ...process.env,
         ...env,
+        EMIT_READY_SIGNAL: 'true', // Request explicit ready signal
       },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    child.stdout.on('data', (d) => stdoutChunks.push(d));
-    child.stderr.on('data', (d) => stderrChunks.push(d));
+    // Listen for explicit ready signal on stdout
+    child.stdout.on('data', (data) => {
+      stdoutChunks.push(data);
+    });
+
+    // Listen for ready/failed signals on stderr
+    child.stderr.on('data', (data) => {
+      stderrChunks.push(data);
+      const output = data.toString();
+      
+      if (output.includes('__READY__')) {
+        isReady = true;
+        // Give it a moment to capture any trailing logs, then gracefully exit
+        setTimeout(() => {
+          child.kill('SIGTERM');
+        }, 100);
+      } else if (output.includes('__FAILED__')) {
+        child.kill('SIGTERM');
+        reject(new Error('Matter server failed to start'));
+      }
+    });
+
     child.on('error', reject);
 
-    // Safety timeout for child process - catch hangs early
-    // Increased from 9s to 12s to handle slower Matter.js initialization
+    // Safety timeout - only for catching exceptional hangs
+    // Normal operation completes via __READY__ signal
     const safetyTimeout = setTimeout(() => {
-      child.kill('SIGTERM');
-      reject(new Error('Child process timeout - likely Matter.js initialization hung'));
-    }, 12000); // 12s - less than Jest 15s timeout
+      child.kill('SIGKILL'); // Force kill on timeout
+      reject(new Error(
+        `Test timeout: ${isReady ? 'Ready signal received but process hung' : 'No ready signal received - Matter.js may have hung'}`
+      ));
+    }, 18000); // 18s - gives plenty of margin but catches real hangs
 
     child.on('close', (code) => {
       clearTimeout(safetyTimeout);
@@ -47,7 +72,7 @@ describe('Runtime log level behavior (child process)', () => {
     NODE_ENV: 'development', // ensure index.js runs the device startup logic
     RTT_USER: 'demo',
     RTT_PASS: 'demo',
-    EXIT_AFTER_MS: '800', // Exit quickly after capturing initial logs
+    // No longer need EXIT_AFTER_MS - we wait for explicit __READY__ signal
     MATTER_LOG_FORMAT: 'plain', // avoid ANSI color codes for easier matching
     FORCE_COLOR: '0', // ensure no color codes interfere
   };

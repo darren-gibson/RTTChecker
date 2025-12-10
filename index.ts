@@ -48,9 +48,22 @@ if (!isTestEnv()) {
       // Start periodic status updates AFTER Matter server is ready
       // This ensures the first status update can be received by the endpoints
       device.startPeriodicUpdates();
+
+      // Emit explicit ready signal for test environments
+      // Tests can wait for this marker instead of using arbitrary timeouts
+      // Write directly to stderr (fd 2) to avoid logger interference
+      if (process.env['EMIT_READY_SIGNAL'] === 'true') {
+        process.stderr.write('__READY__\n');
+      }
     })
     .catch((error) => {
       log.error('❌ Failed to start Matter server:', error);
+      
+      // Emit failure signal for test environments
+      if (process.env['EMIT_READY_SIGNAL'] === 'true') {
+        process.stderr.write('__FAILED__\n');
+      }
+      
       process.exit(1);
     });
 
