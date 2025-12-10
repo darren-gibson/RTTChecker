@@ -1,6 +1,7 @@
 import { loggers } from '../utils/logger.js';
 import { config } from '../config.js';
-import { hhmmToMins, adjustForDayRollover, isWithinTimeWindow } from '../utils/timeUtils.js';
+import { hhmmToMins } from '../utils/timeUtils.js';
+import { DepartureTimeFilter, JourneyTimeCalculator } from '../domain/timeCalculations.js';
 import type { RTTService } from '../api/rttApiClient.js';
 
 export interface TrainSelectionOptions {
@@ -49,13 +50,9 @@ function buildCandidate(
     loc.origin?.[0]?.workingTime || loc.origin?.[0]?.publicTime || loc.gbttBookedDeparture;
   const destTime =
     destEntry.workingTime || destEntry.publicTime || loc.gbttBookedArrival || loc.realtimeArrival;
-  const o = hhmmToMins(originTime?.toString?.());
-  const d = hhmmToMins(destTime?.toString?.());
-  let duration = NaN;
-  if (!Number.isNaN(o) && !Number.isNaN(d)) {
-    duration = d - o;
-    if (duration < 0) duration += 24 * 60; // wrap
-  }
+
+  const duration = JourneyTimeCalculator.calculateDuration(originTime, destTime);
+
   return { service, depMins, duration, depStr, destEntry, loc };
 }
 
@@ -137,18 +134,16 @@ export function pickNextService(
   const minAfterMinutes = Number(opts.minAfterMinutes ?? 20);
   const windowMinutes = Number(opts.windowMinutes ?? 60);
   const now = opts.now ? new Date(opts.now) : new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const earliest = nowMinutes + minAfterMinutes;
-  const latest = earliest + windowMinutes;
+  const timeWindow = DepartureTimeFilter.createTimeWindow(now, minAfterMinutes, windowMinutes);
 
   const candidates = services
     .map((s) => {
       const loc = s.locationDetail || {};
       const depStr = loc.gbttBookedDeparture || loc.realtimeDeparture;
-      let depMins = hhmmToMins(depStr);
-      if (Number.isNaN(depMins)) return null;
-      depMins = adjustForDayRollover(depMins, nowMinutes);
-      if (!isWithinTimeWindow(depMins, earliest, latest)) return null;
+
+      if (!DepartureTimeFilter.isWithinWindow(depStr, timeWindow)) return null;
+
+      const depMins = hhmmToMins(depStr);
       const destEntry = findDestinationEntry(loc, destTiploc);
       if (!destEntry) {
         const id = s.serviceUid || s.trainIdentity || 'unknown';
