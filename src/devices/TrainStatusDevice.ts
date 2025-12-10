@@ -1,17 +1,18 @@
 import { EventEmitter } from 'events';
 
+import type { RTTService, RTTSearchResponse } from '../api/rttApiClient.js';
 import {
   TrainStatus,
   type TrainStatusType,
   MatterDevice as MatterConstants,
 } from '../constants.js';
 import { config } from '../config.js';
+import { calculateDelayMinutes, hasDelayChanged } from '../domain/delayCalculation.js';
 import { getTrainStatus } from '../services/trainStatusService.js';
 import { loggers } from '../utils/logger.js';
-import { RTTCheckerError } from '../errors.js';
-import { RTTApiError } from '../api/errors.js';
-import { NoTrainFoundError } from '../domain/errors.js';
-import type { RTTService, RTTSearchResponse } from '../api/rttApiClient.js';
+
+import { logTrainStatusError, extractErrorMessage } from './errorHandlers.js';
+import { statusToMode, getSupportedModes } from './statusMapping.js';
 
 export interface StatusChangeEvent {
   timestamp: Date;
@@ -37,15 +38,6 @@ export interface DeviceInfo {
 
 const log = loggers.rtt;
 
-// Map TrainStatus to Matter mode numbers
-const STATUS_TO_MODE: Record<TrainStatusType, number> = {
-  [TrainStatus.ON_TIME]: MatterConstants.Modes.ON_TIME.mode,
-  [TrainStatus.MINOR_DELAY]: MatterConstants.Modes.MINOR_DELAY.mode,
-  [TrainStatus.DELAYED]: MatterConstants.Modes.DELAYED.mode,
-  [TrainStatus.MAJOR_DELAY]: MatterConstants.Modes.MAJOR_DELAY.mode,
-  [TrainStatus.UNKNOWN]: MatterConstants.Modes.UNKNOWN.mode,
-};
-
 /**
  * TrainStatusDevice class
  * Implements a Matter device with Mode Select cluster for train status monitoring
@@ -68,13 +60,7 @@ export class TrainStatusDevice extends EventEmitter {
   }
 
   getSupportedModes(): Array<{ mode: number; label: string }> {
-    return [
-      MatterConstants.Modes.ON_TIME,
-      MatterConstants.Modes.MINOR_DELAY,
-      MatterConstants.Modes.DELAYED,
-      MatterConstants.Modes.MAJOR_DELAY,
-      MatterConstants.Modes.UNKNOWN,
-    ];
+    return getSupportedModes();
   }
 
   getCurrentMode(): number {
@@ -96,20 +82,12 @@ export class TrainStatusDevice extends EventEmitter {
         now: timestamp,
       });
 
-      const newMode = STATUS_TO_MODE[result.status] ?? MatterConstants.Modes.UNKNOWN.mode;
+      const newMode = statusToMode(result.status);
       const modeChanged = newMode !== this.currentMode;
 
       // Calculate delay minutes from selected service
-      let delayMinutes = null;
-      if (result.selected?.locationDetail) {
-        const lateness =
-          result.selected.locationDetail.realtimeGbttDepartureLateness ??
-          result.selected.locationDetail.realtimeWttDepartureLateness;
-        if (lateness != null && !isNaN(Number(lateness))) {
-          delayMinutes = Number(lateness);
-        }
-      }
-      const delayChanged = delayMinutes !== this.currentDelayMinutes;
+      const delayMinutes = calculateDelayMinutes(result.selected);
+      const delayChanged = hasDelayChanged(this.currentDelayMinutes, delayMinutes);
 
       // Emit statusChange if: mode changed, delay changed, or first update
       if (modeChanged || delayChanged || this.isFirstUpdate) {
@@ -136,24 +114,7 @@ export class TrainStatusDevice extends EventEmitter {
 
       return result;
     } catch (error) {
-      if (error instanceof RTTApiError) {
-        if (error.isAuthError()) {
-          log.error('❌ RTT API authentication failed. Check RTT_USER and RTT_PASS credentials.');
-        } else if (error.isRetryable()) {
-          log.warn(
-            `⚠️  RTT API temporarily unavailable (${error.statusCode}). Will retry on next update.`
-          );
-        } else {
-          log.error(`❌ RTT API error: ${error.message} (status: ${error.statusCode})`);
-        }
-      } else if (error instanceof NoTrainFoundError) {
-        log.warn(`⚠️  No suitable train found: ${error.message}`);
-      } else if (error instanceof RTTCheckerError) {
-        log.error(`❌ RTTChecker error: ${error.message}`);
-      } else {
-        const err = error as Error;
-        log.error(`❌ Failed to update train status: ${err.message}`);
-      }
+      logTrainStatusError(error, log);
 
       const previousMode = this.currentMode;
       this.currentMode = MatterConstants.Modes.UNKNOWN.mode;
@@ -172,7 +133,7 @@ export class TrainStatusDevice extends EventEmitter {
           selectedService: null,
           delayMinutes: null,
           raw: null,
-          error: error instanceof Error ? error.message : String(error),
+          error: extractErrorMessage(error),
         });
       }
 
