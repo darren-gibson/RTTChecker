@@ -87,14 +87,29 @@ This document summarizes the systematic code refactoring work completed to impro
   - `src/utils/retry/index.ts` (18 lines) - Barrel export
 - **Benefit**: Each concern isolated, better testability, reusable utilities
 
+### ✅ Priority #7: Split configValidation.ts Module
+
+**File**: `src/config/configValidation.ts`
+
+- **Before**: 221 lines (mixed schema, refinements, validation orchestration)
+- **After**: 7 lines (re-export wrapper)
+- **Reduction**: 214 lines (96.8%)
+- **Created**:
+  - `src/config/validation/envSchema.ts` (47 lines) - Zod schema definition
+  - `src/config/validation/refinements.ts` (177 lines) - Custom validation refinements
+  - `src/config/validation/envLoader.ts` (48 lines) - Environment variable loading
+  - `src/config/validation/errorFormatter.ts` (28 lines) - Error formatting utilities
+  - `src/config/validation/index.ts` (37 lines) - Validation orchestration
+- **Benefit**: Clear separation of schema → refinements → loading → error handling, 98.75% test coverage
+
 ## Summary Statistics
 
 ### Lines of Code Impact
 
-- **Total files refactored**: 6 major files + 21 new modules created
-- **Total lines reorganized**: ~2,000+ lines
-- **Wrapper files**: 6 backward-compatible wrappers (12-17 lines each)
-- **New focused modules**: 21 files (average ~80 lines each)
+- **Total files refactored**: 7 major files + 26 new modules created
+- **Total lines reorganized**: ~2,300+ lines
+- **Wrapper files**: 7 backward-compatible wrappers (7-17 lines each)
+- **New focused modules**: 26 files (average ~75 lines each)
 
 ### Code Quality Metrics
 
@@ -117,17 +132,16 @@ This document summarizes the systematic code refactoring work completed to impro
 
 ### Medium Priority (150-220 lines)
 
-1. **TrainStatusDevice.ts** (218 lines)
+1. **CircuitBreaker.ts** (227 lines) - Already well-organized from Priority #5
+2. **TrainStatusDevice.ts** (218 lines)
    - Could extract delay calculation logic
    - Could extract error handling utilities
    - Reasonably well-structured as-is
-
-2. **rttApiClient.ts** (212 lines)
+3. **rttApiClient.ts** (212 lines)
    - Could extract URL building logic
    - Could extract response validation
    - Already focused on single concern
-
-3. **resilientRequest.ts** (198 lines)
+4. **resilientRequest.ts** (198 lines)
    - Well-organized wrapper class
    - Not a strong candidate for splitting
 
