@@ -2,8 +2,8 @@
 import { spawn } from 'child_process';
 import path from 'path';
 
-// Reduced timeout - we only need enough time for quick startup and shutdown
-jest.setTimeout(10000);
+// Timeout needs to accommodate Matter.js startup (can be slow) + EXIT_AFTER_MS + shutdown
+jest.setTimeout(15000);
 
 function runWithEnv(env) {
   return new Promise((resolve, reject) => {
@@ -21,7 +21,15 @@ function runWithEnv(env) {
     child.stdout.on('data', (d) => stdoutChunks.push(d));
     child.stderr.on('data', (d) => stderrChunks.push(d));
     child.on('error', reject);
+
+    // Add timeout to kill hanging child process
+    const timeout = setTimeout(() => {
+      child.kill('SIGTERM');
+      reject(new Error('Child process timeout - likely Matter.js initialization hung'));
+    }, 12000); // 12 seconds - less than Jest timeout
+
     child.on('close', (code) => {
+      clearTimeout(timeout);
       resolve({
         code,
         stdout: Buffer.concat(stdoutChunks).toString('utf8'),
@@ -36,7 +44,7 @@ describe('Runtime log level behavior (child process)', () => {
     NODE_ENV: 'development', // ensure index.js runs the device startup logic
     RTT_USER: 'demo',
     RTT_PASS: 'demo',
-    EXIT_AFTER_MS: '800', // Reduced from 1500ms - just need enough time to verify logging
+    EXIT_AFTER_MS: '1500', // Allow enough time for Matter.js startup + logging verification
     MATTER_LOG_FORMAT: 'plain', // avoid ANSI color codes for easier matching
     FORCE_COLOR: '0', // ensure no color codes interfere
   };
